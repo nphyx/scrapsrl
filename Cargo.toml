@@ -1,0 +1,9 @@
+[package]
+name = "scrapsrl"
+version = "0.1.0"
+authors = ["Justen Robertson <justen@justen.us>"]
+edition = "2018"
+
+[dependencies]
+tcod = "0.13"
+rand = "*"
