@@ -11,23 +11,19 @@ mod mapgen;
 mod tiles;
 mod ui;
 mod game_state;
+mod constants;
 use crate::game_state::GameState;
 use crate::ui::SIDEBAR_WIDTH;
+use crate::constants::{
+    TORCH_RADIUS,
+    MAP_WIDTH,
+    MAP_HEIGHT,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    DEFAULT_BG,
+    DEFAULT_FG};
 
 
-const TILE_HEIGHT: i32 = 24;
-const TILE_WIDTH: i32 = 16;
-
-const SCREEN_HEIGHT: i32 = 1080 / TILE_HEIGHT - 1;
-const SCREEN_WIDTH: i32 = 1920 / TILE_WIDTH;
-
-const MAP_WIDTH: i32 = SCREEN_WIDTH - SIDEBAR_WIDTH;
-const MAP_HEIGHT: i32 = SCREEN_HEIGHT - 1;
-
-const TORCH_RADIUS: i32 = 20;
-
-const DEFAULT_BG: Color = Color{r: 0, g:12, b:9};
-const DEFAULT_FG: Color = Color{r: 225, g: 255, b: 232};
 
 fn clamp(a: f32, b: f32, x: f32) -> f32 {
     if x < a { a } else if x > b { b } else { x }
@@ -91,6 +87,13 @@ fn main() {
     let dark = Color::new(0, 6, 18);
     let ground = DEFAULT_BG; //Color::new(0, 40, 25);
 
+    interface.open_menu(
+        ui::Notification::new(
+            format!("Start Game"),
+            format!("Find and catch the bugs!"),
+            )
+    );
+
     while !root.window_closed() {
         root.clear();
         // Compute the FOV starting from the coordinates 20,20. Where we'll put the '@'
@@ -132,10 +135,10 @@ fn main() {
             by = rng.gen_range(0, MAP_HEIGHT);
 
             interface.open_menu(
-                ui::Menu::new(
-                    format!("Got 'em"),
-                    format!("[esc to continue]"),
-                    ui::MenuType::CenteredDialog)
+                ui::Notification::new(
+                    format!("Success"),
+                    format!("Got 'em!"),
+                    )
                 );
         }
         interface.draw(&root, &state);
