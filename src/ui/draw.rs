@@ -95,23 +95,39 @@ pub fn draw_status_bar(mut console: &Console, text: String) {
     console.print_rect(x, y, width, height, text);
 }
 
-pub fn draw_sidebar(mut console: &Console, _state: &GameState) {
+pub fn draw_sidebar(mut console: &Console, state: &GameState) {
     reset_colors(&console);
     console.set_alignment(TextAlignment::Left);
     let x = console.width() - SIDEBAR_WIDTH;
     let y = 0;
     let width = SIDEBAR_WIDTH;
     let height = console.height();
-    let text = concat!(
-        "- THIS IS SIDEBAR -\n",
-        "\n",
-        "STATUS: 0\n",
-        "STATUS: 0\n",
-        "STATUS: 0\n",
-        "STATUS: 0\n",
-        "-- INVENTORY --\n",
-        "THING ONE (1)\n",
-        "THING TWO (2)\n");
+    let text = format!(
+        concat!(
+            "- THIS IS SIDEBAR -\n",
+            "\n",
+            " ATTR   \u{250c}POW SUB RES\u{2510}\n",
+            " Body:{:?} |S:{:?} G:{:?} T:{:?}|\n",
+            " Mind:{:?} |I:{:?} W:{:?} R:{:?}|\n",
+            " Soul:{:?} |C:{:?} E:{:?} W:{:?}|\n",
+            "        \u{2514}-----------\u{2518}\n",
+            "\n",
+            " -- INVENTORY --\n",
+            " THING ONE (1)\n",
+            " THING TWO (2)\n"),
+           state.player.body(),
+           state.player.strength(),
+           state.player.grace(),
+           state.player.toughness(),
+           state.player.mind(),
+           state.player.intellect(),
+           state.player.wits(),
+           state.player.resolve(),
+           state.player.soul(),
+           state.player.charisma(),
+           state.player.empathy(),
+           state.player.will()
+    );
 
     console.print_rect(x, y, width, height, text);
 }

@@ -53,7 +53,7 @@ pub struct Character {
     mind: u8,
     soul: u8,
 
-    brawn: u8,
+    strength: u8,
     grace: u8,
     toughness: u8,
 
@@ -82,9 +82,9 @@ impl Character {
             pos: Coord{x:0, y:0},
             move_plan: Coord{x:0, y:0},
             body: 1, mind: 1, soul: 1,
-            brawn: 1, grace: 1, toughness: 1,
+            strength: 1, grace: 1, toughness: 1,
             intellect: 1, wits: 1, resolve: 1,
-            charisma: 0, empathy: 0, will: 0,
+            charisma: 1, empathy: 1, will: 1,
             cur_stamina: 0, cur_focus: 0, cur_grit: 0,
             skills: Vec::new(),
             features: Vec::new(),
@@ -108,8 +108,8 @@ impl Character {
     pub fn resolve(&self) -> u8 { self.resolve }
     pub fn set_resolve(&mut self, val:u8) { self.resolve = val }
     
-    pub fn brawn(&self) -> u8 { self.brawn }
-    pub fn set_brawn(&mut self, val:u8) { self.brawn = val }
+    pub fn strength(&self) -> u8 { self.strength }
+    pub fn set_strength(&mut self, val:u8) { self.strength = val }
     pub fn grace(&self) -> u8 { self.grace }
     pub fn set_grace(&mut self, val:u8) { self.grace = val }
     pub fn toughness(&self) -> u8 { self.toughness }

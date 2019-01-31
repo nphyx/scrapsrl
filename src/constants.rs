@@ -3,7 +3,7 @@ use tcod::colors::Color;
 pub const TILE_HEIGHT: i32 = 24;
 pub const TILE_WIDTH: i32 = 16;
 
-pub const SIDEBAR_WIDTH: i32 = 20;
+pub const SIDEBAR_WIDTH: i32 = 25;
 pub const DIALOG_WIDTH: i32 = 32;
 
 pub const SCREEN_HEIGHT: i32 = 1080 / TILE_HEIGHT - 1;
