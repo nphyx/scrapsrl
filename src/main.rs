@@ -1,17 +1,28 @@
 extern crate rand;
 extern crate tcod;
 
-use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, TextAlignment};
+use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag};
 use tcod::colors::{Color, lerp};
 use tcod::input::Key;
-use tcod::input::KeyCode::{Up, Down, Left, Right, Escape, Enter};
+use tcod::input::KeyCode::{Up, Down, Left, Right, Escape, F11};
 use tcod::map::FovAlgorithm;
 use rand::prelude::*;
 mod mapgen;
 mod tiles;
+mod ui;
+mod game_state;
+use crate::game_state::GameState;
+use crate::ui::SIDEBAR_WIDTH;
 
-const MAP_WIDTH: i32 = 120;
-const MAP_HEIGHT: i32 = 50;
+
+const TILE_HEIGHT: i32 = 24;
+const TILE_WIDTH: i32 = 16;
+
+const SCREEN_HEIGHT: i32 = 1080 / TILE_HEIGHT - 1;
+const SCREEN_WIDTH: i32 = 1920 / TILE_WIDTH;
+
+const MAP_WIDTH: i32 = SCREEN_WIDTH - SIDEBAR_WIDTH;
+const MAP_HEIGHT: i32 = SCREEN_HEIGHT - 1;
 
 const TORCH_RADIUS: i32 = 20;
 
@@ -43,18 +54,12 @@ fn distance(px: f32, py: f32, dx: f32, dy: f32) -> f32 {
     return ((dx - px).powf(2.0) + (dy - py).powf(2.0)).sqrt()
 }
 
-fn dialog(cx: i32, cy:i32, text: String, mut console: &RootConsole) {
-    console.set_alignment(TextAlignment::Center);
-    console.rect(cx - 12, cy - 1, 24, 4, true, BackgroundFlag::Set);
-    console.print(cx, cy, text);
-}
-
 fn main() {
     let mut root = RootConsole::initializer()
-        .font("font.png", FontLayout::AsciiInRow)
+        .font("monofur-nf.png", FontLayout::AsciiInRow)
         .font_type(FontType::Greyscale)
         .font_dimensions(128,507)
-        .size(MAP_WIDTH, MAP_HEIGHT)
+        .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("SCRAPS: Bug Hunter")
         .init();
 
@@ -66,13 +71,14 @@ fn main() {
     let cy = MAP_HEIGHT / 2;
     let mut x = cx;
     let mut y = cy;
-    let mut tx = x; // planned x loc
-    let mut ty = y; // planned y loc
+    let mut tx; // planned x loc
+    let mut ty; // planned y loc
     let mut rng = rand::thread_rng();
     let mut bx = rng.gen_range(0, MAP_WIDTH);
     let mut by = rng.gen_range(0, MAP_HEIGHT);
-    let mut done = false;
-    let mut caught: i32 = 1;
+    let mut fullscreen = false;
+    let mut state = GameState::new();
+    let mut interface = ui::UI::new();
     root.clear();
 
     let (mut map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
@@ -121,13 +127,18 @@ fn main() {
         root.put_char(x, y, '\u{e213}', BackgroundFlag::None);
 
         if x == bx && y == by {
-            dialog(
-                cx,
-                cy,
-                format!("Got 'em! ({:?} so far)\n[enter to continue]", caught),
-                &root);
-            done = true;
+            state.score += 1;
+            bx = rng.gen_range(0, MAP_WIDTH);
+            by = rng.gen_range(0, MAP_HEIGHT);
+
+            interface.open(
+                ui::Menu::new(
+                    format!("Got 'em"),
+                    format!("[esc to continue]"),
+                    ui::MenuType::CenteredDialog),
+                &mut state);
         }
+        interface.draw(&root, &state);
         root.flush();
         let keypress = root.wait_for_keypress(true);
         // libtcod 1.5.1 has a bug where `wait_for_keypress` emits two events:
@@ -135,33 +146,30 @@ fn main() {
         if keypress.pressed {
             ty = y;
             tx = x;
-
-        }
-        if !done {
+            // handle buttons that should always work even in menus
             match keypress {
-                Key { code: Escape, .. } => break,
-                Key { code: Up, .. } => ty = y - 1,
-                Key { code: Down, .. } => ty = y + 1,
-                Key { code: Left, .. } => tx = x - 1,
-                Key { code: Right, .. } => tx = x + 1,
+                Key { code: F11, .. } => {
+                    fullscreen = !fullscreen;
+                    root.set_fullscreen(fullscreen);
+                },
                 _ => {}
             }
-            let p = plan(x, y, tx, ty, &map);
-            x = p.0;
-            y = p.1;
-
-            let bp = move_bug(bx, by, &map);
-            bx = bp.0;
-            by = bp.1;
-        } else {
-            match keypress {
-                Key { code: Enter, .. } => {
-                    bx = rng.gen_range(0, MAP_WIDTH);
-                    by = rng.gen_range(0, MAP_HEIGHT);
-                    caught += 1;
-                    done = false;
+            if !interface.handle_input(keypress, &mut state) {
+                match keypress {
+                    Key { code: Escape, .. } => break,
+                    Key { code: Up, .. } => ty = y - 1,
+                    Key { code: Down, .. } => ty = y + 1,
+                    Key { code: Left, .. } => tx = x - 1,
+                    Key { code: Right, .. } => tx = x + 1,
+                    _ => {}
                 }
-                _ => {}
+                let bp = move_bug(bx, by, &map);
+                bx = bp.0;
+                by = bp.1;
+
+                let p = plan(x, y, tx, ty, &map);
+                x = p.0;
+                y = p.1;
             }
         }
     }
