@@ -67,37 +67,6 @@ fn draw_sidebar(mut console: &Console, state: &GameState) {
     console.print_rect(x, y, width, height, text);
 }
 
-pub struct UI {
-    menu_manager: MenuManager
-}
-
-impl UI {
-    pub fn new() -> UI {
-        UI{menu_manager: MenuManager::new()}
-    }
-
-    pub fn draw(&mut self, console: &Console, state: &GameState) {
-        if self.menu_manager.menu_open() {
-            draw_status_bar(&console, format!("-- PAUSED -- SCORE {:?}", state.score));
-        } else {
-            draw_status_bar(&console, format!("STATUS STATUS STATUS SCORE {:?}", state.score));
-        }
-        draw_sidebar(&console, &state);
-        self.menu_manager.draw(console, state);
-    }
-
-    pub fn handle_input(&mut self, keypress: Key, state: &mut GameState) -> bool {
-        if !self.menu_manager.handle_input(keypress) {
-            return false;
-        }
-        return true;
-    }
-
-    pub fn open(&mut self, menu: Menu, state: &mut GameState) {
-        self.menu_manager.open(menu)
-    }
-}
-
 pub struct Menu {
     title: String,
     text: String,
@@ -133,16 +102,22 @@ impl Menu {
     }
 }
 
-pub struct MenuManager {
+pub struct UI {
     stack: Vec<Menu>
 }
 
-impl MenuManager {
-    pub fn new() -> MenuManager {
-        MenuManager{stack: Vec::new()}
+impl UI {
+    pub fn new() -> UI {
+        UI{stack: Vec::new()}
     }
 
     pub fn draw(&mut self, console: &Console, state: &GameState) {
+        if self.in_menu() {
+            draw_status_bar(&console, format!("-- PAUSED -- SCORE {:?}", state.score));
+        } else {
+            draw_status_bar(&console, format!("STATUS STATUS STATUS SCORE {:?}", state.score));
+        }
+        draw_sidebar(&console, &state);
         let current_menu = self.stack.get(0);
         match current_menu {
             Some(menu) => menu.draw(&console),
@@ -150,7 +125,7 @@ impl MenuManager {
         }
     }
 
-    pub fn handle_input(&mut self, keypress: Key) -> bool {
+    pub fn handle_input(&mut self, keypress: Key, state: &mut GameState) -> bool {
         let current_menu = self.stack.get(0);
         match current_menu {
             Some(menu) => {
@@ -163,11 +138,11 @@ impl MenuManager {
         }
     }
 
-    pub fn open(&mut self, menu: Menu) {
+    pub fn open_menu(&mut self, menu: Menu) {
         self.stack.push(menu);
     }
 
-    pub fn menu_open(&mut self) -> bool {
+    pub fn in_menu(&mut self) -> bool {
         self.stack.len() > 0
     }
 }

@@ -131,12 +131,12 @@ fn main() {
             bx = rng.gen_range(0, MAP_WIDTH);
             by = rng.gen_range(0, MAP_HEIGHT);
 
-            interface.open(
+            interface.open_menu(
                 ui::Menu::new(
                     format!("Got 'em"),
                     format!("[esc to continue]"),
-                    ui::MenuType::CenteredDialog),
-                &mut state);
+                    ui::MenuType::CenteredDialog)
+                );
         }
         interface.draw(&root, &state);
         root.flush();
