@@ -12,8 +12,9 @@ mod tiles;
 mod ui;
 mod game_state;
 mod constants;
+mod entity;
+use crate::entity::{Coord, Entity, Character};
 use crate::game_state::GameState;
-use crate::ui::SIDEBAR_WIDTH;
 use crate::constants::{
     TORCH_RADIUS,
     MAP_WIDTH,
@@ -25,25 +26,28 @@ use crate::constants::{
 
 
 
-fn clamp(a: f32, b: f32, x: f32) -> f32 {
+fn clamp<T>(a: T, b: T, x: T) -> T  where T: std::cmp::PartialOrd {
     if x < a { a } else if x > b { b } else { x }
 }
 
-fn plan(mut x:i32, mut y:i32, mut tx:i32, mut ty:i32, map: &tcod::map::Map) -> (i32, i32) {
-    tx = clamp(0.0, (MAP_WIDTH - 1) as f32, tx as f32) as i32;
-    ty = clamp(0.0, (MAP_HEIGHT - 1) as f32, ty as f32) as i32;
-    if map.is_walkable(tx, ty) {
-        x = tx;
-        y = ty;
+fn plan(&to: &Coord, map: &tcod::map::Map) -> Option<Coord> {
+    let planned = Coord{
+        x: clamp(0, MAP_WIDTH - 1, to.x),
+        y: clamp(0, MAP_HEIGHT - 1, to.y)
+    };
+    if map.is_walkable(planned.x, planned.y) {
+        return Some(planned)
     }
-    return (x, y);
+    None
 }
 
-fn move_bug(bx: i32, by: i32, map: &tcod::map::Map) -> (i32, i32) {
+fn move_bug(&pos: &Coord, map: &tcod::map::Map) -> Option<Coord> {
     let mut rng = rand::thread_rng();
-    let tbx = rng.gen_range(bx - 1, bx + 2);
-    let tby = rng.gen_range(by - 1, by + 2);
-    return plan(bx, by, tbx, tby, &map);
+    let to = Coord{
+        x: rng.gen_range(pos.x - 1, pos.x + 2),
+        y: rng.gen_range(pos.y - 1, pos.y + 2)
+    };
+    plan(&to, &map)
 }
 
 fn distance(px: f32, py: f32, dx: f32, dy: f32) -> f32 {
@@ -65,16 +69,18 @@ fn main() {
     
     let cx = MAP_WIDTH / 2;
     let cy = MAP_HEIGHT / 2;
-    let mut x = cx;
-    let mut y = cy;
     let mut tx; // planned x loc
     let mut ty; // planned y loc
     let mut rng = rand::thread_rng();
-    let mut bx = rng.gen_range(0, MAP_WIDTH);
-    let mut by = rng.gen_range(0, MAP_HEIGHT);
     let mut fullscreen = false;
-    let mut state = GameState::new();
+    let mut state = GameState::new(Character::blank());
     let mut interface = ui::UI::new();
+    let mut bug = Character::blank();
+    state.player.set_pos(Coord{x: cx, y: cy});
+    bug.set_pos(Coord{
+        x: rng.gen_range(0, MAP_WIDTH),
+        y: rng.gen_range(0, MAP_HEIGHT)
+    });
     root.clear();
 
     let (mut map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
@@ -98,14 +104,14 @@ fn main() {
         root.clear();
         // Compute the FOV starting from the coordinates 20,20. Where we'll put the '@'
         // Use a max_radius of 10 and light the walls.
-        map.compute_fov(x, y, 15, true, FovAlgorithm::Basic);
+        map.compute_fov(state.player.pos().x, state.player.pos().y, 15, true, FovAlgorithm::Basic);
 
         for ((px, py), tile) in &tiles {
             let visible = map.is_in_fov(*px, *py);
             let dist = clamp(
                 0.0,
                 1.0,
-                distance(x as f32, y as f32, *px as f32, *py as f32)
+                distance(state.player.pos().x as f32, state.player.pos().y as f32, *px as f32, *py as f32)
                 / TORCH_RADIUS as f32);
             let fg: Color;
             let bg: Color;
@@ -123,16 +129,18 @@ fn main() {
             root.put_char_ex(*px, *py, tile.ch, fg, bg);
         }
 
-        if map.is_in_fov(bx, by) {
-            root.put_char(bx, by, '\u{f46f}', BackgroundFlag::None);
-            root.set_char_foreground(bx, by, Color{r: 32, g: 128, b: 225});
+        if map.is_in_fov(bug.pos().x, bug.pos().y) {
+            root.put_char(bug.pos().x, bug.pos().y, '\u{f46f}', BackgroundFlag::None);
+            root.set_char_foreground(bug.pos().x, bug.pos().y, Color{r: 32, g: 128, b: 225});
         }
-        root.put_char(x, y, '\u{e213}', BackgroundFlag::None);
+        root.put_char(state.player.pos().x, state.player.pos().y, '\u{e213}', BackgroundFlag::None);
 
-        if x == bx && y == by {
+        if state.player.pos() == bug.pos() {
             state.score += 1;
-            bx = rng.gen_range(0, MAP_WIDTH);
-            by = rng.gen_range(0, MAP_HEIGHT);
+            bug.set_pos(Coord{
+                x: rng.gen_range(0, MAP_WIDTH),
+                y: rng.gen_range(0, MAP_HEIGHT)
+            });
 
             interface.open_menu(
                 ui::Notification::new(
@@ -147,8 +155,8 @@ fn main() {
         // libtcod 1.5.1 has a bug where `wait_for_keypress` emits two events:
         // one for key down and one for key up. So we ignore the "key up" ones.
         if keypress.pressed {
-            ty = y;
-            tx = x;
+            ty = state.player.pos().y;
+            tx = state.player.pos().x;
             // handle buttons that should always work even in menus
             match keypress {
                 Key { code: F11, .. } => {
@@ -160,19 +168,21 @@ fn main() {
             if !interface.handle_input(keypress, &mut state) {
                 match keypress {
                     Key { code: Escape, .. } => break,
-                    Key { code: Up, .. } => ty = y - 1,
-                    Key { code: Down, .. } => ty = y + 1,
-                    Key { code: Left, .. } => tx = x - 1,
-                    Key { code: Right, .. } => tx = x + 1,
+                    Key { code: Up, .. } => ty = state.player.pos().y - 1,
+                    Key { code: Down, .. } => ty = state.player.pos().y + 1,
+                    Key { code: Left, .. } => tx = state.player.pos().x - 1,
+                    Key { code: Right, .. } => tx = state.player.pos().x + 1,
                     _ => {}
                 }
-                let bp = move_bug(bx, by, &map);
-                bx = bp.0;
-                by = bp.1;
+                match move_bug(&bug.pos(), &map) {
+                    Some(coord) => bug.set_pos(coord),
+                    _ => {}
+                }
 
-                let p = plan(x, y, tx, ty, &map);
-                x = p.0;
-                y = p.1;
+                match plan(&Coord{x: tx, y: ty}, &map) {
+                    Some(coord) => state.player.set_pos(coord),
+                    _ => {}
+                }
             }
         }
     }

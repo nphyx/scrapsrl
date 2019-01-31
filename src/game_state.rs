@@ -1,9 +1,12 @@
+use crate::entity::Character;
+
 pub struct GameState {
-    pub score: i32
+    pub score: i32,
+    pub player: Character
 }
 
 impl GameState {
-    pub fn new() -> GameState {
-        GameState{score: 0}
+    pub fn new(player: Character) -> GameState {
+        GameState{score: 0, player: player}
     }
 }

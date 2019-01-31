@@ -95,7 +95,7 @@ pub fn draw_status_bar(mut console: &Console, text: String) {
     console.print_rect(x, y, width, height, text);
 }
 
-pub fn draw_sidebar(mut console: &Console, state: &GameState) {
+pub fn draw_sidebar(mut console: &Console, _state: &GameState) {
     reset_colors(&console);
     console.set_alignment(TextAlignment::Left);
     let x = console.width() - SIDEBAR_WIDTH;

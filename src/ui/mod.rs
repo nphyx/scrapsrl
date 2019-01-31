@@ -31,7 +31,7 @@ impl UI {
         }
     }
 
-    pub fn handle_input(&mut self, keypress: Key, state: &mut GameState) -> bool {
+    pub fn handle_input(&mut self, keypress: Key, _state: &mut GameState) -> bool {
         let current_menu = self.stack.get(0);
         match current_menu {
             Some(menu) => {
