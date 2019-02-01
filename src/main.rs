@@ -8,7 +8,7 @@ use tcod::input::KeyCode::{NumPad7, NumPad8, NumPad9, NumPad4, NumPad6, NumPad1,
 use tcod::map::FovAlgorithm;
 use rand::prelude::*;
 mod mapgen;
-mod tiles;
+mod tile;
 mod ui;
 mod game_state;
 mod constants;
