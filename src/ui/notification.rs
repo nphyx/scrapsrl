@@ -16,7 +16,7 @@ impl Notification {
 }
 
 impl Widget for Notification {
-  fn handle_input(&self, keypress: Key) -> bool {
+  fn handle_input(&mut self, keypress: Key) -> bool {
     match keypress {
       Key { code: Enter, .. } |
         Key { code: NumPadEnter, .. } => {

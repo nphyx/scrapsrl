@@ -55,10 +55,16 @@ fn main() {
   // state.map.compute_fov(20,20, TORCH_RADIUS, true, FovAlgorithm::Basic);
 
   interface.open_menu(
-    ui::Notification::new(
-      format!("Start Game"),
-      format!("Find and catch the bugs!"),
-      )
+    ui::Chain::new(vec![
+        Box::new(ui::Notification::new(
+          format!("SCRAPS: Bug Hunter"),
+          format!("Your task, should you choose to accept it, is to catch bugs."),
+        )),
+        Box::new(ui::Notification::new(
+          format!("Start Game"),
+          format!("Find and catch the bugs!"),
+        )),
+    ])
   );
 
   while !display.root.window_closed() {
@@ -74,7 +80,7 @@ fn main() {
         ui::Notification::new(
           format!("Success"),
           format!("Got 'em!"),
-          )
+        )
       );
     }
 
