@@ -1,4 +1,4 @@
-use tcod::input::KeyCode::{Enter, Escape};
+use tcod::input::KeyCode::{NumPadEnter, Enter, Escape};
 use tcod::input::Key;
 use tcod::console::Console;
 use crate::ui::widget::Widget;
@@ -18,7 +18,8 @@ impl Notification {
 impl Widget for Notification {
     fn handle_input(&self, keypress: Key) -> bool {
         match keypress {
-            Key { code: Enter, .. } => {
+            Key { code: Enter, .. } |
+            Key { code: NumPadEnter, .. } => {
                 return false;
             },
             Key { code: Escape, .. } => {

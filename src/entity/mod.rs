@@ -81,11 +81,11 @@ impl Character {
         Character{
             pos: Coord{x:0, y:0},
             move_plan: Coord{x:0, y:0},
-            body: 1, mind: 1, soul: 1,
-            strength: 1, grace: 1, toughness: 1,
-            intellect: 1, wits: 1, resolve: 1,
-            charisma: 1, empathy: 1, will: 1,
-            cur_stamina: 0, cur_focus: 0, cur_grit: 0,
+            body: 3, mind: 3, soul: 3,
+            strength: 1, grace: 2, toughness: 3,
+            intellect: 1, wits: 2, resolve: 3,
+            charisma: 1, empathy: 2, will: 3,
+            cur_stamina: 1, cur_focus: 1, cur_grit: 1,
             skills: Vec::new(),
             features: Vec::new(),
             components: Vec::new(),
@@ -138,6 +138,13 @@ impl Character {
             self.compute_vital_modifier(VitalMod::Stamina)
         )
     }
+    pub fn spend_stamina(&mut self, amt: u8) -> bool {
+        if amt <= self.cur_stamina {
+            self.cur_stamina -= amt;
+            return true;
+        }
+        return false;
+    }
 
     fn compute_focus(&self) -> u8 { self.mind + self.resolve }
     pub fn focus(&self) -> (u8, u8, u8) {
@@ -147,6 +154,13 @@ impl Character {
             self.compute_vital_modifier(VitalMod::Focus)
         )
     }
+    pub fn spend_focus(&mut self, amt: u8) -> bool {
+        if amt >= self.cur_focus {
+            self.cur_focus -= amt;
+            return true;
+        }
+        return false;
+    }
 
     fn compute_grit(&self) -> u8 { self.soul + self.will }
     pub fn grit(&self) -> (u8, u8, u8) {
@@ -155,6 +169,24 @@ impl Character {
             self.cur_grit,
             self.compute_vital_modifier(VitalMod::Focus)
         )
+    }
+    pub fn spend_grit(&mut self, amt: u8) -> bool {
+        if amt >= self.cur_grit {
+            self.cur_grit -= amt;
+            return true;
+        }
+        return false;
+    }
+    pub fn tick(&mut self) {
+        if self.cur_stamina < self.compute_stamina() {
+            self.cur_stamina += 1;
+        }
+        if self.cur_focus < self.compute_focus() {
+            self.cur_focus += 1;
+        }
+        if self.cur_grit < self.compute_grit() {
+            self.cur_grit += 1;
+        }
     }
 }
 

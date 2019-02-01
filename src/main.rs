@@ -4,7 +4,7 @@ extern crate tcod;
 use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag};
 use tcod::colors::{Color, lerp};
 use tcod::input::Key;
-use tcod::input::KeyCode::{Up, Down, Left, Right, Escape, F11};
+use tcod::input::KeyCode::{NumPad7, NumPad8, NumPad9, NumPad4, NumPad6, NumPad1, NumPad2, NumPad3, Escape, F11, NoKey, Shift};
 use tcod::map::FovAlgorithm;
 use rand::prelude::*;
 mod mapgen;
@@ -13,6 +13,8 @@ mod ui;
 mod game_state;
 mod constants;
 mod entity;
+mod util;
+use crate::util::{clamp, plan};
 use crate::entity::{Coord, Entity, Character};
 use crate::game_state::GameState;
 use crate::constants::{
@@ -24,22 +26,6 @@ use crate::constants::{
     DEFAULT_BG,
     DEFAULT_FG};
 
-
-
-fn clamp<T>(a: T, b: T, x: T) -> T  where T: std::cmp::PartialOrd {
-    if x < a { a } else if x > b { b } else { x }
-}
-
-fn plan(&to: &Coord, map: &tcod::map::Map) -> Option<Coord> {
-    let planned = Coord{
-        x: clamp(0, MAP_WIDTH - 1, to.x),
-        y: clamp(0, MAP_HEIGHT - 1, to.y)
-    };
-    if map.is_walkable(planned.x, planned.y) {
-        return Some(planned)
-    }
-    None
-}
 
 fn move_bug(&pos: &Coord, map: &tcod::map::Map) -> Option<Coord> {
     let mut rng = rand::thread_rng();
@@ -58,7 +44,7 @@ fn main() {
     let mut root = RootConsole::initializer()
         .font("monofur-nf.png", FontLayout::AsciiInRow)
         .font_type(FontType::Greyscale)
-        .font_dimensions(128,507)
+        .font_dimensions(102,636)
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("SCRAPS: Bug Hunter")
         .init();
@@ -69,8 +55,6 @@ fn main() {
     
     let cx = MAP_WIDTH / 2;
     let cy = MAP_HEIGHT / 2;
-    let mut tx; // planned x loc
-    let mut ty; // planned y loc
     let mut rng = rand::thread_rng();
     let mut fullscreen = false;
     let mut state = GameState::new(Character::blank());
@@ -149,14 +133,14 @@ fn main() {
                     )
                 );
         }
+        if state.player_acted { state.player.tick(); }
         interface.draw(&root, &state);
         root.flush();
         let keypress = root.wait_for_keypress(true);
         // libtcod 1.5.1 has a bug where `wait_for_keypress` emits two events:
         // one for key down and one for key up. So we ignore the "key up" ones.
         if keypress.pressed {
-            ty = state.player.pos().y;
-            tx = state.player.pos().x;
+            let mut to: Coord = state.player.pos();
             // handle buttons that should always work even in menus
             match keypress {
                 Key { code: F11, .. } => {
@@ -166,22 +150,64 @@ fn main() {
                 _ => {}
             }
             if !interface.handle_input(keypress, &mut state) {
+                let mut speed = 1;
+                if keypress.shift {
+                    speed = 2;
+                }
+                if keypress.code == NoKey || keypress.code == Shift {
+                    state.player_acted = false;
+                } else {
+                    state.player_acted = true;
+                }
                 match keypress {
                     Key { code: Escape, .. } => break,
-                    Key { code: Up, .. } => ty = state.player.pos().y - 1,
-                    Key { code: Down, .. } => ty = state.player.pos().y + 1,
-                    Key { code: Left, .. } => tx = state.player.pos().x - 1,
-                    Key { code: Right, .. } => tx = state.player.pos().x + 1,
-                    _ => {}
-                }
-                match move_bug(&bug.pos(), &map) {
-                    Some(coord) => bug.set_pos(coord),
+                    Key { code: NumPad7, .. } => { // up-left
+                        to.x = state.player.pos().x - speed;
+                        to.y = state.player.pos().y - speed;
+                    },
+                    Key { code: NumPad8, .. } => { // up
+                        to.y = state.player.pos().y - speed;
+                    },
+                    Key { code: NumPad9, .. } => { // up-right
+                        to.x = state.player.pos().x + speed;
+                        to.y = state.player.pos().y - speed;
+                    },
+                    Key { code: NumPad1, .. } => { // down-left
+                        to.x = state.player.pos().x - speed;
+                        to.y = state.player.pos().y + speed;
+                    },
+                    Key { code: NumPad2, .. } => { // down
+                        to.y = state.player.pos().y + speed;
+                    },
+                    Key { code: NumPad3, .. } => { // down-right
+                        to.x = state.player.pos().x + speed;
+                        to.y = state.player.pos().y + speed;
+                    },
+                    Key { code: NumPad4, .. } => { // left
+                        to.x = state.player.pos().x - speed;
+                    },
+                    Key { code: NumPad6, .. } => { // right
+                        to.x = state.player.pos().x + speed; 
+                    },
                     _ => {}
                 }
 
-                match plan(&Coord{x: tx, y: ty}, &map) {
-                    Some(coord) => state.player.set_pos(coord),
-                    _ => {}
+                if to != state.player.pos() {
+                    match plan(&to, &map) {
+                        Some(coord) => {
+                            if state.player.spend_stamina(speed as u8) {
+                                state.player.set_pos(coord);
+                            }
+                        },
+                        _ => {}
+                    }
+                }
+
+                if state.player_acted {
+                    match move_bug(&bug.pos(), &map) {
+                        Some(coord) => bug.set_pos(coord),
+                        _ => {}
+                    }
                 }
             }
         }

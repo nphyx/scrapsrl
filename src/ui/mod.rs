@@ -8,6 +8,11 @@ use crate::ui::draw::{draw_status_bar, draw_sidebar};
 pub use crate::constants::SIDEBAR_WIDTH;
 pub use crate::ui::notification::Notification;
 
+fn meter_bar(max: u8, cur: u8,  cap: u8) -> String {
+    let gap: u8 = max - cur - cap;
+    return format!("[{:\u{2588}<3$}{:\u{2592}<4$}{:\u{2593}<5$}]", "", "", "", cur as usize, gap as usize, cap as usize);
+}
+
 pub struct UI {
     stack: Vec<Box<widget::Widget>>
 }
@@ -21,7 +26,20 @@ impl UI {
         if self.in_menu() {
             draw_status_bar(&console, format!("-- PAUSED -- SCORE {:?}", state.score));
         } else {
-            draw_status_bar(&console, format!("STATUS STATUS STATUS SCORE {:?}", state.score));
+            let stamina: (u8, u8, u8) = state.player.stamina();
+            let focus: (u8, u8, u8) = state.player.focus();
+            let grit: (u8, u8, u8) = state.player.grit();
+            draw_status_bar(&console,
+                format!(
+                    concat!(
+                        "stamina: {} ",
+                        "focus: {} ",
+                        "grit: {} ",
+                        "SCORE {}"),
+                    meter_bar(stamina.0, stamina.1, stamina.2),
+                    meter_bar(focus.0, focus.1, focus.2),
+                    meter_bar(grit.0, grit.1, grit.2),
+                    state.score));
         }
         draw_sidebar(&console, &state);
         let current_menu = self.stack.get(0);
