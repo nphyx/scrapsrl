@@ -23,12 +23,13 @@ impl UI {
     }
 
     pub fn draw(&mut self, console: &Console, state: &GameState) {
+        let pc = &state.player.character;
         if self.in_menu() {
             draw_status_bar(&console, format!("-- PAUSED -- SCORE {:?}", state.score));
         } else {
-            let stamina: (u8, u8, u8) = state.player.stamina();
-            let focus: (u8, u8, u8) = state.player.focus();
-            let grit: (u8, u8, u8) = state.player.grit();
+            let stamina: (u8, u8, u8) = pc.stamina();
+            let focus: (u8, u8, u8) = pc.focus();
+            let grit: (u8, u8, u8) = pc.grit();
             draw_status_bar(&console,
                 format!(
                     concat!(

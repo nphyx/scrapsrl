@@ -18,7 +18,7 @@ const TALL_GRASS: Tile = Tile{color: Color{r:89, g:97, b:15},
 const TREE_TRUNK: Tile = Tile{color: Color{r: 128, g:97, b:15},
         ch: '0', solid: true };
 
-type Tiles = HashMap<(i32, i32), Tile>;
+pub type Tiles = HashMap<(i32, i32), Tile>;
 
 pub fn put_tree(map: &mut Map, tiles: &mut Tiles, cx: i32, cy: i32) {
 
@@ -45,7 +45,7 @@ pub fn put_tree(map: &mut Map, tiles: &mut Tiles, cx: i32, cy: i32) {
     tiles.insert((cx, cy), TREE_TRUNK);
 }
 
-pub fn connect_tiles(map: &mut Map, tiles: &mut Tiles) {
+pub fn connect_tiles(tiles: &mut Tiles) {
     let connectables = connectable_tiles::build_connectables();
 
     let mut queue: Vec<(i32, i32, Tile)> = Vec::new();
@@ -148,7 +148,7 @@ pub fn generate(width: i32, height: i32) -> (Map, HashMap<(i32, i32), Tile>) {
         put_tree(&mut map, &mut tiles, cx, cy);
     }
 
-    connect_tiles(&mut map, &mut tiles);
+    connect_tiles(&mut tiles);
 
     return (map, tiles);
 }

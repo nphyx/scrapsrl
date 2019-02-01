@@ -98,6 +98,7 @@ pub fn draw_status_bar(mut console: &Console, text: String) {
 pub fn draw_sidebar(mut console: &Console, state: &GameState) {
     reset_colors(&console);
     console.set_alignment(TextAlignment::Left);
+    let pc = &state.player.character;
     let x = console.width() - SIDEBAR_WIDTH;
     let y = 0;
     let width = SIDEBAR_WIDTH;
@@ -115,18 +116,18 @@ pub fn draw_sidebar(mut console: &Console, state: &GameState) {
             " -- INVENTORY --\n",
             " THING ONE (1)\n",
             " THING TWO (2)\n"),
-           state.player.body(),
-           state.player.strength(),
-           state.player.grace(),
-           state.player.toughness(),
-           state.player.mind(),
-           state.player.intellect(),
-           state.player.wits(),
-           state.player.resolve(),
-           state.player.soul(),
-           state.player.charisma(),
-           state.player.empathy(),
-           state.player.will()
+           pc.body(),
+           pc.strength(),
+           pc.grace(),
+           pc.toughness(),
+           pc.mind(),
+           pc.intellect(),
+           pc.wits(),
+           pc.resolve(),
+           pc.soul(),
+           pc.charisma(),
+           pc.empathy(),
+           pc.will()
     );
 
     console.print_rect(x, y, width, height, text);
