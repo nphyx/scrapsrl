@@ -1,9 +1,8 @@
-use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag};
+use tcod::{Console, RootConsole, FontLayout, FontType};
 use tcod::colors::{Color, lerp};
 
 use super::util::{clamp, distance};
 use super::game_state::GameState;
-use super::entity::{Character, Entity};
 use super::ui::UI;
 
 use super::constants::{
@@ -37,7 +36,7 @@ impl Display {
 
     return Display{root}
   }
-  pub fn draw(&mut self, state: &GameState, bug: &Character, interface: &mut UI) {
+  pub fn draw(&mut self, state: &GameState, interface: &mut UI) {
     let light = Color::new(200, 180, 50);
     let dark = Color::new(0, 6, 18);
     let ground = DEFAULT_BG; //Color::new(0, 40, 25);
@@ -69,10 +68,12 @@ impl Display {
       self.root.put_char_ex(*px, *py, tile.ch, fg, bg);
     }
 
-    if state.map.is_in_fov(bug.pos().x, bug.pos().y) {
-      self.root.put_char(bug.pos().x, bug.pos().y, '\u{f46f}', BackgroundFlag::None);
-      self.root.set_char_foreground(bug.pos().x, bug.pos().y, Color{r: 32, g: 128, b: 225});
+    for entity in state.entities.iter() {
+      if state.map.is_in_fov(entity.pos().x, entity.pos().y) {
+        entity.draw(&mut self.root);
+      }
     }
+
     state.player.character.draw(&mut self.root);
     interface.draw(&self.root, &state);
     self.root.flush();
