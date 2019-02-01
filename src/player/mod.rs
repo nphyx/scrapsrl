@@ -9,9 +9,11 @@ pub struct Player {
 }
 
 impl Player {
-  pub fn new(character: Character) -> Player {
-    return Player{character};
+  pub fn new(mut character: Character) -> Player {
+    character.set_ch('\u{e213}');
+    Player{character}
   }
+
   // TEMP passthrough for character.pos
   pub fn pos(&self) -> Coord {
     self.character.pos()

@@ -1,4 +1,6 @@
 use std::collections::HashSet;
+use super::display::DrawSelf;
+use tcod::{Console, BackgroundFlag};
 
 #[derive(Hash, Eq, PartialEq)]
 pub enum VitalMod {
@@ -48,6 +50,7 @@ pub trait Entity {
 pub struct Character {
   pos: Coord,
   move_plan: Coord,
+  ch: char,
 
   body: u8,
   mind: u8,
@@ -79,6 +82,7 @@ pub struct Character {
 impl Character {
   pub fn blank() -> Character {
     Character{
+      ch: '?',
       pos: Coord{x:0, y:0},
       move_plan: Coord{x:0, y:0},
       body: 3, mind: 3, soul: 3,
@@ -92,6 +96,11 @@ impl Character {
       gear: Vec::new(),
       vitals: Vec::new()}
   }
+
+  pub fn set_ch(&mut self, ch: char) {
+    self.ch = ch;
+  }
+
   pub fn move_plan(&self) -> Coord { self.move_plan }
   pub fn set_move_plan(&mut self, pos: Coord) { self.pos = pos }
 
@@ -193,4 +202,10 @@ impl Character {
 impl Entity for Character {
   fn pos(&self) -> Coord { self.pos }
   fn set_pos(&mut self, pos: Coord) { self.pos = pos }
+}
+
+impl DrawSelf for Character {
+  fn draw(&self, console: &mut Console) {
+    console.put_char(self.pos().x, self.pos().y, self.ch, BackgroundFlag::None);
+  }
 }

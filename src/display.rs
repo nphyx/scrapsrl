@@ -13,6 +13,10 @@ use super::constants::{
   DEFAULT_BG,
   DEFAULT_FG};
 
+pub trait DrawSelf {
+  fn draw(&self, console: &mut Console);
+}
+
 pub struct Display {
   pub root: RootConsole
 }
@@ -69,7 +73,7 @@ impl Display {
       self.root.put_char(bug.pos().x, bug.pos().y, '\u{f46f}', BackgroundFlag::None);
       self.root.set_char_foreground(bug.pos().x, bug.pos().y, Color{r: 32, g: 128, b: 225});
     }
-    self.root.put_char(state.player.pos().x, state.player.pos().y, '\u{e213}', BackgroundFlag::None);
+    state.player.character.draw(&mut self.root);
     interface.draw(&self.root, &state);
     self.root.flush();
   }
