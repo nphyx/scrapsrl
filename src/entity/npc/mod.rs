@@ -1,11 +1,15 @@
 use tcod::{Console, BackgroundFlag};
-use super::{Character, Coord, Entity, EntityInteraction, Player, behavior};
+use rand::prelude::*;
+use super::*;
 use crate::display::DrawSelf;
 use crate::game_state::GameState;
+use crate::ui::Notification;
+use crate::util::distance;
 
 pub struct NPC {
   pub character: Character,
   pub behavior: &'static behavior::Behavior,
+  interact_notification: Option<Notification>,
   target: Option<&'static Entity>
 }
 
@@ -14,8 +18,13 @@ impl NPC {
     NPC{
       character,
       target: None,
+      interact_notification: None,
       behavior: &behavior::MovementBehavior::BrownianWalk
     }
+  }
+
+  pub fn set_notification(&mut self, notif: Notification) {
+    self.interact_notification = Some(notif);
   }
 }
 
@@ -31,10 +40,25 @@ impl Entity for NPC {
     self.character.tick(state);
   }
   fn player_interact(&mut self, player: &mut Player, state: &mut GameState) -> EntityInteraction {
+    if distance(player.pos(), self.pos()) < 2.0 {
+      let mut rng = rand::thread_rng();
+      player.score += 1;
+      self.set_pos(Coord{
+        x: rng.gen_range(0, MAP_WIDTH),
+        y: rng.gen_range(0, MAP_HEIGHT)
+      });
+      match &self.interact_notification {
+        Some(notif) => return EntityInteraction::Notification(notif.clone()),
+        None => {}
+      }
+    }
     EntityInteraction::None
   }
   fn desc(&self) -> String {
     self.character.desc()
+  }
+  fn entity_type(&self) -> EntityType {
+    EntityType::NPC
   }
 }
 

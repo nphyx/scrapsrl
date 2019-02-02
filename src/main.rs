@@ -35,7 +35,12 @@ fn make_bug() -> NPC {
   bug.set_color(Color{r: 32, g: 128, b: 225});
   bug.set_body_layout(body_layout::insectoid());
   bug.set_desc("A housecat-sized cockroach. Electric sparks arc between its antenna.".to_string());
-  return NPC::new(bug);
+  let mut npc_wrap = NPC::new(bug);
+  npc_wrap.set_notification(
+    Notification::new(
+      format!("Success"),
+      format!("Got 'em!")));
+  npc_wrap
 }
 
 fn make_computer() -> Object {
@@ -53,23 +58,6 @@ fn make_computer() -> Object {
 }
 
 fn handle_bugs(interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {
-  let mut rng = rand::thread_rng();
-  for bug in entities.iter_mut() {
-    if player.pos() == bug.pos() {
-      player.score += 1;
-      bug.set_pos(Coord{
-        x: rng.gen_range(0, MAP_WIDTH),
-        y: rng.gen_range(0, MAP_HEIGHT)
-      });
-
-      interface.open_menu(
-        ui::Notification::new(
-          format!("Success"),
-          format!("Got 'em!"),
-          )
-      );
-    }
-  }
 }
 
 fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {

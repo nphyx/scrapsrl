@@ -2,7 +2,7 @@ use tcod::input::Key;
 use tcod::map::Map;
 use tcod::input::KeyCode::*; // {NumPad7, NumPad8, NumPad9, NumPad4, NumPad6, NumPad1, NumPad2, NumPad3, NumPad5, NoKey, Shift};
 use tcod::{Console};
-use super::{Character, Coord, Entity, EntityCollection, EntityInteraction};
+use super::*;
 use crate::game_state::GameState;
 use crate::cursor::Cursor;
 use crate::util::plan;
@@ -31,6 +31,9 @@ impl Entity for Player {
   }
   fn desc(&self) -> String {
     self.character.desc()
+  }
+  fn entity_type(&self) -> EntityType {
+    return EntityType::Player
   }
 }
 

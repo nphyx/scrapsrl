@@ -1,6 +1,6 @@
 use tcod::{Console, BackgroundFlag};
 use tcod::colors::Color;
-use super::{Entity, EntityInteraction, Coord, Player};
+use super::*;
 use crate::display::DrawSelf;
 use crate::game_state::GameState;
 use crate::ui::Notification;
@@ -53,6 +53,9 @@ impl Entity for Object {
   }
   fn desc(&self) -> String {
     self.desc.to_string()
+  }
+  fn entity_type(&self) -> EntityType {
+    EntityType::Object
   }
 }
 

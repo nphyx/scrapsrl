@@ -46,12 +46,19 @@ impl std::cmp::PartialEq for Coord {
   }
 }
 
+pub enum EntityType {
+  Player,
+  NPC,
+  Object
+}
+
 pub trait Entity: DrawSelf {
   fn pos(&self) -> Coord;
   fn set_pos(&mut self, pos: Coord);
   fn tick(&mut self, state: &GameState);
   fn player_interact(&mut self, player: &mut Player, state: &mut GameState) -> EntityInteraction;
   fn desc(&self) -> String;
+  fn entity_type(&self) -> EntityType;
 }
 
 pub type EntityCollection = Vec<Box<Entity>>;

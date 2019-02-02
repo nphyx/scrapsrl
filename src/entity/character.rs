@@ -23,7 +23,7 @@ pub struct Vital {
   debuffs: HashSet<VitalMod>
 }
 
-pub struct Capability {
+pub enum Capability {
 }
 
 pub struct Feature {
@@ -196,6 +196,10 @@ impl Character {
     if self.cur_grit < self.compute_grit() {
       self.cur_grit += 1;
     }
+  }
+
+  pub fn has_capability(&self, _capability: Capability) -> bool {
+    true
   }
 }
 
