@@ -1,6 +1,7 @@
 use tcod::{Console, BackgroundFlag};
 use crate::entity::{Entity, Coord};
 use crate::display::DrawSelf;
+use crate::game_state::GameState;
 
 pub struct Object {
   pos: Coord,
@@ -24,6 +25,7 @@ impl Object {
 impl Entity for Object {
   fn pos(&self) -> Coord { self.pos }
   fn set_pos(&mut self, pos: Coord) { self.pos = pos }
+  fn tick(&mut self, _state: &GameState) {}
 }
 
 impl DrawSelf for Object {

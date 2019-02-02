@@ -17,7 +17,7 @@ mod player;
 mod display;
 use crate::display::Display;
 use crate::util::plan;
-use crate::entity::{Coord, Entity, EntityCollection, Character};
+use crate::entity::{Coord, Entity, Character, body_layout};
 use crate::game_state::GameState;
 use crate::constants::{
   TORCH_RADIUS,
@@ -43,6 +43,7 @@ fn make_bug() -> Character {
     y: rng.gen_range(0, MAP_HEIGHT)
   });
   bug.set_color(Color{r: 32, g: 128, b: 225});
+  bug.set_body_layout(body_layout::insectoid());
 
   return bug;
 }
@@ -84,6 +85,7 @@ fn main() {
   let (map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
   let mut state = GameState::new(Character::blank(), map, tiles);
   state.player.set_pos(Coord{x: cx, y: cy});
+  state.player.character.set_body_layout(body_layout::humanoid());
   for _ in 0..3 {
     state.entities.push(Box::new(make_bug()));
   }

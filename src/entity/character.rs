@@ -4,6 +4,12 @@ use tcod::colors::Color;
 
 use crate::display::DrawSelf;
 use crate::entity::{Entity, Coord};
+use crate::game_state::GameState;
+use super::entity_part::{
+  EntityComponent,
+  EntityComponentVariety,
+  EntityComponentSide
+};
 
 #[derive(Hash, Eq, PartialEq)]
 pub enum VitalMod {
@@ -28,9 +34,6 @@ pub struct Item {
 }
 
 pub struct Skill {
-}
-
-pub struct EntityComponent {
 }
 
 pub struct Character {
@@ -61,7 +64,7 @@ pub struct Character {
 
   skills: Vec<Skill>,
   features: Vec<Feature>,
-  components: Vec<EntityComponent>,
+  body_layout: EntityComponent,
   gear: Vec<Item>,
   vitals: Vec<Vital>
 }
@@ -80,13 +83,20 @@ impl Character {
       cur_stamina: 1, cur_focus: 1, cur_grit: 1,
       skills: Vec::new(),
       features: Vec::new(),
-      components: Vec::new(),
+      body_layout: EntityComponent::new(EntityComponentVariety::Torso, EntityComponentSide::NoSide),
       gear: Vec::new(),
       vitals: Vec::new()}
   }
 
   pub fn set_ch(&mut self, ch: char) { self.ch = ch; }
   pub fn set_color(&mut self, color: Color) { self.color = color; }
+
+  pub fn get_body_layout(&self) -> &EntityComponent {
+    &self.body_layout
+  }
+  pub fn set_body_layout(&mut self, layout: EntityComponent) {
+    self.body_layout = layout;
+  }
 
   pub fn move_plan(&self) -> Coord { self.move_plan }
   pub fn set_move_plan(&mut self, pos: Coord) { self.pos = pos }
@@ -189,6 +199,8 @@ impl Character {
 impl Entity for Character {
   fn pos(&self) -> Coord { self.pos }
   fn set_pos(&mut self, pos: Coord) { self.pos = pos }
+  fn tick(&mut self, state: &GameState) {
+  }
 }
 
 impl DrawSelf for Character {
