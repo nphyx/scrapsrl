@@ -183,12 +183,9 @@ impl Character {
     }
     return false;
   }
-}
-
-impl Entity for Character {
-  fn pos(&self) -> Coord { self.pos }
-  fn set_pos(&mut self, pos: Coord) { self.pos = pos }
-  fn tick(&mut self, _state: &GameState) {
+  pub fn pos(&self) -> Coord { self.pos }
+  pub fn set_pos(&mut self, pos: Coord) { self.pos = pos }
+  pub fn tick(&mut self, _state: &GameState) {
     if self.cur_stamina < self.compute_stamina() {
       self.cur_stamina += 1;
     }
@@ -200,6 +197,11 @@ impl Entity for Character {
     }
   }
 }
+
+/*
+impl Entity for Character {
+}
+*/
 
 impl DrawSelf for Character {
   fn draw(&self, console: &mut Console) {

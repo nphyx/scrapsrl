@@ -15,8 +15,9 @@ mod entity;
 mod util;
 mod display;
 mod cursor;
+use self::ui::Notification;
 use crate::display::Display;
-use crate::entity::{Coord, Entity, Character, body_layout, Object, Player, NPC, EntityCollection};
+use crate::entity::{Coord, Entity, Character, body_layout, Object, Player, NPC, EntityCollection, EntityInteraction};
 use crate::game_state::GameState;
 use crate::constants::{
   TORCH_RADIUS,
@@ -35,6 +36,19 @@ fn make_bug() -> NPC {
   bug.set_body_layout(body_layout::insectoid());
 
   return NPC::new(bug);
+}
+
+fn make_computer() -> Object {
+  let mut rng = rand::thread_rng();
+  let mut computer = Object::new();
+  computer.set_ch('\u{fcbe}');
+  computer.set_pos(Coord{x: rng.gen_range(0, MAP_WIDTH), y: rng.gen_range(0, MAP_HEIGHT)});
+  computer.set_notification(
+    Notification::new(
+      " \u{fcbe} ".to_string(),
+      "Bleep, bloop!".to_string())
+  );
+  return computer;
 }
 
 fn handle_bugs(interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {
@@ -57,6 +71,25 @@ fn handle_bugs(interface: &mut ui::UI, player: &mut Player, entities: &mut Entit
   }
 }
 
+fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {
+  match player.wants_interact_at {
+    Some(coord) => {
+      for entity in entities.iter_mut() {
+        if entity.pos() == coord {
+          match entity.player_interact(player, state) {
+            EntityInteraction::Notification(notice) => {
+              interface.open_menu(notice);
+              break;
+            },
+            EntityInteraction::None => {}
+          }
+        }
+      }
+    },
+    None => {}
+  }
+}
+
 fn main() {
   let mut display = Display::new();
   let cx = MAP_WIDTH / 2;
@@ -71,10 +104,7 @@ fn main() {
 
   let (map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
   let mut state = GameState::new(map, tiles);
-  let mut computer = Object::new();
-  computer.set_ch('\u{fcbe}');
-  computer.set_pos(Coord{x: rng.gen_range(0, MAP_WIDTH), y: rng.gen_range(0, MAP_HEIGHT)});
-  entities.push(Box::new(computer));
+  entities.push(Box::new(make_computer()));
   for _ in 0..3 {
     entities.push(Box::new(make_bug()));
   }
@@ -115,6 +145,7 @@ fn main() {
       }
       if !interface.handle_input(keypress, &mut state) {
         if player.handle_input(&keypress, &state.map, &entities) {
+          handle_player_interact(&mut state, &mut interface, &mut player, &mut entities);
           player.tick(&state);
           for entity in entities.iter_mut() {
             entity.tick(&state);

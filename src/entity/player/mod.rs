@@ -2,7 +2,7 @@ use tcod::input::Key;
 use tcod::map::Map;
 use tcod::input::KeyCode::*; // {NumPad7, NumPad8, NumPad9, NumPad4, NumPad6, NumPad1, NumPad2, NumPad3, NumPad5, NoKey, Shift};
 use tcod::{Console};
-use super::{Character, Coord, Entity, EntityCollection};
+use super::{Character, Coord, Entity, EntityCollection, EntityInteraction};
 use crate::game_state::GameState;
 use crate::cursor::Cursor;
 use crate::util::plan;
@@ -11,6 +11,7 @@ use crate::display::DrawSelf;
 pub struct Player {
   pub character: Character,
   pub cursor: Cursor,
+  pub wants_interact_at: Option<Coord>,
   pub score: i32
 }
 
@@ -24,6 +25,9 @@ impl Entity for Player {
   }
   fn tick(&mut self, state: &GameState) {
     self.character.tick(state);
+  }
+  fn player_interact(&mut self, _player: &mut Player, _state: &mut GameState) -> EntityInteraction {
+    EntityInteraction::None
   }
 }
 
@@ -43,6 +47,7 @@ impl Player {
     Player{
       character,
       score: 0,
+      wants_interact_at: None,
       cursor: Cursor{
         pos: Coord{x: 0, y: 0},
         active: false
@@ -50,10 +55,8 @@ impl Player {
     }
   }
 
-  pub fn interact(entities: &EntityCollection) {
-  }
-
   pub fn handle_input(&mut self, keypress: &Key, map: &Map, entities: &EntityCollection) -> bool {
+    self.wants_interact_at = None;
     let mut to = Coord{x: 0, y: 0}; // = self.character.pos();
     let mut speed = 1;
     if keypress.shift {
@@ -94,13 +97,23 @@ impl Player {
       Key { code: NumPad5, .. } => { // interact
         self.cursor.active = !self.cursor.active;
       },
+      Key { code: Enter, .. } |
+      Key { code: NumPadEnter, ..} => {
+        if self.cursor.active {
+          self.wants_interact_at = Some(self.cursor.pos.clone());
+          self.cursor.active = false;
+        }
+        else {
+          self.cursor.active = true;
+        }
+      }
       _ => {}
     }
 
     if self.cursor.active {
       self.cursor.pos += to;
       return false;
-    } else if (to.x != 0 || to.y != 0) {
+    } else if to.x != 0 || to.y != 0 {
       to += self.pos();
       match plan(&to, &map) {
         Some(coord) => {

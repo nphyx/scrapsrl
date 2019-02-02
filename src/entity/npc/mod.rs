@@ -1,5 +1,5 @@
 use tcod::{Console};
-use super::{Character, Coord, Entity, behavior};
+use super::{Character, Coord, Entity, EntityInteraction, Player, behavior};
 use crate::display::DrawSelf;
 use crate::game_state::GameState;
 
@@ -25,6 +25,9 @@ impl Entity for NPC {
   fn tick(&mut self, state: &GameState) {
     self.behavior.execute(self, state);
     self.character.tick(state);
+  }
+  fn player_interact(&mut self, player: &mut Player, state: &mut GameState) -> EntityInteraction {
+    EntityInteraction::None
   }
 }
 

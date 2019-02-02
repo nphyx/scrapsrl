@@ -4,6 +4,7 @@ use tcod::console::Console;
 use crate::ui::widget::Widget;
 use crate::ui::draw::{draw_centered_dialog};
 
+#[derive(Clone)]
 pub struct Notification {
   title: String,
   body: String

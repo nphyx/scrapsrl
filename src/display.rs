@@ -1,7 +1,7 @@
 use tcod::{Console, RootConsole, FontLayout, FontType};
 use tcod::colors::{Color, lerp};
 use super::util::{clamp, distance};
-use super::entity::{Entity, EntityCollection, Player};
+use super::entity::{Entity, EntityCollection, Player, Coord};
 use super::game_state::GameState;
 use super::ui::UI;
 
@@ -51,7 +51,7 @@ impl Display {
       let dist = clamp(
         0.0,
         1.0,
-        distance(pc.pos().x as f32, pc.pos().y as f32, *px as f32, *py as f32)
+        distance(pc.pos(), Coord{x: *px, y: *py})
         / TORCH_RADIUS as f32);
       let fg: Color;
       let bg: Color;

@@ -14,6 +14,7 @@ use crate::display::DrawSelf;
 use crate::game_state::GameState;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
+use crate::ui::Notification;
 
 /**
  * A coordinate.
@@ -50,6 +51,12 @@ pub trait Entity: DrawSelf {
   fn pos(&self) -> Coord;
   fn set_pos(&mut self, pos: Coord);
   fn tick(&mut self, state: &GameState);
+  fn player_interact(&mut self, player: &mut Player, state: &mut GameState) -> EntityInteraction;
 }
 
 pub type EntityCollection = Vec<Box<Entity>>;
+
+pub enum EntityInteraction {
+  Notification(Notification),
+  None
+}

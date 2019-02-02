@@ -8,8 +8,9 @@ pub mod chain;
 use crate::entity::Player;
 use crate::ui::draw::{draw_status_bar, draw_sidebar};
 pub use crate::constants::SIDEBAR_WIDTH;
-pub use crate::ui::notification::Notification;
-pub use crate::ui::chain::Chain;
+pub use self::widget::Widget;
+pub use self::notification::Notification;
+pub use self::chain::Chain;
 
 fn meter_bar(max: u8, cur: u8,  cap: u8) -> String {
   let gap: u8 = max - cur - cap;
