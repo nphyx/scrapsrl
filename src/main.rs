@@ -57,9 +57,6 @@ fn make_computer() -> Object {
   return computer;
 }
 
-fn handle_bugs(interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {
-}
-
 fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {
   match player.wants_interact_at {
     Some(coord) => {
@@ -139,7 +136,6 @@ fn main() {
           for entity in entities.iter_mut() {
             entity.tick(&state);
           }
-          handle_bugs(&mut interface, &mut player, &mut entities);
         }
         match keypress {
           Key { code: Escape, .. } => break,
