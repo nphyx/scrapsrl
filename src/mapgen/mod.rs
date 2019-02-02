@@ -7,18 +7,25 @@ use super::util::clamp;
 use super::tile::Tile;
 mod connectable_tiles;
 
-const PLANT: Tile = Tile{color: Color{r:24, g:180, b:78},
-  ch: '\u{e22f}', solid: false };
+const PLANT: Tile = Tile{
+  color: Color{r:24, g:180, b:78},
+  ch: '\u{e22f}', solid: false,
+  desc: "A small plant."};
 const TREE_BARK: Tile = Tile{color: Color{r:128, g:97, b:15}, 
-  ch: '\u{256c}', solid: true };
-const GRASS: Tile = Tile{color: Color{r:89, g:97, b:15},
-ch: ',', solid: false };
+  ch: '\u{256c}', solid: true,
+  desc: "The bark of a tree."};
+const GRASS: Tile = Tile{
+  color: Color{r:89, g:97, b:15},
+  ch: ',', solid: false,
+  desc: "Just some ordinary grass."};
 const TALL_GRASS: Tile = Tile{color: Color{r:89, g:97, b:15}, 
-  ch: '"', solid: false };
+  ch: '"', solid: false,
+  desc: "Some tall grass."};
 const TREE_TRUNK: Tile = Tile{color: Color{r: 128, g:97, b:15},
-  ch: '0', solid: true };
+  ch: '0', solid: true,
+  desc: "The trunk of a tree."};
 
-pub type Tiles = HashMap<(i32, i32), Tile>;
+pub type Tiles<'a> = HashMap<(i32, i32), Tile<'a>>;
 
 pub fn put_tree(map: &mut Map, tiles: &mut Tiles, cx: i32, cy: i32) {
 
@@ -97,7 +104,8 @@ pub fn connect_tiles(tiles: &mut Tiles) {
         queue.push((*x, *y, Tile{
           color: tile.color,
           ch: ch,
-          solid: tile.solid
+          solid: tile.solid,
+          desc: tile.desc
         }));
       },
       None => {}
@@ -116,7 +124,7 @@ pub fn connect_tiles(tiles: &mut Tiles) {
   }
 }
 
-pub fn generate(width: i32, height: i32) -> (Map, HashMap<(i32, i32), Tile>) {
+pub fn generate<'a>(width: i32, height: i32) -> (Map, HashMap<(i32, i32), Tile<'a>>) {
   let mut map = Map::new(width, height);
   let mut tiles: Tiles = HashMap::new();
   let mut rng = rand::thread_rng();

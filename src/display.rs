@@ -1,7 +1,7 @@
 use tcod::{Console, RootConsole, FontLayout, FontType};
 use tcod::colors::{Color, lerp};
-
 use super::util::{clamp, distance};
+use super::entity::{Entity, EntityCollection, Player};
 use super::game_state::GameState;
 use super::ui::UI;
 
@@ -36,7 +36,8 @@ impl Display {
 
     return Display{root}
   }
-  pub fn draw(&mut self, state: &GameState, interface: &mut UI) {
+  pub fn draw(&mut self, state: &GameState, interface: &mut UI, player: &Player, entities: &EntityCollection) {
+    let pc = &player.character;
     let light = Color::new(200, 180, 50);
     let dark = Color::new(0, 6, 18);
     let ground = DEFAULT_BG; //Color::new(0, 40, 25);
@@ -50,7 +51,7 @@ impl Display {
       let dist = clamp(
         0.0,
         1.0,
-        distance(state.player.pos().x as f32, state.player.pos().y as f32, *px as f32, *py as f32)
+        distance(pc.pos().x as f32, pc.pos().y as f32, *px as f32, *py as f32)
         / TORCH_RADIUS as f32);
       let fg: Color;
       let bg: Color;
@@ -68,14 +69,14 @@ impl Display {
       self.root.put_char_ex(*px, *py, tile.ch, fg, bg);
     }
 
-    for entity in state.entities.iter() {
+    for entity in entities.iter() {
       if state.map.is_in_fov(entity.pos().x, entity.pos().y) {
         entity.draw(&mut self.root);
       }
     }
 
-    state.player.character.draw(&mut self.root);
-    interface.draw(&self.root, &state);
+    player.draw(&mut self.root);
+    interface.draw(&self.root, player, state);
     self.root.flush();
   }
 }

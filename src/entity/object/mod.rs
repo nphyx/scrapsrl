@@ -1,18 +1,21 @@
 use tcod::{Console, BackgroundFlag};
+use tcod::colors::Color;
 use crate::entity::{Entity, Coord};
 use crate::display::DrawSelf;
 use crate::game_state::GameState;
 
 pub struct Object {
   pos: Coord,
-  ch: char
+  ch: char,
+  color: Color
 }
 
 impl Object {
   pub fn new() -> Object {
     return Object{
       pos: Coord{x: 0, y: 0},
-      ch: '!'
+      ch: '!',
+      color: Color{r: 128, g: 128, b: 128}
     }
   }
 

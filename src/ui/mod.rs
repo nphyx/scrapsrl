@@ -5,6 +5,7 @@ pub mod draw;
 pub mod notification;
 pub mod widget;
 pub mod chain;
+use crate::entity::Player;
 use crate::ui::draw::{draw_status_bar, draw_sidebar};
 pub use crate::constants::SIDEBAR_WIDTH;
 pub use crate::ui::notification::Notification;
@@ -24,10 +25,10 @@ impl UI {
     UI{stack: Vec::new()}
   }
 
-  pub fn draw(&mut self, console: &Console, state: &GameState) {
-    let pc = &state.player.character;
+  pub fn draw(&mut self, console: &Console, player: &Player, state: &GameState) {
+    let pc = &player.character;
     if self.in_menu() {
-      draw_status_bar(&console, format!("-- PAUSED -- SCORE {:?}", state.score));
+      draw_status_bar(console, format!("-- PAUSED -- SCORE {:?}", player.score));
     } else {
       let stamina: (u8, u8, u8) = pc.stamina();
       let focus: (u8, u8, u8) = pc.focus();
@@ -42,9 +43,9 @@ impl UI {
             meter_bar(stamina.0, stamina.1, stamina.2),
             meter_bar(focus.0, focus.1, focus.2),
             meter_bar(grit.0, grit.1, grit.2),
-            state.score));
+            player.score));
     }
-    draw_sidebar(&console, &state);
+    draw_sidebar(console, player, state);
     let current_menu = self.stack.get(0);
     match current_menu {
       Some(menu) => menu.draw(&console),

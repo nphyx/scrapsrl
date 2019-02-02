@@ -1,17 +1,43 @@
 mod character;
 mod object;
 mod entity_part;
+mod behavior;
+mod player;
+mod npc;
 pub mod body_layout;
+pub use self::player::Player;
+pub use self::npc::NPC;
 pub use self::entity_part::EntityComponent;
-pub use crate::entity::character::Character;
-pub use crate::entity::object::Object;
+pub use self::character::Character;
+pub use self::object::Object;
 use crate::display::DrawSelf;
 use crate::game_state::GameState;
+use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
+use crate::util::clamp;
 
-#[derive(Copy,Clone)]
+/**
+ * A coordinate.
+ */
+
+#[derive(Copy,Clone,Debug)]
 pub struct Coord {
   pub x: i32,
   pub y: i32
+}
+
+impl std::ops::AddAssign<Coord> for Coord {
+  fn add_assign(&mut self, coord: Coord) {
+    println!("adding {:?}, {:?}", self, coord);
+    self.x = clamp(0, MAP_WIDTH, self.x + coord.x);
+    self.y = clamp(0, MAP_HEIGHT, self.y + coord.y);
+  }
+}
+
+impl std::ops::Add<Coord> for Coord {
+  type Output = Coord;
+  fn add(self, coord: Coord) -> Coord {
+    Coord{x: self.x + coord.x, y: self.y + coord.y}
+  }
 }
 
 impl std::cmp::PartialEq for Coord {
