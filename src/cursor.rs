@@ -19,11 +19,13 @@ impl Cursor {
 
 impl DrawSelf for Cursor {
   fn draw(&self, console: &mut Console) {
-    println!("drawing cursor");
     console.set_char_background(
       self.pos.x,
       self.pos.y,
       Color{r: 128, g: 178, b: 128},
       BackgroundFlag::Set);
+  }
+  fn draw_at(&self, console: &mut Console, x:i32, y:i32) {
+    console.set_char_background(x, y, Color{r: 128, g: 178, b: 128}, BackgroundFlag::Set);
   }
 }

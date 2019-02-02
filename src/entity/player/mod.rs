@@ -29,15 +29,20 @@ impl Entity for Player {
   fn player_interact(&mut self, _player: &mut Player, _state: &mut GameState) -> EntityInteraction {
     EntityInteraction::None
   }
+  fn desc(&self) -> String {
+    self.character.desc()
+  }
 }
 
 impl DrawSelf for Player {
   fn draw(&self, console: &mut Console) {
-    println!("drawing self");
     self.character.draw(console);
     if self.cursor.active {
       self.cursor.draw(console);
     }
+  }
+  fn draw_at(&self, console: &mut Console, x: i32, y:i32) {
+    self.character.draw_at(console, x, y);
   }
 }
 
@@ -51,7 +56,7 @@ impl Player {
       cursor: Cursor{
         pos: Coord{x: 0, y: 0},
         active: false
-      }
+      },
     }
   }
 

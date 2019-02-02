@@ -1,6 +1,6 @@
 use tcod::console::{Console, TextAlignment, BackgroundFlag};
 use tcod::colors::Color;
-use crate::entity::{Player, Character};
+use crate::entity::{Player, EntityCollection};
 use crate::game_state::GameState;
 use crate::constants::{SIDEBAR_WIDTH, MAP_WIDTH, MAP_HEIGHT, DIALOG_WIDTH};
 
@@ -96,44 +96,26 @@ pub fn draw_status_bar(mut console: &Console, text: String) {
   console.print_rect(x, y, width, height, text);
 }
 
-pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState) {
+pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState, entities: &EntityCollection) {
   let pc = &player.character;
-  let cursor = &player.cursor;
   reset_colors(&console);
   console.set_alignment(TextAlignment::Left);
   let x = console.width() - SIDEBAR_WIDTH;
   let y = 0;
   let width = SIDEBAR_WIDTH;
   let height = console.height();
-  let mut cursor_ch = ' ';
-  let mut cursor_desc = "";
-  let mut cursor_sep = "";
-  if player.cursor.active {
-    let cursor_tile = state.tiles.get(&(player.cursor.pos.x, player.cursor.pos.y));
-    match cursor_tile {
-      Some(tile) => {
-        cursor_ch = tile.ch;
-        cursor_desc = tile.desc;
-        cursor_sep = ":";
-      },
-      None => {}
-    }
-  }
+  let mut did_cursor_draw = false;
+  vert_line(console, x, y, height, VERT_LINE_CH);
   let text = format!(
     concat!(
-      "- THIS IS SIDEBAR -\n",
+      "   THIS IS SIDEBAR\n",
       "\n",
-      " ATTR   \u{250c}POW SUB RES\u{2510}\n",
-      " Body:{} |S:{} G:{} T:{}|\n",
-      " Mind:{} |I:{} W:{} R:{}|\n",
-      " Soul:{} |C:{} E:{} W:{}|\n",
-      "        \u{2514}-----------\u{2518}\n",
-      "\n",
-      " -- INVENTORY --\n",
-      " THING ONE (1)\n",
-      " THING TWO (2)\n",
-      "\n",
-      "  {}{}{}"),
+      "ATTR   \u{250c}POW SUB RES\u{2510}\n",
+      "Body:{} |S:{} G:{} T:{}|\n",
+      "Mind:{} |I:{} W:{} R:{}|\n",
+      "Soul:{} |C:{} E:{} W:{}|\n",
+      "       \u{2514}-----------\u{2518}\n",
+      "\n"),
       pc.body(),
       pc.strength(),
       pc.grace(),
@@ -145,10 +127,29 @@ pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState) {
       pc.soul(),
       pc.charisma(),
       pc.empathy(),
-      pc.will(),
-      cursor_ch,
-      cursor_sep,
-      cursor_desc);
+      pc.will());
 
-  console.print_rect(x, y, width, height, text);
+  console.print_rect(x + 2, y, width - 2, height, text);
+  if player.cursor.active {
+    if state.map.is_in_fov(player.cursor.pos.x, player.cursor.pos.y) {
+      for entity in entities.iter() {
+        if entity.pos() == player.cursor.pos {
+          entity.draw_at(&mut console, x + 2, y + 13);
+          console.print_rect(x + 4, y + 13, width - 5, 10, entity.desc());
+          did_cursor_draw = true;
+        }
+      }
+      if !did_cursor_draw {
+        let cursor_tile = state.tiles.get(&(player.cursor.pos.x, player.cursor.pos.y));
+        match cursor_tile {
+          Some(tile) => {
+            console.put_char(x + 2, y + 13, tile.ch, BackgroundFlag::None);
+            console.set_char_foreground(x + 2, y + 13, tile.color);
+            console.print_rect(x + 4, y + 13, width - 5, 2, tile.desc);
+          },
+          None => {}
+        }
+      }
+    }
+  }
 }

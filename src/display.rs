@@ -14,6 +14,7 @@ use super::constants::{
 
 pub trait DrawSelf {
   fn draw(&self, console: &mut Console);
+  fn draw_at(&self, console: &mut Console, x: i32, y: i32);
 }
 
 pub struct Display {
@@ -76,7 +77,7 @@ impl Display {
     }
 
     player.draw(&mut self.root);
-    interface.draw(&self.root, player, state);
+    interface.draw(&self.root, player, state, entities);
     self.root.flush();
   }
 }

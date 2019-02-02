@@ -28,7 +28,6 @@ pub struct Coord {
 
 impl std::ops::AddAssign<Coord> for Coord {
   fn add_assign(&mut self, coord: Coord) {
-    println!("adding {:?}, {:?}", self, coord);
     self.x = clamp(0, MAP_WIDTH, self.x + coord.x);
     self.y = clamp(0, MAP_HEIGHT, self.y + coord.y);
   }
@@ -52,6 +51,7 @@ pub trait Entity: DrawSelf {
   fn set_pos(&mut self, pos: Coord);
   fn tick(&mut self, state: &GameState);
   fn player_interact(&mut self, player: &mut Player, state: &mut GameState) -> EntityInteraction;
+  fn desc(&self) -> String;
 }
 
 pub type EntityCollection = Vec<Box<Entity>>;

@@ -38,9 +38,9 @@ pub struct Skill {
 
 pub struct Character {
   pos: Coord,
-  move_plan: Coord,
-  ch: char,
-  color: Color,
+  pub ch: char,
+  pub color: Color,
+  desc: String,
 
   body: u8,
   mind: u8,
@@ -75,7 +75,7 @@ impl Character {
       ch: '?',
       pos: Coord{x:0, y:0},
       color: Color{r: 255, g: 255, b: 255},
-      move_plan: Coord{x:0, y:0},
+      desc: "".to_string(),
       body: 3, mind: 3, soul: 3,
       strength: 1, grace: 2, toughness: 3,
       intellect: 1, wits: 2, resolve: 3,
@@ -88,8 +88,12 @@ impl Character {
       vitals: Vec::new()}
   }
 
+  pub fn ch(&self) -> char { self.ch }
   pub fn set_ch(&mut self, ch: char) { self.ch = ch; }
+  pub fn color(&self) -> Color { self.color }
   pub fn set_color(&mut self, color: Color) { self.color = color; }
+  pub fn desc(&self) -> String { self.desc.to_string() }
+  pub fn set_desc(&mut self, desc: String) { self.desc = desc; }
 
   pub fn get_body_layout(&self) -> &EntityComponent {
     &self.body_layout
@@ -97,9 +101,6 @@ impl Character {
   pub fn set_body_layout(&mut self, layout: EntityComponent) {
     self.body_layout = layout;
   }
-
-  pub fn move_plan(&self) -> Coord { self.move_plan }
-  pub fn set_move_plan(&mut self, pos: Coord) { self.pos = pos }
 
   pub fn body(&self) -> u8 { self.body }
   pub fn set_body(&mut self, val:u8) { self.body = val }
@@ -198,14 +199,13 @@ impl Character {
   }
 }
 
-/*
-impl Entity for Character {
-}
-*/
-
 impl DrawSelf for Character {
   fn draw(&self, console: &mut Console) {
     console.put_char(self.pos().x, self.pos().y, self.ch, BackgroundFlag::None);
     console.set_char_foreground(self.pos().x, self.pos().y, self.color);
+  }
+  fn draw_at(&self, console: &mut Console, x: i32, y: i32) {
+    console.put_char(x, y, self.ch, BackgroundFlag::None);
+    console.set_char_foreground(x, y, self.color);
   }
 }

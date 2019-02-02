@@ -10,7 +10,8 @@ pub struct Object {
   pos: Coord,
   ch: char,
   color: Color,
-  interact_notification: Option<Notification>
+  interact_notification: Option<Notification>,
+  desc: String
 }
 
 impl Object {
@@ -19,7 +20,8 @@ impl Object {
       pos: Coord{x: 0, y: 0},
       ch: '!',
       color: Color{r: 128, g: 128, b: 128},
-      interact_notification: None
+      interact_notification: None,
+      desc: "".to_string()
     }
   }
 
@@ -31,6 +33,9 @@ impl Object {
     self.interact_notification = Some(notif);
   }
 
+  pub fn set_desc(&mut self, desc: String) {
+    self.desc = desc;
+  }
 }
 
 impl Entity for Object {
@@ -46,11 +51,18 @@ impl Entity for Object {
     }
     EntityInteraction::None
   }
+  fn desc(&self) -> String {
+    self.desc.to_string()
+  }
 }
 
 impl DrawSelf for Object {
   fn draw(&self, console: &mut Console) {
     console.put_char(self.pos().x, self.pos().y, self.ch, BackgroundFlag::None);
     console.set_char_foreground(self.pos().x, self.pos().y, self.color);
+  }
+  fn draw_at(&self, console: &mut Console, x: i32, y:i32) {
+    console.put_char(x, y, self.ch, BackgroundFlag::None);
+    console.set_char_foreground(x, y, self.color);
   }
 }

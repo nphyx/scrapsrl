@@ -34,7 +34,7 @@ fn make_bug() -> NPC {
   });
   bug.set_color(Color{r: 32, g: 128, b: 225});
   bug.set_body_layout(body_layout::insectoid());
-
+  bug.set_desc("A housecat-sized cockroach. Electric sparks arc between its antenna.".to_string());
   return NPC::new(bug);
 }
 
@@ -48,6 +48,7 @@ fn make_computer() -> Object {
       " \u{fcbe} ".to_string(),
       "Bleep, bloop!".to_string())
   );
+  computer.set_desc("An old-world electronic device. Looks like it's still working.".to_string());
   return computer;
 }
 
