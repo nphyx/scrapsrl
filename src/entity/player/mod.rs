@@ -63,6 +63,8 @@ impl Player {
     }
   }
 
+  /// Called when input is delegated to the player character. Returns true if the
+  /// game state should advance and/or system level keys should be permitted.
   pub fn handle_input(&mut self, keypress: &Key, map: &Map, entities: &EntityCollection) -> bool {
     self.wants_interact_at = None;
     let mut to = Coord{x: 0, y: 0}; // = self.character.pos();
@@ -104,6 +106,12 @@ impl Player {
       },
       Key { code: NumPad5, .. } => { // interact
         self.cursor.active = !self.cursor.active;
+      },
+      Key { code: Escape, .. } => {
+        if self.cursor.active {
+          self.cursor.active = false; 
+          return false;
+        }
       },
       Key { code: Enter, .. } |
       Key { code: NumPadEnter, ..} => {

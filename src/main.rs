@@ -131,15 +131,18 @@ fn main() {
       }
       if !interface.handle_input(keypress, &mut state) {
         if player.handle_input(&keypress, &state.map, &entities) {
+          // only implement system-level keys and process ticks 
+          // when player is not doing something
+          match keypress {
+            Key { code: Escape, .. } => break,
+            _ => {}
+          }
           handle_player_interact(&mut state, &mut interface, &mut player, &mut entities);
           player.tick(&state);
           for entity in entities.iter_mut() {
             entity.tick(&state);
           }
-        }
-        match keypress {
-          Key { code: Escape, .. } => break,
-          _ => {}
+        } else { 
         }
       }
     }
