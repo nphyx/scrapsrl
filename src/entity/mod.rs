@@ -48,6 +48,12 @@ impl std::cmp::PartialEq for Coord {
 
 impl std::cmp::Eq for Coord {}
 
+impl Coord {
+  pub fn as_array(&self) -> [i32; 2] {
+    [self.x.clone(), self.y.clone()]
+  }
+}
+
 pub enum EntityType {
   Player,
   NPC,

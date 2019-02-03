@@ -58,14 +58,14 @@ impl Display {
       let bg: Color;
       let blend = lerp(light, dark, dist);
       if visible && (dist < TORCH_RADIUS as f32) {
-        bg = lerp(ground, blend, 0.3);
-        fg = lerp(tile.color, blend, 0.7);
+        bg = lerp(tile.bg, blend, 0.3);
+        fg = lerp(tile.fg, blend, 0.7);
       } else if visible {
-        bg = lerp(ground, blend, 0.5);
-        fg = lerp(tile.color, blend, 0.5);
+        bg = lerp(tile.bg, blend, 0.5);
+        fg = lerp(tile.fg, blend, 0.5);
       } else {
-        bg = lerp(ground, dark, 0.5);
-        fg = lerp(tile.color, dark, 0.7);
+        bg = lerp(tile.bg, dark, 0.5);
+        fg = lerp(tile.fg, dark, 0.7);
       }
       self.root.put_char_ex(coord.x, coord.y, tile.ch, fg, bg);
     }

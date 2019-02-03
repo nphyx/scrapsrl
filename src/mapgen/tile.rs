@@ -7,8 +7,10 @@ use crate::util::ConnectableChars;
 #[derive(Clone)]
 pub struct Tile<'a> {
   pub ch: char,
-  pub color: Color,
-  pub solid: bool,
+  pub fg: Color,
+  pub bg: Color,
+  pub transparent: bool,
+  pub walkable: bool,
   pub desc: &'a str
 }
 
@@ -48,10 +50,8 @@ impl<'a> Tiles<'a> {
           self.get_ch(Coord{x:coord.x + 1, y:coord.y})) {
         Some(chosen) => {
           queue.push((*coord, Tile{
-            color: tile.color,
             ch: chosen,
-            solid: tile.solid,
-            desc: tile.desc
+            ..*tile
           }));
         },
         None => {}

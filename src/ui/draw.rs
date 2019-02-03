@@ -139,7 +139,7 @@ pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState, e
         match cursor_tile {
           Some(tile) => {
             console.put_char(x + 2, y + 13, tile.ch, BackgroundFlag::None);
-            console.set_char_foreground(x + 2, y + 13, tile.color);
+            console.set_char_foreground(x + 2, y + 13, tile.fg);
             console.print_rect(x + 4, y + 13, width - 5, 2, tile.desc);
           },
           None => {}
