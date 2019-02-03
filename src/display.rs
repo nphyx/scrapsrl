@@ -64,7 +64,8 @@ impl Display {
     }
 
     // TODO compute time of day adjustment, sunset gradient, and moon phase :D
-    let time_of_day_rel = 0.8;
+    let time_of_day_rel = state.world_time_relative();
+    println!("{}", time_of_day_rel);
 
     // lighting pass SUPER SLOW
     for x in 0..MAP_WIDTH {
@@ -89,8 +90,8 @@ impl Display {
         } else {
           fg = screen(&lerp(fg, fg_gray, rel_dist), &ambient);
           bg = overlay(&lerp(bg, bg_gray, rel_dist), &ambient);
-          fg = lerp(fg, desaturate(&fg), time_of_day_rel);
-          bg = lerp(bg, desaturate(&bg), time_of_day_rel);
+          fg = lerp(fg, lerp(orig_fg, desaturate(&orig_fg), 0.25), time_of_day_rel);
+          bg = lerp(bg, lerp(orig_bg, desaturate(&orig_bg), 0.25), time_of_day_rel);
         }
         // fg = screen(&fg, &ambient);
         // bg = screen(&bg, &ambient);
@@ -102,7 +103,7 @@ impl Display {
     player.draw(&mut self.root);
     interface.draw(&self.root, player, state, entities);
     self.root.set_alignment(TextAlignment::Right);
-    self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 9, 1, format!("fps: {}", get_fps()));
+    // self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
     self.root.flush();
   }
 }

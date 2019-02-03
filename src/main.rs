@@ -137,6 +137,7 @@ fn main() {
             _ => {}
           }
           handle_player_interact(&mut state, &mut interface, &mut player, &mut entities);
+          state.tick();
           player.tick(&state);
           for entity in entities.iter_mut() {
             entity.tick(&state);
