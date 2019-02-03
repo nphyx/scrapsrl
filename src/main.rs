@@ -7,7 +7,6 @@ use tcod::map::FovAlgorithm;
 use tcod::colors::Color;
 use rand::prelude::*;
 mod mapgen;
-mod tile;
 mod ui;
 mod game_state;
 mod constants;

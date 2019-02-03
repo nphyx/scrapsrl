@@ -20,7 +20,7 @@ use crate::ui::Notification;
  * A coordinate.
  */
 
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy,Clone,Debug,Hash)]
 pub struct Coord {
   pub x: i32,
   pub y: i32
@@ -45,6 +45,8 @@ impl std::cmp::PartialEq for Coord {
     return self.x == cmp.x && self.y == cmp.y;
   }
 }
+
+impl std::cmp::Eq for Coord {}
 
 pub enum EntityType {
   Player,

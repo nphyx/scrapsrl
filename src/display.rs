@@ -47,12 +47,12 @@ impl Display {
     // Compute the FOV starting from the coordinates 20,20. Where we'll put the '@'
     // Use a max_radius of 10 and light the walls.
 
-    for ((px, py), tile) in &state.tiles {
-      let visible = state.map.is_in_fov(*px, *py);
+    for (coord, tile) in state.tiles.map.iter() {
+      let visible = state.map.is_in_fov(coord.x, coord.y);
       let dist = clamp(
         0.0,
         1.0,
-        distance(pc.pos(), Coord{x: *px, y: *py})
+        distance(pc.pos(), *coord)
         / TORCH_RADIUS as f32);
       let fg: Color;
       let bg: Color;
@@ -67,7 +67,7 @@ impl Display {
         bg = lerp(ground, dark, 0.5);
         fg = lerp(tile.color, dark, 0.7);
       }
-      self.root.put_char_ex(*px, *py, tile.ch, fg, bg);
+      self.root.put_char_ex(coord.x, coord.y, tile.ch, fg, bg);
     }
 
     for entity in entities.iter() {

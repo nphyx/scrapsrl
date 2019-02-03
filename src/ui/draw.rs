@@ -140,7 +140,7 @@ pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState, e
         }
       }
       if !did_cursor_draw {
-        let cursor_tile = state.tiles.get(&(player.cursor.pos.x, player.cursor.pos.y));
+        let cursor_tile = state.tiles.get(player.cursor.pos);
         match cursor_tile {
           Some(tile) => {
             console.put_char(x + 2, y + 13, tile.ch, BackgroundFlag::None);
