@@ -1,12 +1,16 @@
-use tcod::{Console, RootConsole, FontLayout, FontType};
+use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, TextAlignment};
+use tcod::system::*;
 use tcod::colors::{Color, lerp};
+use tcod::map::FovAlgorithm;
 use super::util::{clamp, distance};
 use super::entity::{Entity, EntityCollection, Player, Coord};
 use super::game_state::GameState;
+use super::util::colors::*;
 use super::ui::UI;
 
 use super::constants::{
-  TORCH_RADIUS,
+  MAP_WIDTH,
+  MAP_HEIGHT,
   SCREEN_WIDTH,
   SCREEN_HEIGHT,
   DEFAULT_BG,
@@ -37,37 +41,20 @@ impl Display {
 
     return Display{root}
   }
-  pub fn draw(&mut self, state: &GameState, interface: &mut UI, player: &Player, entities: &EntityCollection) {
-    let pc = &player.character;
-    let light = Color::new(200, 180, 50);
-    let dark = Color::new(0, 6, 18);
-    let ground = DEFAULT_BG; //Color::new(0, 40, 25);
+  pub fn draw(&mut self, state: &mut GameState, interface: &mut UI, player: &Player, entities: &EntityCollection) {
+    state.map.compute_fov(player.pos().x, player.pos().y, SCREEN_WIDTH, true, FovAlgorithm::Basic);
+    let light = Color::new(255, 240, 128);
+    let ambient = Color::new(0, 6, 18);
+    // TODO calculate relative contrast and maintain for out-of-vis objects
+    let bg_gray = Color::new(8, 8, 8);
+    let fg_gray = Color::new(24, 24, 24);
 
     self.root.clear();
     // Compute the FOV starting from the coordinates 20,20. Where we'll put the '@'
     // Use a max_radius of 10 and light the walls.
 
     for (coord, tile) in state.tiles.map.iter() {
-      let visible = state.map.is_in_fov(coord.x, coord.y);
-      let dist = clamp(
-        0.0,
-        1.0,
-        distance(pc.pos(), *coord)
-        / TORCH_RADIUS as f32);
-      let fg: Color;
-      let bg: Color;
-      let blend = lerp(light, dark, dist);
-      if visible && (dist < TORCH_RADIUS as f32) {
-        bg = lerp(tile.bg, blend, 0.3);
-        fg = lerp(tile.fg, blend, 0.7);
-      } else if visible {
-        bg = lerp(tile.bg, blend, 0.5);
-        fg = lerp(tile.fg, blend, 0.5);
-      } else {
-        bg = lerp(tile.bg, dark, 0.5);
-        fg = lerp(tile.fg, dark, 0.7);
-      }
-      self.root.put_char_ex(coord.x, coord.y, tile.ch, fg, bg);
+      self.root.put_char_ex(coord.x, coord.y, tile.ch, tile.fg, tile.bg);
     }
 
     for entity in entities.iter() {
@@ -76,8 +63,47 @@ impl Display {
       }
     }
 
+    // TODO compute time of day adjustment, sunset gradient, and moon phase :D
+    let time_of_day_rel = 0.8;
+
+    // lighting pass SUPER SLOW
+    for x in 0..MAP_WIDTH {
+      for y in 0..MAP_HEIGHT {
+        let orig_fg = self.root.get_char_foreground(x, y);
+        let orig_bg = self.root.get_char_background(x, y);
+        let mut fg = orig_fg.clone();
+        let mut bg = orig_bg.clone();
+        let dist = distance(player.pos(), Coord{x, y});
+
+        let rel_dist = clamp(
+          0.0,
+          1.0,
+          dist.powf(1.25) / (MAP_WIDTH as f32)
+        ).sqrt();
+        println!("dist {} rel {}", dist, rel_dist);
+        let blend = lerp(light, ambient, rel_dist);
+        if state.map.is_in_fov(x, y) {
+          bg = soft_light(&soft_light(&bg, &blend), &blend); 
+          fg = soft_light(&soft_light(&fg, &blend), &blend);
+          fg = lerp(fg, lerp(orig_fg, color_dodge(&orig_fg, &light), 0.15), time_of_day_rel);
+          bg = lerp(bg, lerp(orig_bg, color_dodge(&orig_bg, &light), 0.1), time_of_day_rel);
+        } else {
+          fg = screen(&lerp(fg, fg_gray, rel_dist), &ambient);
+          bg = overlay(&lerp(bg, bg_gray, rel_dist), &ambient);
+          fg = lerp(fg, desaturate(&fg), time_of_day_rel);
+          bg = lerp(bg, desaturate(&bg), time_of_day_rel);
+        }
+        // fg = screen(&fg, &ambient);
+        // bg = screen(&bg, &ambient);
+        self.root.set_char_foreground(x, y, fg);
+        self.root.set_char_background(x, y, bg, BackgroundFlag::Set);
+      }
+    }
+
     player.draw(&mut self.root);
     interface.draw(&self.root, player, state, entities);
+    self.root.set_alignment(TextAlignment::Right);
+    self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 9, 1, format!("fps: {}", get_fps()));
     self.root.flush();
   }
 }

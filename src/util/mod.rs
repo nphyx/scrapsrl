@@ -2,6 +2,7 @@ use crate::entity::Coord;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 mod connectable_char;
 pub mod icons;
+pub mod colors;
 pub use self::connectable_char::ConnectableChars;
 
 pub fn clamp<T>(a: T, b: T, x: T) -> T  where T: std::cmp::PartialOrd {

@@ -28,6 +28,7 @@ impl UI {
 
   pub fn draw(&mut self, console: &Console, player: &Player, state: &GameState, entities: &EntityCollection) {
     let pc = &player.character;
+    draw_sidebar(console, player, state, entities);
     if self.in_menu() {
       draw_status_bar(console, format!("-- PAUSED -- SCORE {:?}", player.score));
     } else if player.cursor.active {
@@ -48,7 +49,6 @@ impl UI {
             meter_bar(grit.0, grit.1, grit.2),
             player.score));
     }
-    draw_sidebar(console, player, state, entities);
     let current_menu = self.stack.get(0);
     match current_menu {
       Some(menu) => menu.draw(&console),

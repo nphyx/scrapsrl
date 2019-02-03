@@ -3,7 +3,6 @@ extern crate tcod;
 
 use tcod::input::Key;
 use tcod::input::KeyCode::{F11, Escape};
-use tcod::map::FovAlgorithm;
 use tcod::colors::Color;
 use rand::prelude::*;
 mod mapgen;
@@ -116,8 +115,7 @@ fn main() {
   while !display.root.window_closed() {
     // game success state
 
-    state.map.compute_fov(player.pos().x, player.pos().y, TORCH_RADIUS, true, FovAlgorithm::Basic);
-    display.draw(&state, &mut interface, &player, &entities);
+    display.draw(&mut state, &mut interface, &player, &entities);
     let keypress = display.root.wait_for_keypress(true);
     // libtcod 1.5.1 has a bug where `wait_for_keypress` emits two events:
     // one for key down and one for key up. So we ignore the "key up" ones.

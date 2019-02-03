@@ -31,19 +31,19 @@ impl ConnectableChars {
   /// TODO move the maps out to a config file and load them here
   pub fn new() -> ConnectableChars {
     let mut map = ConnectMap::new();
-    map.insert('+', ConnectableChar{
-      base: '+',
-      horiz: '-',
-      vert: '|',
-      corner_tl: '+',
-      corner_tr: '+',
-      corner_bl: '+',
-      corner_br: '+',
-      t_l: '+',
-      t_r: '+',
-      t_u: '+',
-      t_d: '+',
-      cross: 'x',
+    map.insert(LINE, ConnectableChar{
+      base: LINE,
+      horiz: LINE_HORIZ,
+      vert: LINE_VERT,
+      corner_tl: LINE_TL,
+      corner_tr: LINE_TR,
+      corner_bl: LINE_BL,
+      corner_br: LINE_BR,
+      t_l: LINE_T_L,
+      t_r: LINE_T_R,
+      t_u: LINE_T_U,
+      t_d: LINE_T_D,
+      cross: LINE,
       cap_l: '<',
       cap_r: '>',
       cap_u: '^',

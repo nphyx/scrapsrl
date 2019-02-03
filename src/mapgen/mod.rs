@@ -1,5 +1,3 @@
-use rand::prelude::*;
-use std::cmp::max;
 use tcod::map::Map;
 use tcod::random::{Rng, Algo};
 use tcod::noise::*;
@@ -12,21 +10,90 @@ use super::util::icons::*;
 mod tile;
 pub use self::tile::{Tile, Tiles};
 
-const SEED: u32 = 2234567890;
+const SEED: u32 = 2234567891;
 
-/*
-const PLANT: Tile = Tile{
-  color: Color{r:24, g:180, b:78},
-  ch: ICON_HERB, solid: false,
-  desc: "A small plant."};
-const GRASS: Tile = Tile{
-  color: Color{r:89, g:97, b:15},
-  ch: ',', solid: false,
-  desc: };
-const TALL_GRASS: Tile = Tile{color: Color{r:89, g:97, b:15}, 
-  ch: '"', solid: false,
-  desc: "Some tall grass."};
-*/
+pub fn rand_up(v: f32) -> f32 { (v + 1.0) / 2.0 }
+
+const VEHICLES: [char; 9] = [
+  ICON_BUS,
+  ICON_DBL_BUS,
+  ICON_SCHOOL_BUS,
+  ICON_CONVERTIBLE,
+  ICON_SUV,
+  ICON_HATCHBACK,
+  ICON_SEDAN,
+  ICON_SPORTSCAR,
+  ICON_TRUCK_PICKUP
+];
+
+
+/// places a car
+pub fn place_car(tiles: &mut Tiles, x: i32, y:i32, noise: &Noise, noise_scale: f32, damage_factor: f32, bg: Color) {
+  let color_good = Color::new(68, 68, 68);
+  let color_bad = Color::new(72, 40, 36);
+  let v = rand_up(noise.get_fbm([x as f32 * noise_scale, y as f32 * noise_scale], 32));
+  let ch = VEHICLES[(v * VEHICLES.len() as f32).floor() as usize];
+  let i = noise.get_turbulence([x as f32 * noise_scale, y as f32 * noise_scale], 32);
+  let fg = lerp(color_good, color_bad, i * damage_factor);
+  tiles.insert(Coord{x, y}, Tile{ch, fg, bg, transparent: true, walkable: false, desc: "A ruined vehicle."});
+}
+
+/// generates a horizontal road on the map. Damage factor is a range from 0 = pristine to +1 =
+/// completely wrecked.
+pub fn place_horizontal_road(tiles: &mut Tiles, width: i32, height: i32, noise: &Noise, noise_scale: f32, damage_factor: f32) {
+  let mut y = height / 2;
+  let y_mod = noise.get_fbm([0.0, y as f32 * noise_scale], 32);
+  y = clamp(0, MAP_HEIGHT, y + (y as f32 * y_mod) as i32);
+  let desc = "A crumbling old road.";
+  let grass_desc = "Some grass growing through a crack in the road.";
+  let transparent = true;
+  let walkable = true;
+  let road_line_fg = Color{r: 102, g: 92, b: 81};
+  let road_bg = Color{r: 22, g: 20, b: 16};
+  let road_rubble_fg = Color{r: 26, g: 23, b: 20};
+  let color_grass_fg = Color{r:102, g:161, b:94};
+  let color_grass_bg = Color{r:48, g:44, b:26};
+  for cx in 0..width {
+    let wander = noise.get_fbm([cx as f32 * noise_scale, y as f32 * noise_scale], 32);
+    if wander > 0.8 {
+      y += 1;
+    }
+    else if wander < -0.8 {
+      y -= 1;
+    }
+    for cy in y-3..y+4 {
+      let mut bg = road_bg;
+      let i = rand_up(noise.get_turbulence([cx as f32 * noise_scale, cy as f32 * noise_scale], 32));
+      if i < damage_factor {
+        let ch = ',';
+        bg = lerp(color_grass_bg, road_bg, i * 0.25);
+        tiles.insert(
+          Coord{x: cx, y: cy},
+          Tile{ch, fg: color_grass_fg, bg, transparent, walkable, desc: grass_desc});
+      } else {
+        if y > 0 && y < height {
+          if cy == y - 3 || cy == y + 3 {
+            tiles.insert(
+              Coord{x: cx, y: cy},
+              Tile{ch: LINE_HORIZ, fg: road_line_fg, bg, transparent, walkable, desc});
+          } else if cy == y {
+            tiles.insert(
+              Coord{x: cx, y: cy},
+              Tile{ch: '-', fg: road_line_fg, bg, transparent, walkable, desc});
+          } else {
+            tiles.insert(
+              Coord{x: cx, y: cy},
+              Tile{ch: '\u{e35d}', fg: road_rubble_fg, bg, transparent, walkable, desc});
+          }
+        }
+      }
+      let car_chance = noise.get_fbm([cx as f32, cy as f32], 32);
+      if car_chance > 0.95 {
+        place_car(tiles, cx, cy, noise, noise_scale, damage_factor, bg);
+      }
+    }
+  }
+}
 
 
 pub fn place_tree(tiles: &mut Tiles, cx: i32, cy: i32) {
@@ -34,10 +101,11 @@ pub fn place_tree(tiles: &mut Tiles, cx: i32, cy: i32) {
   let min_y = clamp(0, MAP_HEIGHT, cy - 1);
   let max_x = clamp(0, MAP_WIDTH, cx + 2);
   let max_y = clamp(0, MAP_HEIGHT, cy + 2);
-  let fg = Color{r:98, g:27, b:15};
-  let bg = Color{r:12, g:14, b:3};
+  let fg = Color{r:86, g:50, b:32};
+  let bg = Color{r:32, g:24, b:12};
+  // let color_tg_bg = Color{r:38, g:36, b:21};
   let tree_bark: Tile = Tile{fg, bg, 
-    ch: LINE_DBL, walkable: false, transparent: false,
+    ch: LINE, walkable: false, transparent: false,
     desc: "The bark of a tree."};
   let tree_trunk: Tile = Tile{fg, bg,
     ch: '0', walkable: false, transparent: false,
@@ -75,23 +143,21 @@ fn place_trees(tiles: &mut Tiles, width: i32, height: i32, noise: &Noise, noise_
   }
 }
 
-pub fn rand_up(v: f32) -> f32 { (v + 1.0) / 2.0 }
-
 pub fn lay_grass(tiles: &mut Tiles, width: i32, height: i32, noise: &Noise, noise_scale: f32) {
   let desc_sg = "Just some ordinary grass.";
   let desc_tg = "Some tall grass.";
   let transparent = true;
   let walkable = true;
-  let color_sg_fg = Color{r:112, g:181, b:15};
-  let color_tg_fg = Color{r:118, g:121, b:15};
-  let color_sg_bg = Color{r:4, g:14, b:8};
-  let color_tg_bg = Color{r:9, g:19, b:5};
+  let color_sg_fg = Color{r:112, g:141, b:64};
+  let color_sg_bg = Color{r:42, g:54, b:28};
+  let color_tg_fg = Color{r:118, g:121, b:72};
+  let color_tg_bg = Color{r:38, g:36, b:21};
   for x in 0..width {
     for y in 0..height {
       let i = rand_up(noise.get_fbm([x as f32 * noise_scale, y as f32 * noise_scale], 32));
-      let fg = lerp(color_sg_fg, color_tg_fg, i);
       let bg = lerp(color_sg_bg, color_tg_bg, i);
-      if i < 0.7 {
+      let fg = lerp(color_sg_fg, color_tg_fg, i);
+      if i < 0.5 {
         tiles.insert(
           Coord{x, y},
           Tile{ch: ',', fg, bg, transparent, walkable, desc: desc_sg});
@@ -114,18 +180,13 @@ pub fn generate<'a>(width: i32, height: i32) -> (Map, Tiles<'a>) {
     .init();
 
   // lay down a basic grass layer
-  lay_grass(&mut tiles, width, height, &noise, 0.3);
-  place_trees(&mut tiles, width, height, &noise, 0.3);
-  // Set the map.
-  // place trees
-  /*
-  let count:i32 = rng.get_int(5, 40);
-  for _ in 0..count {
-    let cx:i32 = rng.get_int(2, width - 2);
-    let cy:i32 = rng.get_int(2, height - 2);
-    // put_tree(&mut map, &mut tiles, cx, cy);
-  }
-  */
+  lay_grass(&mut tiles, width, height, &noise, 0.2);
+
+  // draw a road
+  place_horizontal_road(&mut tiles, width, height, &noise, 0.1, 0.8);
+
+  // place trees (ok for them to grow through the road, it's been a long time)
+  place_trees(&mut tiles, width, height, &noise, 0.2);
 
   // connect connectable tiles
   tiles.connect_tiles();
