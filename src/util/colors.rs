@@ -47,7 +47,6 @@ pub fn soft_light(a: &Color, b:&Color) -> Color {
 pub fn color_dodge_cel(a: u8, b: u8) -> u8 {
   let af = to_fcel(a);
   let bf = to_fcel(b);
-  println!("af {} bf {} res {}", af, bf, af / (1.0 - bf));
   to_ucel(
     if af == 0.0 { 0.0 }
     else if bf == 1.0 { 1.0 }

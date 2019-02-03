@@ -80,7 +80,6 @@ impl Display {
           1.0,
           dist.powf(1.25) / (MAP_WIDTH as f32)
         ).sqrt();
-        println!("dist {} rel {}", dist, rel_dist);
         let blend = lerp(light, ambient, rel_dist);
         if state.map.is_in_fov(x, y) {
           bg = soft_light(&soft_light(&bg, &blend), &blend); 
