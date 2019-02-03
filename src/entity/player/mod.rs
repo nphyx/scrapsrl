@@ -52,7 +52,7 @@ impl DrawSelf for Player {
 
 impl Player {
   pub fn new(mut character: Character) -> Player {
-    character.set_ch(ICON_PERSON);
+    character.set_ch('?');
     Player{
       character,
       score: 0,

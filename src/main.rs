@@ -87,6 +87,7 @@ fn main() {
   let mut entities = EntityCollection::new();
   player.set_pos(Coord{x: cx, y: cy});
   player.character.set_body_layout(body_layout::humanoid());
+  player.character.set_ch(ICON_MALE);
 
   let (map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
   let mut state = GameState::new(map, tiles);
