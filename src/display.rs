@@ -24,9 +24,9 @@ pub struct Display {
 impl Display {
   pub fn new() -> Display {
     let mut root = RootConsole::initializer()
-      .font("monofur-nf-24.png", FontLayout::AsciiInRow)
+      .font("monofur-nf-24-square.png", FontLayout::AsciiInRow)
       .font_type(FontType::Greyscale)
-      .font_dimensions(2048/16,507)
+      .font_dimensions(256,256)
       .size(SCREEN_WIDTH, SCREEN_HEIGHT)
       .title("SCRAPS: Bug Hunter")
       .init();
