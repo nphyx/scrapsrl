@@ -6,6 +6,7 @@ use super::*;
 use crate::game_state::GameState;
 use crate::cursor::Cursor;
 use crate::util::plan;
+use crate::util::icons::*;
 use crate::display::DrawSelf;
 
 pub struct Player {
@@ -51,7 +52,7 @@ impl DrawSelf for Player {
 
 impl Player {
   pub fn new(mut character: Character) -> Player {
-    character.set_ch('\u{e213}');
+    character.set_ch(ICON_PERSON);
     Player{
       character,
       score: 0,

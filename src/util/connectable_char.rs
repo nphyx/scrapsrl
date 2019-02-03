@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use super::icons::*;
 
 struct ConnectableChar {
   pub base: char,
@@ -48,19 +49,19 @@ impl ConnectableChars {
       cap_u: '^',
       cap_d: 'v' 
     });
-    map.insert('\u{256c}', ConnectableChar{
-      base: '\u{256c}',
-      horiz: '\u{2550}',
-      vert: '\u{2551}',
-      corner_tl: '\u{2554}',
-      corner_tr: '\u{2557}',
-      corner_bl: '\u{255a}',
-      corner_br: '\u{255d}',
-      t_l: '\u{2563}',
-      t_r: '\u{2560}',
-      t_u: '\u{2569}',
-      t_d: '\u{2566}',
-      cross: '\u{256c}',
+    map.insert(LINE_DBL, ConnectableChar{
+      base: LINE_DBL,
+      horiz: LINE_DBL_HORIZ,
+      vert: LINE_DBL_VERT,
+      corner_tl: LINE_DBL_TL,
+      corner_tr: LINE_DBL_TR,
+      corner_bl: LINE_DBL_BL,
+      corner_br: LINE_DBL_BR,
+      t_l: LINE_DBL_T_L,
+      t_r: LINE_DBL_T_R,
+      t_u: LINE_DBL_T_U,
+      t_d: LINE_DBL_T_D,
+      cross: LINE_DBL,
       cap_l: 'O',
       cap_r: 'O',
       cap_u: 'O',

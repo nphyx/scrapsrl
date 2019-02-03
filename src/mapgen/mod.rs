@@ -4,16 +4,17 @@ use tcod::colors::Color;
 use super::constants::{MAP_WIDTH, MAP_HEIGHT};
 use super::entity::Coord;
 use super::util::clamp;
+use super::util::icons::*;
 
 mod tile;
 pub use self::tile::{Tile, Tiles};
 
 const PLANT: Tile = Tile{
   color: Color{r:24, g:180, b:78},
-  ch: '\u{e22f}', solid: false,
+  ch: ICON_HERB, solid: false,
   desc: "A small plant."};
 const TREE_BARK: Tile = Tile{color: Color{r:128, g:97, b:15}, 
-  ch: '\u{256c}', solid: true,
+  ch: LINE_DBL, solid: true,
   desc: "The bark of a tree."};
 const GRASS: Tile = Tile{
   color: Color{r:89, g:97, b:15},

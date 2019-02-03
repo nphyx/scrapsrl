@@ -15,6 +15,7 @@ mod util;
 mod display;
 mod cursor;
 use self::ui::Notification;
+use self::util::icons::*;
 use crate::display::Display;
 use crate::entity::{Coord, Entity, Character, body_layout, Object, Player, NPC, EntityCollection, EntityInteraction};
 use crate::game_state::GameState;
@@ -26,7 +27,7 @@ use crate::constants::{
 fn make_bug() -> NPC {
   let mut rng = rand::thread_rng();
   let mut bug = Character::blank();
-  bug.set_ch('\u{f46f}');
+  bug.set_ch(ICON_BUG);
   bug.set_pos(Coord{
     x: rng.gen_range(0, MAP_WIDTH),
     y: rng.gen_range(0, MAP_HEIGHT)
@@ -45,11 +46,11 @@ fn make_bug() -> NPC {
 fn make_computer() -> Object {
   let mut rng = rand::thread_rng();
   let mut computer = Object::new();
-  computer.set_ch('\u{fcbe}');
+  computer.set_ch(ICON_OLD_COMPUTER);
   computer.set_pos(Coord{x: rng.gen_range(0, MAP_WIDTH), y: rng.gen_range(0, MAP_HEIGHT)});
   computer.set_notification(
     Notification::new(
-      " \u{fcbe} ".to_string(),
+      format!(" {} ", ICON_OLD_COMPUTER).to_string(),
       "Bleep, bloop!".to_string())
   );
   computer.set_desc("An old-world electronic device. Looks like it's still working.".to_string());

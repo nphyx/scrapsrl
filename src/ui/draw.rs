@@ -3,15 +3,10 @@ use tcod::colors::Color;
 use crate::entity::{Player, EntityCollection};
 use crate::game_state::GameState;
 use crate::constants::{SIDEBAR_WIDTH, MAP_WIDTH, MAP_HEIGHT, DIALOG_WIDTH};
+use crate::util::icons::*;
 
 const TEXT_COLOR: Color = Color{r: 255, g: 255, b: 255};
 const DIALOG_BG: Color = Color{r: 0, g: 0, b: 0};
-const CORNER_TL_CH: char = '\u{2554}';
-const CORNER_TR_CH: char = '\u{2557}';
-const CORNER_BL_CH: char = '\u{255a}';
-const CORNER_BR_CH: char = '\u{255d}';
-const HORIZ_LINE_CH: char = '\u{2550}';
-const VERT_LINE_CH: char = '\u{2551}';
 
 
 pub fn reset_colors(mut console: &Console) {
@@ -65,14 +60,14 @@ pub fn draw_dialog(
     height,
     true,
     BackgroundFlag::Set);
-  horiz_line(console, cx - half_width, cy - half_height, width, HORIZ_LINE_CH);
-  horiz_line(console, cx - half_width, cy + half_height, width, HORIZ_LINE_CH);
-  vert_line(console, cx - half_width, cy - half_height, height, VERT_LINE_CH);
-  vert_line(console, cx + half_width, cy - half_height, height, VERT_LINE_CH);
-  console.put_char(cx - half_width, cy - half_height, CORNER_TL_CH, BackgroundFlag::None);
-  console.put_char(cx + half_width, cy - half_height, CORNER_TR_CH, BackgroundFlag::None);
-  console.put_char(cx - half_width, cy + half_height, CORNER_BL_CH, BackgroundFlag::None);
-  console.put_char(cx + half_width, cy + half_height, CORNER_BR_CH, BackgroundFlag::None);
+  horiz_line(console, cx - half_width, cy - half_height, width, LINE_DBL_HORIZ);
+  horiz_line(console, cx - half_width, cy + half_height, width, LINE_DBL_HORIZ);
+  vert_line(console, cx - half_width, cy - half_height, height, LINE_DBL_VERT);
+  vert_line(console, cx + half_width, cy - half_height, height, LINE_DBL_VERT);
+  console.put_char(cx - half_width, cy - half_height, LINE_DBL_TL, BackgroundFlag::None);
+  console.put_char(cx + half_width, cy - half_height, LINE_DBL_TR, BackgroundFlag::None);
+  console.put_char(cx - half_width, cy + half_height, LINE_DBL_BL, BackgroundFlag::None);
+  console.put_char(cx + half_width, cy + half_height, LINE_DBL_BR, BackgroundFlag::None);
   console.set_alignment(TextAlignment::Center);
   console.print(cx, cy - half_height, title);
   console.print_rect(cx, cy - half_height + 2, width - 4, height - 4, body);
@@ -105,7 +100,7 @@ pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState, e
   let width = SIDEBAR_WIDTH;
   let height = console.height();
   let mut did_cursor_draw = false;
-  vert_line(console, x, y, height, VERT_LINE_CH);
+  vert_line(console, x, y, height, LINE_DBL_VERT);
   let text = format!(
     concat!(
       "   THIS IS SIDEBAR\n",
