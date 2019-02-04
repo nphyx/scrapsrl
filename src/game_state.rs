@@ -23,7 +23,7 @@ impl <'a>GameState<'a> {
   }
 
   pub fn tick(&mut self) {
-    self.world_time = self.world_time + (60.0 / 1000.0);
+    self.world_time = self.world_time + (100.0 / 60.0) / 100.0;
     if self.world_time >= 24.0 {
       self.world_time = 0.0;
       self.world_day += 1;
