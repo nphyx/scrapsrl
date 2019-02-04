@@ -9,16 +9,12 @@ pub use self::player::Player;
 pub use self::npc::NPC;
 pub use self::entity_part::EntityComponent;
 pub use self::character::Character;
-pub use self::object::Object;
+pub use self::object::{make_object_entity, Object};
 use crate::display::DrawSelf;
 use crate::game_state::GameState;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
 use crate::ui::Notification;
-
-/**
- * A coordinate.
- */
 
 #[derive(Copy,Clone,Debug,Hash)]
 pub struct Coord {

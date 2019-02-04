@@ -1,10 +1,13 @@
 extern crate rand;
 extern crate tcod;
+extern crate specs;
 
 use tcod::input::Key;
 use tcod::input::KeyCode::{F11, Escape};
 use tcod::colors::Color;
 use rand::prelude::*;
+use specs::{World, Builder, DispatcherBuilder};
+
 mod mapgen;
 mod ui;
 mod game_state;
@@ -13,12 +16,16 @@ mod entity;
 mod util;
 mod display;
 mod cursor;
+mod component;
+mod system;
+use self::component::Position;
 use self::ui::Notification;
 use self::util::icons::*;
-use crate::display::Display;
-use crate::entity::{Coord, Entity, Character, body_layout, Object, Player, NPC, EntityCollection, EntityInteraction};
-use crate::game_state::GameState;
-use crate::constants::{
+use self::display::Display;
+use self::system::*;
+use self::entity::{Coord, Entity, Character, body_layout, Object, Player, NPC, EntityCollection, EntityInteraction, make_object_entity};
+use self::game_state::GameState;
+use self::constants::{
   TORCH_RADIUS,
   MAP_WIDTH,
   MAP_HEIGHT};
@@ -79,11 +86,23 @@ fn main() {
   let mut display = Display::new();
   let cx = MAP_WIDTH / 2;
   let cy = MAP_HEIGHT / 2;
-  let mut rng = rand::thread_rng();
   let mut fullscreen = false;
   let mut interface = ui::UI::new();
   let mut player = Player::new(Character::blank());
   let mut entities = EntityCollection::new();
+  let mut world = World::new();
+  world.register::<component::Position>();
+  world.register::<component::Color>();
+  world.register::<component::Description>();
+  world.register::<component::Icon>();
+
+  let tablet = make_object_entity(&mut world, ICON_TABLET, "mobile device".to_string());
+  let car = make_object_entity(&mut world, ICON_HATCHBACK, "car".to_string());
+  let mut dispatcher = DispatcherBuilder::new()
+    .with(DrawIcon, "draw_icon", &[])
+    .with(Describe, "describe", &["draw_icon"])
+    .build();
+
   player.set_pos(Coord{x: cx, y: cy});
   player.character.set_body_layout(body_layout::humanoid());
   player.character.set_ch(ICON_MALE);
@@ -114,6 +133,10 @@ fn main() {
 
   while !display.root.window_closed() {
     // game success state
+    
+
+    dispatcher.dispatch(&mut world.res);
+    world.maintain();
 
     display.draw(&mut state, &mut interface, &player, &entities);
     let keypress = display.root.wait_for_keypress(true);

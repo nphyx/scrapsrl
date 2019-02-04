@@ -1,3 +1,4 @@
+use specs::{Component, VecStorage};
 use std::collections::HashSet;
 use tcod::{Console, BackgroundFlag};
 use tcod::colors::Color;
@@ -212,4 +213,8 @@ impl DrawSelf for Character {
     console.put_char(x, y, self.ch, BackgroundFlag::None);
     console.set_char_foreground(x, y, self.color);
   }
+}
+
+impl Component for Character {
+  type Storage = VecStorage<Self>;
 }

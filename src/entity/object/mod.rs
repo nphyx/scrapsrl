@@ -1,3 +1,4 @@
+use specs::{World, Builder};
 use tcod::{Console, BackgroundFlag};
 use tcod::colors::Color;
 use super::*;
@@ -5,6 +6,17 @@ use crate::display::DrawSelf;
 use crate::game_state::GameState;
 use crate::ui::Notification;
 use crate::util::distance;
+use crate::component;
+use crate::component::{Position, Icon, Description};
+
+pub fn make_object_entity(world: &mut World, ch: char, desc: String) -> specs::Entity {
+  world.create_entity()
+    .with(Position{x:0, y:0})
+    .with(Icon{ch})
+    .with(component::Color{r: 128, g: 128, b:128})
+    .with(Description{short: desc.clone(), long: desc.clone()})
+    .build()
+}
 
 pub struct Object {
   pos: Coord,
