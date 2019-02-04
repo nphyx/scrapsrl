@@ -7,4 +7,10 @@ edition = "2018"
 [dependencies]
 tcod = "0.13"
 specs = "0.14.0"
+shred = "0.7.1"
+specs-derive = "0.4.0"
+frappe = "0.4.4"
 rand = "*"
+
+[features]
+nightly = ["shred/nightly"]
