@@ -15,6 +15,16 @@ pub struct EntityComponent {
   pub children: EntityComponentChildren,
 }
 
+impl Default for EntityComponent {
+  fn default() -> EntityComponent {
+    EntityComponent{
+      variety: EntityComponentVariety::Torso,
+      side: EntityComponentSide::NoSide,
+      children: EntityComponentChildren::new()
+    }
+  }
+}
+
 impl EntityComponent {
 
   pub fn new(

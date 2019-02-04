@@ -1,12 +1,15 @@
 extern crate rand;
 extern crate tcod;
 extern crate specs;
+extern crate frappe;
+#[macro_use]
+extern crate specs_derive;
 
 use tcod::input::Key;
-use tcod::input::KeyCode::{F11, Escape};
+// use tcod::input::KeyCode::{F11, Escape};
 use tcod::colors::Color;
 use rand::prelude::*;
-use specs::{World, Builder, DispatcherBuilder};
+use specs::{World, DispatcherBuilder};
 
 mod mapgen;
 mod ui;
@@ -64,6 +67,7 @@ fn make_computer() -> Object {
 }
 
 fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {
+  /*
   match player.wants_interact_at {
     Some(coord) => {
       for entity in entities.iter_mut() {
@@ -80,49 +84,65 @@ fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player:
     },
     None => {}
   }
+  */
 }
 
+#[derive(Default,Clone)]
+pub struct WindowClosed(bool);
+
 fn main() {
-  let mut display = Display::new();
-  let cx = MAP_WIDTH / 2;
-  let cy = MAP_HEIGHT / 2;
-  let mut fullscreen = false;
-  let mut interface = ui::UI::new();
-  let mut player = Player::new(Character::blank());
-  let mut entities = EntityCollection::new();
+  // let cx = MAP_WIDTH / 2;
+  // let cy = MAP_HEIGHT / 2;
+  // let mut fullscreen = false;
+  // let mut interface = ui::UI::new();
+  // let mut player = Player::new(Character::blank());
+  // let mut entities = EntityCollection::new();
+
   let mut world = World::new();
+  let (map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
+  let display = Display::new(map);
+  let keypress = Key::default();
+  world.register::<entity::Character>();
+  world.register::<entity::Player>();
   world.register::<component::Position>();
-  world.register::<component::Color>();
   world.register::<component::Description>();
   world.register::<component::Icon>();
+  world.register::<component::Color>();
+  world.add_resource(GameState::new(tiles));
+  world.add_resource(tiles);
+  world.add_resource(ui::UI::new());
+  world.add_resource(WindowClosed(false));
+  world.add_resource(keypress);
+
+  let mut window_closed = false;
 
   let tablet = make_object_entity(&mut world, ICON_TABLET, "mobile device".to_string());
   let car = make_object_entity(&mut world, ICON_HATCHBACK, "car".to_string());
   let mut dispatcher = DispatcherBuilder::new()
     .with(DrawIcon, "draw_icon", &[])
     .with(Describe, "describe", &["draw_icon"])
+    .with_thread_local(display)
     .build();
 
+  /*
   player.set_pos(Coord{x: cx, y: cy});
   player.character.set_body_layout(body_layout::humanoid());
   player.character.set_ch(ICON_MALE);
 
-  let (map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
-  let mut state = GameState::new(map, tiles);
   entities.push(Box::new(make_computer()));
   for _ in 0..3 {
     entities.push(Box::new(make_bug()));
   }
+  */
 
   // Compute the FOV starting from the coordinates 20,20. Where we'll put the '@'
   // Use a max_radius of 10 and light the walls.
-  // state.map.compute_fov(20,20, TORCH_RADIUS, true, FovAlgorithm::Basic);
+  /* state.map.compute_fov(20,20, TORCH_RADIUS, true, FovAlgorithm::Basic);
 
   interface.open_menu(
     ui::Chain::new(vec![
         Box::new(ui::Notification::new(
-          format!("SCRAPS: Bug Hunter"),
-          format!("Your task, should you choose to accept it, is to catch bugs."),
+          format!("SCRAPS: Bug Hunter"), format!("Your task, should you choose to accept it, is to catch bugs."),
         )),
         Box::new(ui::Notification::new(
           format!("Start Game"),
@@ -130,16 +150,18 @@ fn main() {
         )),
     ])
   );
+  */
 
-  while !display.root.window_closed() {
+  while !window_closed {
     // game success state
     
 
     dispatcher.dispatch(&mut world.res);
     world.maintain();
 
-    display.draw(&mut state, &mut interface, &player, &entities);
-    let keypress = display.root.wait_for_keypress(true);
+    window_closed = world.read_resource::<WindowClosed>().clone().0;
+
+    /*display.draw(&mut world);
     // libtcod 1.5.1 has a bug where `wait_for_keypress` emits two events:
     // one for key down and one for key up. So we ignore the "key up" ones.
     if keypress.pressed {
@@ -152,7 +174,7 @@ fn main() {
         _ => {}
       }
       if !interface.handle_input(keypress, &mut state) {
-        if player.handle_input(&keypress, &state.map, &entities) {
+        if player.handle_input(&keypress, &map) {
           // only implement system-level keys and process ticks 
           // when player is not doing something
           match keypress {
@@ -169,5 +191,6 @@ fn main() {
         }
       }
     }
+    */
   }
 }

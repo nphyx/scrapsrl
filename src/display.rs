@@ -1,12 +1,14 @@
-use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, TextAlignment};
-use tcod::system::*;
-use tcod::colors::{Color, lerp};
+use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, TextAlignment, Map};
+use tcod::colors::{lerp};
+use tcod::input::Key;
 use tcod::map::FovAlgorithm;
 use super::util::{clamp, distance};
-use super::entity::{Entity, EntityCollection, Player, Coord};
+use super::entity::{Coord, Player, Character};
+use super::component::{Position, Icon, Color};
 use super::game_state::GameState;
 use super::util::colors::*;
-use super::ui::UI;
+use super::WindowClosed;
+use super::mapgen::Tiles;
 
 use super::constants::{
   MAP_WIDTH,
@@ -22,11 +24,13 @@ pub trait DrawSelf {
 }
 
 pub struct Display {
-  pub root: RootConsole
+  pub root: RootConsole,
+  pub map: Map,
 }
 
-impl Display {
-  pub fn new() -> Display {
+
+impl<'a> Display {
+  pub fn new(map: Map) -> Display {
     let mut root = RootConsole::initializer()
       .font("monofur-nf-24-square.png", FontLayout::AsciiInRow)
       .font_type(FontType::Greyscale)
@@ -39,27 +43,51 @@ impl Display {
     root.set_default_foreground(DEFAULT_FG);
     root.clear();
 
-    return Display{root}
+    return Display{root, map}
   }
-  pub fn draw(&mut self, state: &mut GameState, interface: &mut UI, player: &Player, entities: &EntityCollection) {
-    state.map.compute_fov(player.pos().x, player.pos().y, SCREEN_WIDTH, true, FovAlgorithm::Basic);
-    let light = Color::new(255, 240, 128);
-    let ambient = Color::new(0, 6, 18);
+}
+
+use specs::{System, Read, Write, ReadStorage, Join};
+impl<'a> System<'a> for Display {
+  type SystemData  = (
+    ReadStorage<'a, Player>,
+    ReadStorage<'a, Character>,
+    ReadStorage<'a, Position>,
+    ReadStorage<'a, Icon>,
+    ReadStorage<'a, Color>,
+    Read<'a, GameState>,
+    Read<'a, Tiles>,
+    Write<'a, WindowClosed>,
+    Write<'a, Key>
+  );
+
+  fn run(&mut self, (players, characters, positions, icons, colors, state, mut window_closed, mut keypress): Self::SystemData) {
+    let mut player_pos: &Position = &Position{x:0, y:0};
+    for (pos, player) in (&positions, &players).join() {
+      player_pos = pos;
+      self.map.compute_fov(pos.x, pos.y, SCREEN_WIDTH, true, FovAlgorithm::Basic);
+    }
+    let light = Color::new(255, 240, 128).to_tcod();
+    let ambient = Color::new(0, 6, 18).to_tcod();
+
     // TODO calculate relative contrast and maintain for out-of-vis objects
-    let bg_gray = Color::new(8, 8, 8);
-    let fg_gray = Color::new(24, 24, 24);
+    let bg_gray = Color::new(8, 8, 8).to_tcod();
+    let fg_gray = Color::new(24, 24, 24).to_tcod();
 
     self.root.clear();
     // Compute the FOV starting from the coordinates 20,20. Where we'll put the '@'
     // Use a max_radius of 10 and light the walls.
 
+    /*
     for (coord, tile) in state.tiles.map.iter() {
       self.root.put_char_ex(coord.x, coord.y, tile.ch, tile.fg, tile.bg);
     }
+    */
 
-    for entity in entities.iter() {
-      if state.map.is_in_fov(entity.pos().x, entity.pos().y) {
-        entity.draw(&mut self.root);
+    for(pos, icon, color, ..) in (&positions, &icons, &colors, !&players).join() {
+      if self.map.is_in_fov(pos.x, pos.y) {
+        self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
+        self.root.set_char_foreground(pos.x, pos.y, color.to_tcod())
       }
     }
 
@@ -74,7 +102,7 @@ impl Display {
         let orig_bg = self.root.get_char_background(x, y);
         let mut fg = orig_fg.clone();
         let mut bg = orig_bg.clone();
-        let dist = distance(player.pos(), Coord{x, y});
+        let dist = distance(Coord{x: player_pos.x, y: player_pos.y}, Coord{x, y});
 
         let rel_dist = clamp(
           0.0,
@@ -82,7 +110,7 @@ impl Display {
           dist.powf(1.25) / (MAP_WIDTH as f32)
         ).sqrt();
         let blend = lerp(light, ambient, rel_dist);
-        if state.map.is_in_fov(x, y) {
+        if self.map.is_in_fov(x, y) {
           bg = soft_light(&soft_light(&bg, &blend), &blend); 
           fg = soft_light(&soft_light(&fg, &blend), &blend);
           fg = lerp(fg, lerp(orig_fg, color_dodge(&orig_fg, &light), 0.15), time_of_day_rel);
@@ -100,10 +128,16 @@ impl Display {
       }
     }
 
-    player.draw(&mut self.root);
-    interface.draw(&self.root, player, state, entities);
+    for (pos, icon, color, ..) in (&positions, &icons, &colors, &players).join() {
+      self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
+      self.root.set_char_foreground(pos.x, pos.y, color.to_tcod())
+    }
+    // interface.draw(&self.root, player, state, entities);
     self.root.set_alignment(TextAlignment::Right);
     // self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
     self.root.flush();
+
+    *keypress = self.root.wait_for_keypress(true);
+    *window_closed = WindowClosed(self.root.window_closed());
   }
 }

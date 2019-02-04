@@ -55,12 +55,14 @@ impl Entity for Object {
   fn set_pos(&mut self, pos: Coord) { self.pos = pos }
   fn tick(&mut self, _state: &GameState) {}
   fn player_interact(&mut self, player: &mut Player, state: &mut GameState) -> EntityInteraction {
+    /*
     if distance(player.pos(), self.pos()) < 2.0 {
       match &self.interact_notification {
         Some(notif) => return EntityInteraction::Notification(notif.clone()),
         None => {}
       }
     }
+    */
     EntityInteraction::None
   }
   fn desc(&self) -> String {

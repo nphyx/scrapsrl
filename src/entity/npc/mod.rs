@@ -1,10 +1,10 @@
 use tcod::{Console, BackgroundFlag};
-use rand::prelude::*;
+// use rand::prelude::*;
 use super::*;
 use crate::display::DrawSelf;
 use crate::game_state::GameState;
 use crate::ui::Notification;
-use crate::util::distance;
+// use crate::util::distance;
 
 pub struct NPC {
   pub character: Character,
@@ -36,10 +36,13 @@ impl Entity for NPC {
     self.character.set_pos(coord)
   }
   fn tick(&mut self, state: &GameState) {
+    /*
     self.behavior.execute(self, state);
     self.character.tick(state);
+    */
   }
   fn player_interact(&mut self, player: &mut Player, state: &mut GameState) -> EntityInteraction {
+    /*
     if distance(player.pos(), self.pos()) < 2.0 {
       let mut rng = rand::thread_rng();
       player.score += 1;
@@ -52,6 +55,7 @@ impl Entity for NPC {
         None => {}
       }
     }
+    */
     EntityInteraction::None
   }
   fn desc(&self) -> String {

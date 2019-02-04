@@ -1,7 +1,7 @@
 use tcod::console::Console;
 use tcod::input::Key;
 
-pub trait Widget {
+pub trait Widget: Send + Sync {
   /**
    * Returns true if still in menu, false if the menu is still in use.
    */

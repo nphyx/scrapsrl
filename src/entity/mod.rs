@@ -16,7 +16,7 @@ use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
 use crate::ui::Notification;
 
-#[derive(Copy,Clone,Debug,Hash)]
+#[derive(Copy,Clone,Debug,Hash,Default)]
 pub struct Coord {
   pub x: i32,
   pub y: i32

@@ -7,8 +7,18 @@ use super::entity::Coord;
 use super::util::clamp;
 use super::util::icons::*;
 
-mod tile;
-pub use self::tile::{Tile, Tiles};
+pub use self::tile::{Tile, ConnectedTile};
+use crate::component::{Tile, Position, Color, Description, Icon};
+
+pub fn make_tile_entity(&world: specs::World, tile: Tile, icon: Icon, colors: Colors, description: Description) -> specs::Entity {
+  world.create_entity()
+    .with(tile)
+    .with(icon)
+    .with(Position{x:0, y:0})
+    .with(Colors{fg: Color{r:0, g:0, b:0}, bg: Color{r:0, g:0, b:0}})
+    .with(description)
+    .build()
+}
 
 const SEED: u32 = 2234567891;
 

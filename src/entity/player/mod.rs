@@ -1,3 +1,4 @@
+/*
 use tcod::input::Key;
 use tcod::map::Map;
 use tcod::input::KeyCode::*; // {NumPad7, NumPad8, NumPad9, NumPad4, NumPad6, NumPad1, NumPad2, NumPad3, NumPad5, NoKey, Shift};
@@ -6,9 +7,31 @@ use super::*;
 use crate::game_state::GameState;
 use crate::cursor::Cursor;
 use crate::util::plan;
-use crate::util::icons::*;
 use crate::display::DrawSelf;
+*/
+use specs::{World, Builder, VecStorage, Component};
+use specs_derive;
+use super::character::Character;
+use crate::component::{Position, Icon, Description, Color};
 
+#[derive(Component, Debug)]
+#[storage(VecStorage)]
+pub struct Player;
+
+pub fn make_player_entity(world: &mut World) -> specs::Entity {
+  world.create_entity()
+    .with(Player)
+    .with(Character::blank())
+    .with(Position{x:0, y:0})
+    .with(Icon{ch:'?'})
+    .with(Color{r: 128, g: 128, b:128})
+    .with(Description{
+      short: "you".to_string(),
+      long: "It's you!".to_string()})
+    .build()
+}
+/*
+#[derive(Default)]
 pub struct Player {
   pub character: Character,
   pub cursor: Cursor,
@@ -66,7 +89,7 @@ impl Player {
 
   /// Called when input is delegated to the player character. Returns true if the
   /// game state should advance and/or system level keys should be permitted.
-  pub fn handle_input(&mut self, keypress: &Key, map: &Map, entities: &EntityCollection) -> bool {
+  pub fn handle_input(&mut self, keypress: &Key, map: &Map) -> bool {
     self.wants_interact_at = None;
     let mut to = Coord{x: 0, y: 0}; // = self.character.pos();
     let mut speed = 1;
@@ -145,3 +168,4 @@ impl Player {
     return true;
   }
 }
+*/

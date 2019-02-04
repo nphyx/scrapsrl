@@ -5,6 +5,7 @@ use crate::display::DrawSelf;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
 
+#[derive(Default)]
 pub struct Cursor {
   pub pos: Coord,
   pub active: bool

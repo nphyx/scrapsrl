@@ -1,6 +1,7 @@
 use tcod::console::Console;
 use tcod::input::Key;
 use crate::game_state::GameState;
+use std::sync::Arc;
 pub mod draw;
 pub mod notification;
 pub mod widget;
@@ -18,7 +19,7 @@ fn meter_bar(max: u8, cur: u8,  cap: u8) -> String {
 }
 
 pub struct UI {
-  stack: Vec<Box<widget::Widget>>
+  stack: Vec<Arc<widget::Widget>>
 }
 
 impl UI {
@@ -27,6 +28,7 @@ impl UI {
   }
 
   pub fn draw(&mut self, console: &Console, player: &Player, state: &GameState, entities: &EntityCollection) {
+    /*
     let pc = &player.character;
     draw_sidebar(console, player, state, entities);
     if self.in_menu() {
@@ -54,9 +56,11 @@ impl UI {
       Some(menu) => menu.draw(&console),
       _ => {} 
     }
+    */
   }
 
   pub fn handle_input(&mut self, keypress: Key, _state: &mut GameState) -> bool {
+    /*
     let current_menu = self.stack.get_mut(0);
     match current_menu {
       Some(menu) => {
@@ -66,11 +70,12 @@ impl UI {
       }
       _ => return false
     }
+    */
     return true
   }
 
   pub fn open_menu(&mut self, menu: impl widget::Widget + 'static) {
-    self.stack.push(Box::new(menu));
+    self.stack.push(Arc::new(menu));
   }
 
   pub fn in_menu(&mut self) -> bool {

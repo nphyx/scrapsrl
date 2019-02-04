@@ -92,6 +92,7 @@ pub fn draw_status_bar(mut console: &Console, text: String) {
 }
 
 pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState, entities: &EntityCollection) {
+  /*
   let pc = &player.character;
   reset_colors(&console);
   console.set_alignment(TextAlignment::Left);
@@ -147,4 +148,5 @@ pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState, e
       }
     }
   }
+  */
 }

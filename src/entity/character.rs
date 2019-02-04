@@ -37,6 +37,7 @@ pub struct Item {
 pub struct Skill {
 }
 
+#[derive(Default)]
 pub struct Character {
   pos: Coord,
   pub ch: char,

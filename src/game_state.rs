@@ -1,24 +1,23 @@
 use crate::mapgen::Tiles;
 use tcod::map::Map;
 
-pub struct GameState<'a> {
-  pub map: Map,
+#[derive(Default)]
+pub struct GameState {
+//  pub map: Map,
   pub frame: u32,
   pub world_time: f32,
   pub world_day: u32,
-  pub world_year: u32,
-  pub tiles: Tiles<'a>
+  pub world_year: u32
 }
 
-impl <'a>GameState<'a> {
-  pub fn new(map: Map, tiles: Tiles) -> GameState {
+impl GameState {
+  pub fn new() -> GameState {
     GameState{
-      map: map,
+      // map: map,
       frame: 0,
       world_time: 6.0,
       world_day: 0,
-      world_year: 0,
-      tiles: tiles
+      world_year: 0
     }
   }
 
