@@ -1,4 +1,3 @@
-extern crate specs;
 use specs::{Component, VecStorage};
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
@@ -35,9 +34,3 @@ impl std::cmp::PartialEq for Position {
 }
 
 impl std::cmp::Eq for Position {}
-
-impl Position {
-  pub fn as_array(&self) -> [i32; 2] {
-    [self.x.clone(), self.y.clone()]
-  }
-}

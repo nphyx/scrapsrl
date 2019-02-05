@@ -73,8 +73,8 @@ fn place_horizontal_road(tiles: &mut TilePreps, width: i32, height: i32, noise: 
   let road_long_desc = "A crumbling old road.";
   let grass_short_desc = "grass";
   let grass_long_desc = "Some grass growing through a crack in the road.";
-  let transparent = true;
-  let walkable = true;
+  let opaque = false;
+  let solid = false;
   let road_line_fg = Color{r: 102, g: 92, b: 81};
   let road_bg = Color{r: 22, g: 20, b: 16};
   let road_rubble_fg = Color{r: 26, g: 23, b: 20};
@@ -96,21 +96,21 @@ fn place_horizontal_road(tiles: &mut TilePreps, width: i32, height: i32, noise: 
         bg = lerp(color_grass_bg, road_bg, i * 0.25);
         tiles.insert(
           Position{x: cx, y: cy},
-          prep_tile(ch, color_grass_fg, bg, transparent, walkable, grass_short_desc, grass_long_desc));
+          prep_tile(ch, color_grass_fg, bg, opaque, solid, grass_short_desc, grass_long_desc));
       } else {
         if y > 0 && y < height {
           if cy == y - 3 || cy == y + 3 {
           tiles.insert(
             Position{x: cx, y: cy},
-            prep_tile(LINE_HORIZ, road_line_fg, bg, transparent, walkable, road_short_desc, road_long_desc));
+            prep_tile(LINE_HORIZ, road_line_fg, bg, opaque, solid, road_short_desc, road_long_desc));
           } else if cy == y {
             tiles.insert(
               Position{x: cx, y: cy},
-              prep_tile('-', road_line_fg, bg, transparent, walkable, road_short_desc, road_long_desc));
+              prep_tile('-', road_line_fg, bg, opaque, solid, road_short_desc, road_long_desc));
           } else {
             tiles.insert(
               Position{x: cx, y: cy},
-              prep_tile('\u{e35d}', road_line_fg, bg, transparent, walkable, road_short_desc, road_long_desc));
+              prep_tile('\u{e35d}', road_line_fg, bg, opaque, solid, road_short_desc, road_long_desc));
           }
         }
       }
@@ -130,8 +130,8 @@ fn place_tree(tiles: &mut TilePreps, cx: i32, cy: i32) {
   let max_y = clamp(0, MAP_HEIGHT, cy + 2);
   let fg = Color{r:86, g:50, b:32};
   let bg = Color{r:32, g:24, b:12};
-  let tree_bark = prep_tile(LINE, fg, bg, false, true, "tree bark", "The bark of a tree.");
-  let tree_trunk = prep_tile(LINE, fg, bg, false, true, "tree trunk", "The trunk of a tree.");
+  let tree_bark = prep_tile(LINE, fg, bg, true, true, "tree bark", "The bark of a tree.");
+  let tree_trunk = prep_tile(LINE, fg, bg, true, true, "tree trunk", "The trunk of a tree.");
 
   for x in min_x..max_x {
     for y in min_y..max_y {
@@ -170,8 +170,8 @@ fn lay_grass(tiles: &mut TilePreps, width: i32, height: i32, noise: &Noise, nois
   let desc_sg_long = "Just some ordinary grass.";
   let desc_tg_short = "tall grass";
   let desc_tg_long = "Some tall grass.";
-  let transparent = true;
-  let walkable = true;
+  let opaque = false;
+  let solid = false;
   let color_sg_fg = Color{r:112, g:141, b:64};
   let color_sg_bg = Color{r:42, g:54, b:28};
   let color_tg_fg = Color{r:118, g:121, b:72};
@@ -184,11 +184,11 @@ fn lay_grass(tiles: &mut TilePreps, width: i32, height: i32, noise: &Noise, nois
       if i < 0.5 {
         tiles.insert(
           Position{x, y},
-          prep_tile(',', fg, bg, transparent, walkable, desc_sg_short, desc_sg_long));
+          prep_tile(',', fg, bg, opaque, solid, desc_sg_short, desc_sg_long));
       } else {
         tiles.insert(
           Position{x, y},
-          prep_tile('"', fg, bg, transparent, walkable, desc_tg_short, desc_tg_long));
+          prep_tile('"', fg, bg, opaque, solid, desc_tg_short, desc_tg_long));
       }
     }
   }
@@ -269,16 +269,5 @@ impl<'a> System<'a> for MapGenerator {
    }
 
     map_gen_requested.0 = false;
-
-    /* assign passability based on final tile layout
-    for x in 0..width {
-      for y in 0..height {
-        match tiles.get(Coord{x, y}) {
-          Some(tile) => map.set(x, y, tile.transparent, tile.walkable),
-          None => {}
-        }
-      }
-    }
-    */
   }
 }

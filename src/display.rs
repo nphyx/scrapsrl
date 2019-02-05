@@ -1,6 +1,5 @@
 use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, TextAlignment, Map};
 use tcod::colors::{lerp, Color};
-use tcod::input::Key;
 use tcod::map::FovAlgorithm;
 use super::component::*;
 use super::game_state::GameState;
@@ -62,7 +61,7 @@ impl<'a> System<'a> for Display {
     ReadStorage<'a, Tile>,
     Read<'a, GameState>,
     Write<'a, WindowClosed>,
-    Write<'a, Key>
+    Write<'a, UserInput>
   );
 
   fn run(
@@ -88,18 +87,18 @@ impl<'a> System<'a> for Display {
     let bg_gray = Color::new(8, 8, 8);
     let fg_gray = Color::new(24, 24, 24);
 
-    let mut player_pos: &Position = &Position{x:0, y:0};
-    for (pos, player) in (&positions, &players).join() {
-      player_pos = pos;
+    let mut player_pos: Position = Position::default();
+    for (pos, _player) in (&positions, &players).join() {
+      player_pos = pos.clone();
     }
 
     // update map before computing fov
     for (pos, ..) in (&positions, &opaques, &solids).join() {
-      self.map.set(pos.x, pos.y, true, true);
+      self.map.set(pos.x, pos.y, false, false);
     }
 
     for (pos, ..) in (&positions, !&opaques, &solids).join() {
-      self.map.set(pos.x, pos.y, false, true);
+      self.map.set(pos.x, pos.y, true, false);
     }
 
     for (pos, ..) in (&positions, &opaques, !&solids).join() {
@@ -107,7 +106,7 @@ impl<'a> System<'a> for Display {
     }
 
     for (pos, ..) in (&positions, !&opaques, !&solids).join() {
-      self.map.set(pos.x, pos.y, false, false);
+      self.map.set(pos.x, pos.y, true, true);
     }
 
     // Compute the FOV
@@ -117,21 +116,20 @@ impl<'a> System<'a> for Display {
     self.root.clear();
 
     // draw all tiles
-    for(pos, icon, colors, tile) in (&positions, &icons, &colors, &tiles).join() {
+    for(pos, icon, colors, _tile) in (&positions, &icons, &colors, &tiles).join() {
       self.root.put_char_ex(pos.x, pos.y, icon.ch, colors.fg, colors.bg);
     }
 
     // draw all npcs
-    for(pos, icon, color, ..) in (&positions, &icons, &colors, !&players).join() {
+    for(pos, icon, color, ..) in (&positions, &icons, &colors, !&players, !&tiles).join() {
       if self.map.is_in_fov(pos.x, pos.y) {
         self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
-        self.root.set_char_foreground(pos.x, pos.y, color.fg)
+        self.root.set_char_foreground(pos.x, pos.y, color.fg);
       }
     }
 
     // TODO compute time of day adjustment, sunset gradient, and moon phase :D
     let time_of_day_rel = 0.0; //state.world_time_relative();
-    println!("{}", time_of_day_rel);
 
     // lighting pass SUPER SLOW
     for pos  in (&positions).join() {
@@ -139,7 +137,7 @@ impl<'a> System<'a> for Display {
       let orig_bg = self.root.get_char_background(pos.x, pos.y);
       let mut fg = orig_fg.clone();
       let mut bg = orig_bg.clone();
-      let dist = distance(*player_pos, *pos);
+      let dist = distance(player_pos, *pos);
 
       let rel_dist = clamp(
         0.0,
@@ -174,7 +172,7 @@ impl<'a> System<'a> for Display {
     // self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
     self.root.flush();
 
-    *keypress = self.root.wait_for_keypress(true);
-    *window_closed = WindowClosed(self.root.window_closed());
+    keypress.key = Some(self.root.wait_for_keypress(true));
+    *window_closed = WindowClosed(self.root.window_closed() || state.close_game);
   }
 }

@@ -1,10 +1,13 @@
 // use crate::mapgen::Tiles;
 // use tcod::map::Map;
+use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct GameState {
-//  pub map: Map,
+  pub collision_map: HashMap<(i32, i32), bool>,
   pub frame: u32,
+  pub fullscreen: bool,
+  pub close_game: bool,
   pub world_time: f32,
   pub world_day: u32,
   pub world_year: u32
@@ -13,8 +16,10 @@ pub struct GameState {
 impl GameState {
   pub fn new() -> GameState {
     GameState{
-      // map: map,
+      collision_map: HashMap::new(),
       frame: 0,
+      fullscreen: false,
+      close_game: false,
       world_time: 6.0,
       world_day: 0,
       world_year: 0

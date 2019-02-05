@@ -9,7 +9,7 @@ use tcod::input::Key;
 // use tcod::input::KeyCode::{F11, Escape};
 use tcod::colors::Color;
 use rand::prelude::*;
-use specs::{World, DispatcherBuilder};
+use specs::{World, DispatcherBuilder, System, RunNow};
 
 mod ui;
 mod game_state;
@@ -25,7 +25,6 @@ use self::display::Display;
 use self::resource::*;
 use self::system::*;
 use self::util::icons::*;
-// use self::entity::{Coord, Entity, Character, body_layout, Object, Player, NPC, EntityCollection, EntityInteraction, make_object_entity};
 use self::game_state::GameState;
 use self::component::*;
 use self::constants::{
@@ -44,27 +43,22 @@ fn make_bug(world: &mut World) {
     .with(Colors{
       fg: Color{r: 32, g: 128, b: 225},
       bg: Color{r: 32, g: 128, b: 225}})
-  //bug.set_body_layout(body_layout::insectoid());
     .with(Description{
       short: "a shockroach".to_string(),
       long: "A housecat-sized cockroach. Electric sparks arc between its antenna.".to_string()})
   .build();
-  /*
-  let mut npc_wrap = NPC::new(bug);
-  npc_wrap.set_notification(
-    Notification::new(
-      format!("Success"),
-      format!("Got 'em!")));
-  npc_wrap
-  */
 }
 
 use specs::{Builder};
 fn make_computer(world: &mut World) {
-  let mut rng = rand::thread_rng();
+  // let mut rng = rand::thread_rng();
   world.create_entity()
-    .with(Position{x: rng.gen_range(0, MAP_WIDTH), y: rng.gen_range(0, MAP_HEIGHT)})
+    .with(Position{
+      x: MAP_WIDTH / 2 + 1, //rng.gen_range(0, MAP_WIDTH), 
+      y: MAP_HEIGHT / 2 + 1 // rng.gen_range(0, MAP_HEIGHT)})
+    })
     .with(Icon{ch: ICON_OLD_COMPUTER})
+    .with(Solid)
     .with(Colors{
       fg: Color::new(130,130,127),
       bg: Color::new(35,35,32)
@@ -108,39 +102,35 @@ fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player:
 */
 
 fn main() {
-  // let cx = MAP_WIDTH / 2;
-  // let cy = MAP_HEIGHT / 2;
-  // let mut fullscreen = false;
-  // let mut interface = ui::UI::new();
-  // let mut player = Player::new(Character::blank());
-  // let mut entities = EntityCollection::new();
 
   let mut world = World::new();
-  // let (map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
-  let display = Display::new();
-  let keypress = Key::default();
   component::init(&mut world);
   world.add_resource(GameState::new());
   world.add_resource(ui::UI::new());
   world.add_resource(self::resource::MapGenRequested(true));
   world.add_resource(self::resource::WindowClosed(false));
-  world.add_resource(keypress);
+  world.add_resource(UserInput{key: None});
 
   let mut window_closed = false;
 
   // set up player
   world.create_entity()
+    .with(Player)
     .with(Position{x:MAP_WIDTH/2, y:MAP_HEIGHT/2})
+    .with(MovePlan{x:MAP_WIDTH/2, y:MAP_HEIGHT/2})
     .with(Icon{ch:ICON_MALE})
     .with(Colors{
       fg: Color::new(255, 255, 255),
       bg: Color::new(255, 255, 255)
     })
-    .with(Player)
     .with(Character::default())
     .build();
+
+  make_bug(&mut world);
+  make_computer(&mut world);
     
 
+  /*
   world.create_entity()
     .with(Position{x:0, y:0})
     .with(Icon{ch:ICON_TABLET})
@@ -166,15 +156,9 @@ fn main() {
       long: "A kind of vehicle with a door on the back.".to_string()
     })
     .build();
-
-  let mut dispatcher = DispatcherBuilder::new()
-    .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &[])
-    .with(DrawIcon, "draw_icon", &["map_gen"])
-    .with(Describe, "describe", &["draw_icon", "map_gen"])
-    .with_thread_local(display)
-    .build();
-
-  dispatcher.setup(&mut world.res);
+    */
+  /*
+  */
 
   /*
   player.set_pos(Coord{x: cx, y: cy});
@@ -204,42 +188,24 @@ fn main() {
   );
   */
 
+  let mut display = Display::new();
+  let mut dispatcher = DispatcherBuilder::new()
+    .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &[])
+    .with(CollisionMap, "collision_map", &["map_gen"])
+    .with(HandleSystemInput, "system_input", &["map_gen"])
+    .with(HandlePlayerInput, "player_input", &["system_input"])
+    .with(HandleFallthroughInput, "fallthrough_input", &["player_input"])
+    .with(Movement, "movement", &["player_input", "collision_map"])
+    .build();
+
+  dispatcher.setup(&mut world.res);
+
   while !window_closed {
     dispatcher.dispatch(&mut world.res);
     world.maintain();
-
-    window_closed = world.read_resource::<WindowClosed>().clone().0;
-
-    /*display.draw(&mut world);
-    // libtcod 1.5.1 has a bug where `wait_for_keypress` emits two events:
-    // one for key down and one for key up. So we ignore the "key up" ones.
-    if keypress.pressed {
-      // handle buttons that should always work even in menus
-      match keypress {
-        Key { code: F11, .. } => {
-          fullscreen = !fullscreen;
-          display.root.set_fullscreen(fullscreen);
-        },
-        _ => {}
-      }
-      if !interface.handle_input(keypress, &mut state) {
-        if player.handle_input(&keypress, &map) {
-          // only implement system-level keys and process ticks 
-          // when player is not doing something
-          match keypress {
-            Key { code: Escape, .. } => break,
-            _ => {}
-          }
-          handle_player_interact(&mut state, &mut interface, &mut player, &mut entities);
-          state.tick();
-          player.tick(&state);
-          for entity in entities.iter_mut() {
-            entity.tick(&state);
-          }
-        } else { 
-        }
-      }
-    }
-    */
+    window_closed = 
+      world.read_resource::<WindowClosed>().clone().0 ||
+      world.read_resource::<GameState>().close_game;
+    display.run_now(&mut world.res);
   }
 }

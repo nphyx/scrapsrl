@@ -13,6 +13,7 @@ mod player;
 mod position;
 mod solid;
 mod tile;
+mod user_input; 
 
 pub use self::character::Character;
 pub use self::colors::Colors;
@@ -25,6 +26,7 @@ pub use self::player::Player;
 pub use self::position::Position;
 pub use self::solid::Solid;
 pub use self::tile::Tile;
+pub use self::user_input::UserInput;
 
 /// initializes all components
 pub fn init(world: &mut World) {
@@ -39,4 +41,5 @@ pub fn init(world: &mut World) {
   world.register::<Opaque>();
   world.register::<Solid>();
   world.register::<Tile>();
+  world.register::<UserInput>();
 }
