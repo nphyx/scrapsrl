@@ -1,31 +1,22 @@
-use specs::{World, Builder};
-use tcod::{Console, BackgroundFlag};
+/*
+use specs::{Builder, EntityBuilder};
 use tcod::colors::Color;
-use super::*;
-use crate::display::DrawSelf;
-use crate::game_state::GameState;
-use crate::ui::Notification;
-use crate::util::distance;
-use crate::component;
-use crate::component::{Position, Icon, Description};
+// use crate::display::DrawSelf;
+use crate::component::*;
 
-pub fn make_object_entity(world: &mut World, ch: char, desc: String) -> specs::Entity {
-  world.create_entity()
+pub fn build_object_entity<'a>(builder: &EntityBuilder<'a>, ch: char, desc: String) -> &'a EntityBuilder<'a> {
+  let ret = &mut builder
     .with(Position{x:0, y:0})
     .with(Icon{ch})
-    .with(component::Color{r: 128, g: 128, b:128})
-    .with(Description{short: desc.clone(), long: desc.clone()})
-    .build()
+    .with(Colors{
+      fg: Color{r: 128, g: 128, b:128},
+      bg: Color{r: 128, g: 128, b:128}
+    })
+    .with(Description{short: desc.clone(), long: desc.clone()});
 }
+*/
 
-pub struct Object {
-  pos: Coord,
-  ch: char,
-  color: Color,
-  interact_notification: Option<Notification>,
-  desc: String
-}
-
+/*
 impl Object {
   pub fn new() -> Object {
     return Object{
@@ -83,3 +74,4 @@ impl DrawSelf for Object {
     console.set_char_foreground(x, y, self.color);
   }
 }
+*/

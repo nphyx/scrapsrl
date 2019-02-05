@@ -1,30 +1,32 @@
-use specs::{WriteStorage, Entities};
-use crate::mapgen::{Tile, ConnectedTile};
+use specs::{ReadStorage, WriteStorage, Entities, System};
+use crate::component::*;
+// use crate::util::ConnectableChars;
 
+// FIXME
 pub struct ConnectTiles;
 
 impl<'a> System<'a> for ConnectTiles {
   type SystemData = (
+    ReadStorage<'a, ConnectedTile>,
+    ReadStorage<'a, Position>,
+    ReadStorage<'a, Icon>,
     WriteStorage<'a, Tile>,
-    WriteStorage<'a, ConnectedTile>,
     Entities<'a>
   );
 
-  fn run(&mut self, (tiles, connected_tiles, entities): Self::SystemData) {
-    let mut queue: Vec<(Coord, Tile)> = Vec::new();
+  fn run(&mut self, (connected_tiles, positions, icons, tiles, entities): Self::SystemData) {
+    /*
+    let mut queue: Vec<(Position, Tile)> = Vec::new();
 
-    for (tile, connected, entity) in (&tiles, !&connected_tiles, &entities).join() {
+    for (position, tile, icon, connected, entity) in (&positions, &tiles, !&connected_tiles, &entities).join() {
       let connectables = ConnectableChars::new();
-
-
-      for (coord, tile) in self.map.iter() {
         let orig = tile.ch;
         match connectables.connect(
           &orig,
-          self.get_ch(Coord{x:coord.x, y:coord.y - 1}),
-          self.get_ch(Coord{x:coord.x, y:coord.y + 1}),
-          self.get_ch(Coord{x:coord.x - 1, y:coord.y}),
-          self.get_ch(Coord{x:coord.x + 1, y:coord.y})) {
+          self.get_ch(Position{x:coord.x, y:coord.y - 1}),
+          self.get_ch(Position{x:coord.x, y:coord.y + 1}),
+          self.get_ch(Position{x:coord.x - 1, y:coord.y}),
+          self.get_ch(Position{x:coord.x + 1, y:coord.y})) {
           Some(chosen) => {
             queue.push((*coord, Tile{
               ch: chosen,
@@ -46,5 +48,6 @@ impl<'a> System<'a> for ConnectTiles {
         None => break
       }
     }
+  */
   }
 }

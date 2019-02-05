@@ -1,8 +1,8 @@
 use specs::{Component, VecStorage};
 
-#[derive(Component, Debug)]
+#[derive(Copy,Clone,Component,Default,Debug)]
 #[storage(VecStorage)]
 pub struct Colors {
-  fg: tcod::colors::Color,
-  bg: tcod::colors::Color
+  pub fg: tcod::colors::Color,
+  pub bg: tcod::colors::Color
 }

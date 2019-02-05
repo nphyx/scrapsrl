@@ -1,6 +1,6 @@
 use specs::{Component, VecStorage};
 
-#[derive(Component, Debug)]
+#[derive(Clone,Component,Debug,Default)]
 #[storage(VecStorage)]
 struct NotificationBody {
   header: String,

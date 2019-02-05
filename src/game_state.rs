@@ -1,5 +1,5 @@
-use crate::mapgen::Tiles;
-use tcod::map::Map;
+// use crate::mapgen::Tiles;
+// use tcod::map::Map;
 
 #[derive(Default)]
 pub struct GameState {
@@ -20,6 +20,9 @@ impl GameState {
       world_year: 0
     }
   }
+
+  /*
+  TODO: systems for these
 
   pub fn tick(&mut self) {
     self.world_time = self.world_time + (100.0 / 60.0) / 100.0;
@@ -43,4 +46,5 @@ impl GameState {
   pub fn world_time_relative(&self) -> f32 {
     ((self.world_time * 15.0 * (std::f32::consts::PI / 180.0)).sin() + 1.0) / 2.0
   }
+  */
 }

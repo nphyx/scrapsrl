@@ -1,60 +1,24 @@
-mod character;
-mod object;
-mod entity_part;
-mod behavior;
-mod player;
+/* TODO reimplement parts & behaviors
+// mod entity_part;
+// mod behavior;
+// mod player;
 mod npc;
-pub mod body_layout;
-pub use self::player::Player;
-pub use self::npc::NPC;
-pub use self::entity_part::EntityComponent;
-pub use self::character::Character;
-pub use self::object::{make_object_entity, Object};
+mod object;
+mod tile;
+// pub mod body_layout;
+// pub use self::player::make_player_entity;
+//pub use self::npc::NPC;
+pub use self::object::build_object_entity;
+// pub use self::entity_part::EntityComponent;
+// pub use self::npc::make_npc_entity;
+*/
+
+/*
 use crate::display::DrawSelf;
 use crate::game_state::GameState;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
 use crate::ui::Notification;
-
-#[derive(Copy,Clone,Debug,Hash,Default)]
-pub struct Coord {
-  pub x: i32,
-  pub y: i32
-}
-
-impl std::ops::AddAssign<Coord> for Coord {
-  fn add_assign(&mut self, coord: Coord) {
-    self.x = clamp(0, MAP_WIDTH, self.x + coord.x);
-    self.y = clamp(0, MAP_HEIGHT, self.y + coord.y);
-  }
-}
-
-impl std::ops::Add<Coord> for Coord {
-  type Output = Coord;
-  fn add(self, coord: Coord) -> Coord {
-    Coord{x: self.x + coord.x, y: self.y + coord.y}
-  }
-}
-
-impl std::cmp::PartialEq for Coord {
-  fn eq(&self, &cmp: &Coord) -> bool {
-    return self.x == cmp.x && self.y == cmp.y;
-  }
-}
-
-impl std::cmp::Eq for Coord {}
-
-impl Coord {
-  pub fn as_array(&self) -> [i32; 2] {
-    [self.x.clone(), self.y.clone()]
-  }
-}
-
-pub enum EntityType {
-  Player,
-  NPC,
-  Object
-}
 
 pub trait Entity: DrawSelf {
   fn pos(&self) -> Coord;
@@ -71,3 +35,4 @@ pub enum EntityInteraction {
   Notification(Notification),
   None
 }
+*/

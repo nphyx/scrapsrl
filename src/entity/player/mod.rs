@@ -10,9 +10,8 @@ use crate::util::plan;
 use crate::display::DrawSelf;
 */
 use specs::{World, Builder, VecStorage, Component};
-use specs_derive;
-use super::character::Character;
-use crate::component::{Position, Icon, Description, Color};
+use tcod::colors::Color;
+use crate::component::*;
 
 #[derive(Component, Debug)]
 #[storage(VecStorage)]
@@ -24,7 +23,7 @@ pub fn make_player_entity(world: &mut World) -> specs::Entity {
     .with(Character::blank())
     .with(Position{x:0, y:0})
     .with(Icon{ch:'?'})
-    .with(Color{r: 128, g: 128, b:128})
+    .with(Colors{fg: Color{r: 255, g: 255, b:255}, bg:Color{r: 255, g: 255, b:255}})
     .with(Description{
       short: "you".to_string(),
       long: "It's you!".to_string()})

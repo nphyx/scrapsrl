@@ -11,63 +11,83 @@ use tcod::colors::Color;
 use rand::prelude::*;
 use specs::{World, DispatcherBuilder};
 
-mod mapgen;
 mod ui;
 mod game_state;
 mod constants;
-mod entity;
 mod util;
 mod display;
 mod cursor;
 mod component;
 mod system;
+mod resource;
 use self::component::Position;
-use self::ui::Notification;
-use self::util::icons::*;
 use self::display::Display;
+use self::resource::*;
 use self::system::*;
-use self::entity::{Coord, Entity, Character, body_layout, Object, Player, NPC, EntityCollection, EntityInteraction, make_object_entity};
+use self::util::icons::*;
+// use self::entity::{Coord, Entity, Character, body_layout, Object, Player, NPC, EntityCollection, EntityInteraction, make_object_entity};
 use self::game_state::GameState;
+use self::component::*;
 use self::constants::{
-  TORCH_RADIUS,
   MAP_WIDTH,
   MAP_HEIGHT};
 
-fn make_bug() -> NPC {
+fn make_bug(world: &mut World) {
   let mut rng = rand::thread_rng();
-  let mut bug = Character::blank();
-  bug.set_ch(ICON_BUG);
-  bug.set_pos(Coord{
-    x: rng.gen_range(0, MAP_WIDTH),
-    y: rng.gen_range(0, MAP_HEIGHT)
-  });
-  bug.set_color(Color{r: 32, g: 128, b: 225});
-  bug.set_body_layout(body_layout::insectoid());
-  bug.set_desc("A housecat-sized cockroach. Electric sparks arc between its antenna.".to_string());
+  world.create_entity()
+    .with(Solid)
+    .with(Character::blank())
+    .with(Icon{ch: ICON_BUG})
+    .with(Position{
+      x: rng.gen_range(0, MAP_WIDTH),
+      y: rng.gen_range(0, MAP_HEIGHT)})
+    .with(Colors{
+      fg: Color{r: 32, g: 128, b: 225},
+      bg: Color{r: 32, g: 128, b: 225}})
+  //bug.set_body_layout(body_layout::insectoid());
+    .with(Description{
+      short: "a shockroach".to_string(),
+      long: "A housecat-sized cockroach. Electric sparks arc between its antenna.".to_string()})
+  .build();
+  /*
   let mut npc_wrap = NPC::new(bug);
   npc_wrap.set_notification(
     Notification::new(
       format!("Success"),
       format!("Got 'em!")));
   npc_wrap
+  */
 }
 
-fn make_computer() -> Object {
+use specs::{Builder};
+fn make_computer(world: &mut World) {
   let mut rng = rand::thread_rng();
-  let mut computer = Object::new();
-  computer.set_ch(ICON_OLD_COMPUTER);
-  computer.set_pos(Coord{x: rng.gen_range(0, MAP_WIDTH), y: rng.gen_range(0, MAP_HEIGHT)});
+  world.create_entity()
+    .with(Position{x: rng.gen_range(0, MAP_WIDTH), y: rng.gen_range(0, MAP_HEIGHT)})
+    .with(Icon{ch: ICON_OLD_COMPUTER})
+    .with(Colors{
+      fg: Color::new(130,130,127),
+      bg: Color::new(35,35,32)
+    })
+    .with(Description{
+      short: "an old computer".to_string(),
+      long: "An old-world electronic device. Looks like it's still working.".to_string()
+    })
+    .build();
+    /*
+  computer.set_pos(Coord);
   computer.set_notification(
     Notification::new(
       format!(" {} ", ICON_OLD_COMPUTER).to_string(),
       "Bleep, bloop!".to_string())
   );
-  computer.set_desc("An old-world electronic device. Looks like it's still working.".to_string());
+  computer.set_desc();
   return computer;
+  */
 }
 
+/*
 fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {
-  /*
   match player.wants_interact_at {
     Some(coord) => {
       for entity in entities.iter_mut() {
@@ -84,11 +104,8 @@ fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player:
     },
     None => {}
   }
-  */
 }
-
-#[derive(Default,Clone)]
-pub struct WindowClosed(bool);
+*/
 
 fn main() {
   // let cx = MAP_WIDTH / 2;
@@ -99,30 +116,65 @@ fn main() {
   // let mut entities = EntityCollection::new();
 
   let mut world = World::new();
-  let (map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
-  let display = Display::new(map);
+  // let (map, tiles) = mapgen::generate(MAP_WIDTH, MAP_HEIGHT);
+  let display = Display::new();
   let keypress = Key::default();
-  world.register::<entity::Character>();
-  world.register::<entity::Player>();
-  world.register::<component::Position>();
-  world.register::<component::Description>();
-  world.register::<component::Icon>();
-  world.register::<component::Color>();
-  world.add_resource(GameState::new(tiles));
-  world.add_resource(tiles);
+  component::init(&mut world);
+  world.add_resource(GameState::new());
   world.add_resource(ui::UI::new());
-  world.add_resource(WindowClosed(false));
+  world.add_resource(self::resource::MapGenRequested(true));
+  world.add_resource(self::resource::WindowClosed(false));
   world.add_resource(keypress);
 
   let mut window_closed = false;
 
-  let tablet = make_object_entity(&mut world, ICON_TABLET, "mobile device".to_string());
-  let car = make_object_entity(&mut world, ICON_HATCHBACK, "car".to_string());
+  // set up player
+  world.create_entity()
+    .with(Position{x:MAP_WIDTH/2, y:MAP_HEIGHT/2})
+    .with(Icon{ch:ICON_MALE})
+    .with(Colors{
+      fg: Color::new(255, 255, 255),
+      bg: Color::new(255, 255, 255)
+    })
+    .with(Player)
+    .with(Character::default())
+    .build();
+    
+
+  world.create_entity()
+    .with(Position{x:0, y:0})
+    .with(Icon{ch:ICON_TABLET})
+    .with(Colors{
+      fg: Color{r: 128, g: 128, b:128},
+      bg: Color{r: 128, g: 128, b:128}
+    })
+    .with(Description{
+      short: "a mobile device".to_string(),
+      long: "This device was used to track the activity of serfs.".to_string()
+    })
+    .build();
+
+  world.create_entity()
+    .with(Position{x:0, y:0})
+    .with(Icon{ch:ICON_HATCHBACK})
+    .with(Colors{
+      fg: Color{r: 128, g: 128, b:128},
+      bg: Color{r: 128, g: 128, b:128}
+    })
+    .with(Description{
+      short: "a hatchback".to_string(),
+      long: "A kind of vehicle with a door on the back.".to_string()
+    })
+    .build();
+
   let mut dispatcher = DispatcherBuilder::new()
-    .with(DrawIcon, "draw_icon", &[])
-    .with(Describe, "describe", &["draw_icon"])
+    .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &[])
+    .with(DrawIcon, "draw_icon", &["map_gen"])
+    .with(Describe, "describe", &["draw_icon", "map_gen"])
     .with_thread_local(display)
     .build();
+
+  dispatcher.setup(&mut world.res);
 
   /*
   player.set_pos(Coord{x: cx, y: cy});
@@ -153,9 +205,6 @@ fn main() {
   */
 
   while !window_closed {
-    // game success state
-    
-
     dispatcher.dispatch(&mut world.res);
     world.maintain();
 

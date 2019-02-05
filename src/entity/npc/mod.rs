@@ -1,3 +1,5 @@
+// TODO refactor NPCs
+/*
 use tcod::{Console, BackgroundFlag};
 // use rand::prelude::*;
 use super::*;
@@ -75,3 +77,4 @@ impl DrawSelf for NPC {
     console.set_char_foreground(x, y, self.character.color);
   }
 }
+*/

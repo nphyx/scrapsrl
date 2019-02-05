@@ -1,17 +1,23 @@
-use tcod::console::Console;
+// use tcod::console::Console;
 use tcod::input::Key;
 use crate::game_state::GameState;
 use std::sync::Arc;
+/*
 pub mod draw;
 pub mod notification;
 pub mod widget;
 pub mod chain;
-use crate::entity::{Player, EntityCollection};
-use crate::ui::draw::{draw_status_bar, draw_sidebar};
+// use crate::entity::{Player, EntityCollection};
+// use crate::ui::draw::{draw_status_bar, draw_sidebar};
 pub use crate::constants::SIDEBAR_WIDTH;
-pub use self::widget::Widget;
 pub use self::notification::Notification;
 pub use self::chain::Chain;
+*/
+
+mod widget;
+pub use self::widget::Widget;
+
+// TODO redo UI
 
 fn meter_bar(max: u8, cur: u8,  cap: u8) -> String {
   let gap: u8 = max - cur - cap;
@@ -27,7 +33,7 @@ impl UI {
     UI{stack: Vec::new()}
   }
 
-  pub fn draw(&mut self, console: &Console, player: &Player, state: &GameState, entities: &EntityCollection) {
+  pub fn draw(&mut self /*, console: &Console, player: &Player, state: &GameState, entities: &EntityCollection*/) {
     /*
     let pc = &player.character;
     draw_sidebar(console, player, state, entities);

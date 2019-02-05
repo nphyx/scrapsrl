@@ -1,9 +1,9 @@
 use specs::{Component, VecStorage};
-use std::collections::HashSet;
-use tcod::{Console, BackgroundFlag};
-use tcod::colors::Color;
+//use std::collections::HashSet;
+//use tcod::{Console, BackgroundFlag};
+//use tcod::colors::Color;
 
-use crate::display::DrawSelf;
+/*
 use crate::entity::{Entity, Coord};
 use crate::game_state::GameState;
 use super::entity_part::{
@@ -11,13 +11,9 @@ use super::entity_part::{
   EntityComponentVariety,
   EntityComponentSide
 };
+*/
 
-#[derive(Hash, Eq, PartialEq)]
-pub enum VitalMod {
-  Stamina,
-  Focus,
-  Grit 
-}
+/*
 
 pub struct Vital {
   buffs: HashSet<VitalMod>,
@@ -36,14 +32,17 @@ pub struct Item {
 
 pub struct Skill {
 }
+*/
 
-#[derive(Default)]
+#[derive(Hash, Eq, PartialEq)]
+pub enum VitalMod {
+  Stamina,
+  Focus,
+  Grit 
+}
+
+#[derive(Copy,Clone,Default,Debug)]
 pub struct Character {
-  pos: Coord,
-  pub ch: char,
-  pub color: Color,
-  desc: String,
-
   body: u8,
   mind: u8,
   soul: u8,
@@ -64,45 +63,45 @@ pub struct Character {
   cur_focus: u8,
   cur_grit: u8,
 
+  /*
   skills: Vec<Skill>,
   features: Vec<Feature>,
-  body_layout: EntityComponent,
+  // body_layout: EntityComponent,
   gear: Vec<Item>,
   vitals: Vec<Vital>
+  */
+}
+
+impl Component for Character {
+  type Storage = VecStorage<Self>;
 }
 
 impl Character {
   pub fn blank() -> Character {
     Character{
-      ch: '?',
-      pos: Coord{x:0, y:0},
-      color: Color{r: 255, g: 255, b: 255},
-      desc: "".to_string(),
       body: 3, mind: 3, soul: 3,
       strength: 1, grace: 2, toughness: 3,
       intellect: 1, wits: 2, resolve: 3,
       charisma: 1, empathy: 2, will: 3,
       cur_stamina: 1, cur_focus: 1, cur_grit: 1,
+      /*
       skills: Vec::new(),
       features: Vec::new(),
       body_layout: EntityComponent::new(EntityComponentVariety::Torso, EntityComponentSide::NoSide),
       gear: Vec::new(),
       vitals: Vec::new()}
+      */
+    }
   }
 
-  pub fn ch(&self) -> char { self.ch }
-  pub fn set_ch(&mut self, ch: char) { self.ch = ch; }
-  pub fn color(&self) -> Color { self.color }
-  pub fn set_color(&mut self, color: Color) { self.color = color; }
-  pub fn desc(&self) -> String { self.desc.to_string() }
-  pub fn set_desc(&mut self, desc: String) { self.desc = desc; }
-
+  /*
   pub fn get_body_layout(&self) -> &EntityComponent {
     &self.body_layout
   }
   pub fn set_body_layout(&mut self, layout: EntityComponent) {
     self.body_layout = layout;
   }
+  */
 
   pub fn body(&self) -> u8 { self.body }
   pub fn set_body(&mut self, val:u8) { self.body = val }
@@ -130,13 +129,16 @@ impl Character {
   pub fn will(&self) -> u8 { self.will }
   pub fn set_will(&mut self, val:u8) { self.will = val }
 
-  fn compute_vital_modifier(&self, vital_type: VitalMod) -> u8 {
+  fn compute_vital_modifier(&self, _vital_type: VitalMod) -> u8 {
+    return 0
+    /*
     let mut sum: u8 = 0;
     for vital in self.vitals.iter() {
       if vital.debuffs.contains(&vital_type) { sum += 1; }
       if vital.buffs.contains(&vital_type) { sum += 1; }
     }
     sum
+  */
   }
 
   fn compute_stamina(&self) -> u8 { self.body + self.toughness }
@@ -186,6 +188,7 @@ impl Character {
     }
     return false;
   }
+  /*
   pub fn pos(&self) -> Coord { self.pos }
   pub fn set_pos(&mut self, pos: Coord) { self.pos = pos }
   pub fn tick(&mut self, _state: &GameState) {
@@ -203,8 +206,10 @@ impl Character {
   pub fn has_capability(&self, _capability: Capability) -> bool {
     true
   }
+  */
 }
 
+/*
 impl DrawSelf for Character {
   fn draw(&self, console: &mut Console) {
     console.put_char(self.pos().x, self.pos().y, self.ch, BackgroundFlag::None);
@@ -215,7 +220,4 @@ impl DrawSelf for Character {
     console.set_char_foreground(x, y, self.color);
   }
 }
-
-impl Component for Character {
-  type Storage = VecStorage<Self>;
-}
+*/

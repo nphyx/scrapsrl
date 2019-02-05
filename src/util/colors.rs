@@ -1,5 +1,4 @@
 use tcod::colors::Color;
-use super::clamp;
 
 fn to_fcel(a: u8) -> f32 { if a == 0 { 0.0 } else { a as f32/255.0 } }
 fn to_ucel(a: f32) -> u8 { (a * 255.0).floor() as u8 }

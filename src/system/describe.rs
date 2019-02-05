@@ -1,4 +1,5 @@
 use specs::{System, ReadStorage};
+use crate::component::Description;
 
 pub struct Describe;
 
