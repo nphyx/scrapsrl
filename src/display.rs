@@ -67,6 +67,7 @@ impl<'a> System<'a> for Display {
         mut window_closed,
         mut keypress
       ): Self::SystemData) {
+    self.root.set_fullscreen(state.fullscreen);
 
     let light = Color::new(255, 240, 128);
     let ambient = Color::new(0, 6, 18);
