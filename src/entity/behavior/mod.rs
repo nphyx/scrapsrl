@@ -32,10 +32,6 @@ fn move_brownian(ent: &mut NPC, state: &GameState, map: &Map) -> bool {
   return false;
 }
 
-pub enum MovementBehavior {
-  BrownianWalk
-}
-
 impl Behavior for MovementBehavior {
   fn execute(&self, ent: &mut NPC, state: &GameState, map: &Map) {
     match self {

@@ -1,6 +1,7 @@
 /// component module
 use specs::World;
 
+pub mod ai_brain;
 mod character;
 mod colors;
 mod description;
@@ -13,6 +14,7 @@ mod position;
 mod solid;
 mod user_input; 
 
+pub use self::ai_brain::AIBrain;
 pub use self::character::Character;
 pub use self::colors::Colors;
 pub use self::description::Description;
@@ -26,6 +28,7 @@ pub use self::user_input::UserInput;
 
 /// initializes all components
 pub fn init(world: &mut World) {
+  world.register::<AIBrain>();
   world.register::<Character>();
   world.register::<Colors>();
   world.register::<Description>();

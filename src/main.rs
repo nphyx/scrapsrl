@@ -34,9 +34,13 @@ fn make_bug(world: &mut World) {
   let mut rng = rand::thread_rng();
   world.create_entity()
     .with(Solid)
+    .with(AIBrain::default())
     .with(Character::blank())
     .with(Icon{ch: ICON_BUG})
     .with(Position{
+      x: rng.gen_range(0, MAP_WIDTH),
+      y: rng.gen_range(0, MAP_HEIGHT)})
+    .with(MovePlan{
       x: rng.gen_range(0, MAP_WIDTH),
       y: rng.gen_range(0, MAP_HEIGHT)})
     .with(Colors{
@@ -194,9 +198,10 @@ fn main() {
     .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &[])
     .with(CollisionMap, "collision_map", &["map_gen"])
     .with(HandleSystemInput, "system_input", &["map_gen"])
-    .with(HandlePlayerInput, "player_input", &["system_input"])
+    .with(HandlePlayerInput, "player_input", &["system_input", "collision_map"])
     .with(HandleFallthroughInput, "fallthrough_input", &["player_input"])
-    .with(Movement, "movement", &["player_input", "collision_map"])
+    .with(AI, "ai", &["collision_map"])
+    .with(Movement, "movement", &["ai", "player_input", "collision_map"])
     .build();
 
   dispatcher.setup(&mut world.res);

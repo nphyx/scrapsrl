@@ -21,7 +21,7 @@ impl<'a> System<'a> for Movement {
         y: clamp(0, MAP_HEIGHT - 1, plan.y + pos.y)
       };
       let map_pair = &(new_position.x, new_position.y);
-      let mut ok = false;
+      let mut ok: bool;
       match map.get(new_position) {
         Some(tile) => { ok = tile.walkable; },
         None => { ok = false; }
@@ -37,6 +37,7 @@ impl<'a> System<'a> for Movement {
         }
       }
       if ok {
+        state.collision_map.insert((pos.x, pos.y), false);
         pos.x = new_position.x;
         pos.y = new_position.y;
         state.collision_map.insert(*map_pair, true);
