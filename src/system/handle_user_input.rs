@@ -19,6 +19,11 @@ impl<'a> System<'a> for HandleSystemInput {
         state.fullscreen = true;
         return;
       },
+      Some(Key { code: Char, printable: 'm', .. }) => {
+        state.map_gen_queued = true;
+        state.world_seed += 1;
+        return;
+      },
       Some(_key) => {
         return;
       }

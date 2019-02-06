@@ -1,19 +1,17 @@
-// use tcod::map::Map;
 use tcod::random::{Rng, Algo};
 use tcod::noise::*;
 use tcod::colors::{Color, lerp};
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::{clamp, icons::*};
 use crate::area_map::{AreaMap, Tile};
-// use crate::entity::build_tile_entity;
-use crate::resource::*;
+use crate::game_state::GameState;
 use crate::component::*;
 
 mod connect_tiles;
 
 use connect_tiles::connect;
 
-const SEED: u32 = 2234567891;
+// const SEED: u32 = 2234567891;
 
 pub fn rand_up(v: f32) -> f32 { (v + 1.0) / 2.0 }
 
@@ -202,13 +200,13 @@ use specs::{System, Write};
 impl<'a> System<'a> for MapGenerator {
   type SystemData = (
     Write<'a, AreaMap<'static>>,
-    Write<'a, MapGenRequested>
+    Write<'a, GameState>
   );
 
-  fn run(&mut self, (mut map, mut map_gen_requested): Self::SystemData) {
-    if !(map_gen_requested.0) { return; }
+  fn run(&mut self, (mut map, mut state): Self::SystemData) {
+    if !(state.map_gen_queued) { return; }
     map.wipe();
-    let rng = Rng::new_with_seed(Algo::CMWC, SEED);
+    let rng = Rng::new_with_seed(Algo::CMWC, state.world_seed);
     let width  = self.width;
     let height = self.height;
     // let (width, height) = (&map_width, &map_height).join();
@@ -230,6 +228,6 @@ impl<'a> System<'a> for MapGenerator {
     connect(&mut map);
 
 
-    map_gen_requested.0 = false;
+    state.map_gen_queued = false;
   }
 }

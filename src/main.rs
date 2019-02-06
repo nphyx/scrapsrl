@@ -110,7 +110,6 @@ fn main() {
   component::init(&mut world);
   world.add_resource(GameState::new());
   world.add_resource(ui::UI::new());
-  world.add_resource(self::resource::MapGenRequested(true));
   world.add_resource(self::resource::WindowClosed(false));
   world.add_resource(UserInput{key: None});
   world.add_resource(area_map::AreaMap::default());
@@ -194,12 +193,12 @@ fn main() {
 
   let mut display = Display::new();
   let mut dispatcher = DispatcherBuilder::new()
-    .with(Time, "", &[])
-    .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &[])
-    .with(CollisionMap, "collision_map", &["map_gen"])
-    .with(HandleSystemInput, "system_input", &["map_gen"])
-    .with(HandlePlayerInput, "player_input", &["system_input", "collision_map"])
+    .with(HandleSystemInput, "system_input", &[])
+    .with(HandlePlayerInput, "player_input", &["system_input"])
     .with(HandleFallthroughInput, "fallthrough_input", &["player_input"])
+    .with(Time, "", &[])
+    .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &["fallthrough_input"])
+    .with(CollisionMap, "collision_map", &["map_gen"])
     .with(AI, "ai", &["collision_map"])
     .with(Movement, "movement", &["ai", "player_input", "collision_map"])
     .build();
@@ -207,11 +206,11 @@ fn main() {
   dispatcher.setup(&mut world.res);
 
   while !window_closed {
+    display.run_now(&mut world.res);
     dispatcher.dispatch(&mut world.res);
     world.maintain();
     window_closed = 
       world.read_resource::<WindowClosed>().clone().0 ||
       world.read_resource::<GameState>().close_game;
-    display.run_now(&mut world.res);
   }
 }
