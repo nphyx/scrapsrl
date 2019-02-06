@@ -19,9 +19,15 @@ impl<'a> System<'a> for HandleSystemInput {
         state.fullscreen = true;
         return;
       },
-      Some(Key { code: Char, printable: 'm', .. }) => {
+      Some(Key { code: F4, .. }) => {
+        println!("DEBUG COMMAND: re-generating map");
         state.map_gen_queued = true;
+        return;
+      },
+      Some(Key { code: F8, .. }) => {
+        println!("DEBUG COMMAND: generating map with new world seed");
         state.world_seed += 1;
+        state.map_gen_queued = true;
         return;
       },
       Some(_key) => {
