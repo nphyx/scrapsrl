@@ -50,7 +50,7 @@ impl<'a> System<'a> for Display {
     ReadStorage<'a, Icon>,
     ReadStorage<'a, Colors>,
     Read<'a, GameState>,
-    Read<'a, AreaMap<'static>>,
+    Read<'a, AreaMap>,
     Write<'a, WindowClosed>,
     Write<'a, UserInput>
   );

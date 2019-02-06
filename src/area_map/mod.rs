@@ -8,44 +8,56 @@ pub const WIDTH: usize = MAP_WIDTH as usize;
 pub const HEIGHT: usize = MAP_HEIGHT as usize;
 
 #[derive(Copy,Clone)]
-pub struct Tile<'a> {
+pub struct Tile {
   pub icon: char,
   pub fg: Color,
   pub bg: Color,
   pub transparent: bool,
   pub walkable: bool,
-  pub desc_short: &'a str,
-  pub desc_long: &'a str
+  pub type_id: u32 // this references the tile descriptions in mapgen/tile_types
 }
 
-impl<'a> Default for Tile<'a> {
-  fn default() -> Tile<'a> {
+impl Default for Tile {
+  fn default() -> Tile {
     Tile{
       icon: ' ',
       fg: Color::new(255, 255, 255),
       bg: Color::new(0, 0, 0),
       transparent: true,
       walkable: true,
-      desc_short: "",
-      desc_long: ""
+      type_id: 0
     }
   }
 }
 
-pub struct AreaMap<'a> {
-  tiles: [[Tile<'a>; HEIGHT]; WIDTH],
+impl Tile {
+  pub fn new(icon: char, fg: Color, bg: Color, transparent: bool,
+    walkable: bool, type_id: u32) -> Tile {
+    Tile{
+      icon,
+      fg,
+      bg,
+      transparent,
+      walkable,
+      type_id
+    }
+  }
+}
+
+pub struct AreaMap {
+  tiles: [[Tile; HEIGHT]; WIDTH],
   pub width: i32,
   pub height: i32
 }
 
-impl<'a> Default for AreaMap<'a> {
-  fn default() -> AreaMap<'a> {
+impl Default for AreaMap {
+  fn default() -> AreaMap {
     let tiles = [[Tile::default(); HEIGHT]; WIDTH];
     AreaMap{tiles, width: WIDTH as i32, height: HEIGHT as i32}
   }
 }
 
-impl<'a> AreaMap<'a> {
+impl AreaMap {
   pub fn wipe(&mut self) {
     let tile = Tile::default();
     for x in 0..WIDTH {
@@ -55,7 +67,7 @@ impl<'a> AreaMap<'a> {
     }
   }
 
-  pub fn get<'b>(&self, pos: Position) -> Option<Tile> {
+  pub fn get(&self, pos: Position) -> Option<Tile> {
     if 0 > pos.x || pos.x >= self.width || 
        0 > pos.y || pos.y >= self.height {
          return None 
@@ -81,7 +93,7 @@ impl<'a> AreaMap<'a> {
     Some(self.tiles[pos.x as usize][pos.y as usize].icon)
   }
 
-  pub fn set(&mut self, pos: Position, tile: Tile<'a>) {
+  pub fn set(&mut self, pos: Position, tile: Tile) {
     if 0 > pos.x || pos.x >= self.width || 
        0 > pos.y || pos.y >= self.height { return; }
     self.tiles[pos.x as usize][pos.y as usize] = tile;
@@ -93,7 +105,7 @@ impl<'a> AreaMap<'a> {
     self.tiles[pos.x as usize][pos.y as usize].icon = icon;
   }
 
-  pub fn iter(&'a self) -> AreaMapIter<'a> {
+  pub fn iter(&self) -> AreaMapIter {
     AreaMapIter{
       map: self,
       cur: [0, 0]
@@ -102,7 +114,7 @@ impl<'a> AreaMap<'a> {
 
   /*
    * this is broken right now so skip it
-  pub fn iter_mut(&'a mut self) -> AreaMapIterMut<'a> {
+  pub fn iter_mut(&'a mut self) -> AreaMapIterMut {
     AreaMapIterMut{
       map: self,
       cur: [0, 0]

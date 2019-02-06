@@ -11,7 +11,7 @@ impl<'a> System<'a> for Movement {
     ReadStorage<'a, Player>,
     ReadStorage<'a, MovePlan>,
     WriteStorage<'a, Position>,
-    Read<'a, AreaMap<'static>>,
+    Read<'a, AreaMap>,
     Write<'a, GameState>
   );
 

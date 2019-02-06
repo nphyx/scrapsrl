@@ -3,8 +3,8 @@ use tcod::noise::Noise;
 use tcod::colors::{Color, lerp};
 use crate::component::Position;
 use super::util::*;
-use crate::util::{clamp, icons::*};
-use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
+use crate::util::{icons::*};
+use super::tile_types::*;
 
 const VEHICLES: [char; 9] = [
   ICON_BUS,
@@ -26,34 +26,19 @@ fn place_car(map: &mut AreaMap, pos:[i32; 2], offset: [i32; 2], noise: &Noise, s
   let ch = VEHICLES[(v * VEHICLES.len() as f32).floor() as usize];
   let i = turb_offset(noise, pos, offset, scale, 32);
   let fg = lerp(color_good, color_bad, i * damage_factor);
-  map.set(Position{x: pos[0], y: pos[1]}, prep_tile(ch, fg, bg, false, true, "a ruined vehicle", "The rusted hulk of an old automobile."));
+  map.set(Position{x: pos[0], y: pos[1]}, Tile::new(ch, fg, bg, true, false, TYPE_VEHICLE))
 }
 
-fn damaged_road<'a>(road_bg: Color, blend_factor: f32) -> Tile<'a> {
+fn damaged_road(road_bg: Color, blend_factor: f32) -> Tile {
   let grass_bg = Color{r:48, g:44, b:26};
   let grass_fg = Color{r:102, g:161, b:94};
   let bg = lerp(grass_bg, road_bg, blend_factor * 0.25);
-  prep_tile(
-    ',',
-    grass_fg,
-    bg,
-    false,
-    false,
-    "grass",
-    "Some grass growing through a crack in the road.")
+  Tile::new(',', grass_fg, bg, true, true, TYPE_ROAD_CRACKED)
 }
 
-fn road_segment<'a>(icon: char, fg: Color, bg: Color) -> Tile<'a> {
-  let road_short_desc = "road";
-  let road_long_desc = "A crumbling old road.";
-  prep_tile(
-    icon,
-    fg,
-    bg,
-    false,
-    false,
-    road_short_desc,
-    road_long_desc)
+/// creates a single segment of road
+fn road_segment(icon: char, fg: Color, bg: Color) -> Tile {
+  Tile::new(icon, fg, bg, true, true, TYPE_ROAD)
 }
 
 /// determines the vertical offset of a horizontal road at a given x position 
@@ -77,6 +62,13 @@ pub fn place_horizontal_roads(noise: &Noise, map: &mut AreaMap, offset: [i32; 2]
     for cy in y_min..y_max+1 {
       let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
       let pos = Position{x: cx, y: cy};
+      /*
+      match map.get(pos) {
+        // don't overwrite solid tiles already placed
+        Some(tile) => if !tile.walkable { continue; },
+        _ => {}
+      }
+      */
       if y > 0 && y < map.height {
         if i < damage_factor {
           map.set(pos, damaged_road(road_bg, i)); 

@@ -10,7 +10,7 @@ impl<'a> System<'a> for AI {
     WriteStorage<'a, AIBrain>,
     ReadStorage<'a, Position>,
     WriteStorage<'a, MovePlan>,
-    Read<'a, AreaMap<'static>>
+    Read<'a, AreaMap>
   );
 
   fn run(&mut self, (mut brains, positions, mut plans, map): Self::SystemData) {
