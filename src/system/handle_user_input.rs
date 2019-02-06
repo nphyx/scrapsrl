@@ -1,6 +1,6 @@
 use tcod::input::Key;
 use tcod::input::KeyCode::*;
-use specs::{System,Write,WriteStorage,ReadStorage,Join,Entities,Entity};
+use specs::{System,Write,WriteStorage,ReadStorage,Join};
 
 use crate::game_state::GameState;
 use crate::component::*;

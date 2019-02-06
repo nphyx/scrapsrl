@@ -1,20 +1,14 @@
-use specs::{ReadStorage, WriteStorage, Entities, System};
-use crate::component::*;
+use specs::{System, Write};
+use crate::area_map::AreaMap;
 // use crate::util::ConnectableChars;
 
 // FIXME
 pub struct ConnectTiles;
 
 impl<'a> System<'a> for ConnectTiles {
-  type SystemData = (
-    ReadStorage<'a, ConnectedTile>,
-    ReadStorage<'a, Position>,
-    ReadStorage<'a, Icon>,
-    WriteStorage<'a, Tile>,
-    Entities<'a>
-  );
+  type SystemData = Write<'a, AreaMap<'static>>;
 
-  fn run(&mut self, (connected_tiles, positions, icons, tiles, entities): Self::SystemData) {
+  fn run(&mut self, mut map: Self::SystemData) {
     /*
     let mut queue: Vec<(Position, Tile)> = Vec::new();
 

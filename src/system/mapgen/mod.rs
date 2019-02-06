@@ -1,10 +1,10 @@
 // use tcod::map::Map;
-use std::collections::HashMap;
 use tcod::random::{Rng, Algo};
 use tcod::noise::*;
 use tcod::colors::{Color, lerp};
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::{clamp, icons::*};
+use crate::area_map::{AreaMap, Tile};
 // use crate::entity::build_tile_entity;
 use crate::resource::*;
 use crate::component::*;
@@ -25,47 +25,36 @@ const VEHICLES: [char; 9] = [
   ICON_TRUCK_PICKUP
 ];
 
-#[derive(Clone)]
-struct TilePrep {
-  icon: Icon,
-  colors: Colors,
-  description: Description,
-  opaque: bool,
-  solid: bool
-}
-
-type TilePreps = HashMap<Position, TilePrep>;
-
 /// build a TilePrep, which will eventually be made into a tile if it ends up in the final tile
 /// set.
-fn prep_tile(icon: char, fg: Color, bg: Color, opaque: bool, solid: bool, short_desc: &str, long_desc: &str) -> TilePrep {
-  TilePrep{
-    icon: Icon{ch: icon},
-    colors: Colors{fg, bg},
-    opaque: opaque,
-    solid: solid,
-    description: Description{
-      short: short_desc.to_string(),
-      long: long_desc.to_string()
-    }
+fn prep_tile<'a>(icon: char, fg: Color, bg: Color, opaque: bool, solid: bool,
+    desc_short: &'a str, desc_long: &'a str) -> Tile<'a> {
+  Tile{
+    icon,
+    fg,
+    bg,
+    transparent: !opaque,
+    walkable: !solid,
+    desc_short,
+    desc_long
   }
 }
 
 
 /// places a car
-fn place_car(tiles: &mut TilePreps, x: i32, y:i32, noise: &Noise, noise_scale: f32, damage_factor: f32, bg: Color) {
+fn place_car(map: &mut AreaMap, x: i32, y:i32, noise: &Noise, noise_scale: f32, damage_factor: f32, bg: Color) {
   let color_good = Color::new(68, 68, 68);
   let color_bad = Color::new(72, 40, 36);
   let v = rand_up(noise.get_fbm([x as f32 * noise_scale, y as f32 * noise_scale], 32));
   let ch = VEHICLES[(v * VEHICLES.len() as f32).floor() as usize];
   let i = noise.get_turbulence([x as f32 * noise_scale, y as f32 * noise_scale], 32);
   let fg = lerp(color_good, color_bad, i * damage_factor);
-  tiles.insert(Position{x, y}, prep_tile(ch, fg, bg, false, true, "a ruined vehicle", "The rusted hulk of an old automobile."));
+  map.set(Position{x, y}, prep_tile(ch, fg, bg, false, true, "a ruined vehicle", "The rusted hulk of an old automobile."));
 }
 
 /// generates a horizontal road on the map. Damage factor is a range from 0 = pristine to +1 =
 /// completely wrecked.
-fn place_horizontal_road(tiles: &mut TilePreps, width: i32, height: i32, noise: &Noise, noise_scale: f32, damage_factor: f32) {
+fn place_horizontal_road(map: &mut AreaMap, width: i32, height: i32, noise: &Noise, noise_scale: f32, damage_factor: f32) {
   let mut y = height / 2;
   let y_mod = noise.get_fbm([0.0, y as f32 * noise_scale], 32);
   y = clamp(0, MAP_HEIGHT, y + (y as f32 * y_mod) as i32);
@@ -94,36 +83,36 @@ fn place_horizontal_road(tiles: &mut TilePreps, width: i32, height: i32, noise: 
       if i < damage_factor {
         let ch = ',';
         bg = lerp(color_grass_bg, road_bg, i * 0.25);
-        tiles.insert(
+        map.set(
           Position{x: cx, y: cy},
           prep_tile(ch, color_grass_fg, bg, opaque, solid, grass_short_desc, grass_long_desc));
       } else {
         if y > 0 && y < height {
           if cy == y - 3 || cy == y + 3 {
-          tiles.insert(
+          map.set(
             Position{x: cx, y: cy},
             prep_tile(LINE_HORIZ, road_line_fg, bg, opaque, solid, road_short_desc, road_long_desc));
           } else if cy == y {
-            tiles.insert(
+            map.set(
               Position{x: cx, y: cy},
               prep_tile('-', road_line_fg, bg, opaque, solid, road_short_desc, road_long_desc));
           } else {
-            tiles.insert(
+            map.set(
               Position{x: cx, y: cy},
-              prep_tile('\u{e35d}', road_line_fg, bg, opaque, solid, road_short_desc, road_long_desc));
+              prep_tile('\u{e35d}', road_rubble_fg, bg, opaque, solid, road_short_desc, road_long_desc));
           }
         }
       }
       let car_chance = noise.get_fbm([cx as f32, cy as f32], 32);
       if car_chance > 0.95 {
-        place_car(tiles, cx, cy, noise, noise_scale, damage_factor, bg);
+        place_car(map, cx, cy, noise, noise_scale, damage_factor, bg);
       }
     }
   }
 }
 
 
-fn place_tree(tiles: &mut TilePreps, cx: i32, cy: i32) {
+fn place_tree(map: &mut AreaMap, cx: i32, cy: i32) {
   let min_x = clamp(0, MAP_WIDTH, cx - 1);
   let min_y = clamp(0, MAP_HEIGHT, cy - 1);
   let max_x = clamp(0, MAP_WIDTH, cx + 2);
@@ -135,10 +124,10 @@ fn place_tree(tiles: &mut TilePreps, cx: i32, cy: i32) {
 
   for x in min_x..max_x {
     for y in min_y..max_y {
-      tiles.insert(Position{x, y}, tree_bark.clone());
+      map.set(Position{x, y}, tree_bark.clone());
     }
   }
-  tiles.insert(Position{x:cx, y:cy}, tree_trunk.clone());
+  map.set(Position{x:cx, y:cy}, tree_trunk.clone());
 }
 
 fn check_tree_placement(tree_places: &Vec<(i32, i32)>, cx: i32, cy: i32) -> bool {
@@ -150,7 +139,7 @@ fn check_tree_placement(tree_places: &Vec<(i32, i32)>, cx: i32, cy: i32) -> bool
   return true;
 }
 
-fn place_trees(tiles: &mut TilePreps, width: i32, height: i32, noise: &Noise, noise_scale: f32) {
+fn place_trees(tiles: &mut AreaMap, width: i32, height: i32, noise: &Noise, noise_scale: f32) {
   let mut tree_places: Vec<(i32, i32)> = vec![];
   for x in 0..width {
     for y in 0..height {
@@ -165,7 +154,7 @@ fn place_trees(tiles: &mut TilePreps, width: i32, height: i32, noise: &Noise, no
   }
 }
 
-fn lay_grass(tiles: &mut TilePreps, width: i32, height: i32, noise: &Noise, noise_scale: f32) {
+fn lay_grass(map: &mut AreaMap, width: i32, height: i32, noise: &Noise, noise_scale: f32) {
   let desc_sg_short = "grass";
   let desc_sg_long = "Just some ordinary grass.";
   let desc_tg_short = "tall grass";
@@ -182,11 +171,11 @@ fn lay_grass(tiles: &mut TilePreps, width: i32, height: i32, noise: &Noise, nois
       let bg = lerp(color_sg_bg, color_tg_bg, i);
       let fg = lerp(color_sg_fg, color_tg_fg, i);
       if i < 0.5 {
-        tiles.insert(
+        map.set(
           Position{x, y},
           prep_tile(',', fg, bg, opaque, solid, desc_sg_short, desc_sg_long));
       } else {
-        tiles.insert(
+        map.set(
           Position{x, y},
           prep_tile('"', fg, bg, opaque, solid, desc_tg_short, desc_tg_long));
       }
@@ -205,35 +194,16 @@ impl MapGenerator {
   }
 }
 
-use specs::{System, Write, WriteStorage, Entities};
+use specs::{System, Write};
 impl<'a> System<'a> for MapGenerator {
   type SystemData = (
-    WriteStorage<'a, Tile>,
-    WriteStorage<'a, Icon>,
-    WriteStorage<'a, Position>,
-    WriteStorage<'a, Colors>,
-    WriteStorage<'a, Description>,
-    WriteStorage<'a, Solid>,
-    WriteStorage<'a, Opaque>,
-    Write<'a, MapGenRequested>,
-    Entities<'a>
+    Write<'a, AreaMap<'static>>,
+    Write<'a, MapGenRequested>
   );
 
-  fn run(
-      &mut self,
-      (
-        mut tiles,
-        mut icons,
-        mut positions,
-        mut colors,
-        mut descriptions,
-        mut solids,
-        mut opaques,
-        mut map_gen_requested,
-        entities): Self::SystemData
-  ) {
+  fn run(&mut self, (mut map, mut map_gen_requested): Self::SystemData) {
     if !(map_gen_requested.0) { return; }
-    let mut tile_preps: TilePreps = TilePreps::new();
+    map.wipe();
     let rng = Rng::new_with_seed(Algo::CMWC, SEED);
     let width  = self.width;
     let height = self.height;
@@ -244,29 +214,17 @@ impl<'a> System<'a> for MapGenerator {
       .init();
 
     // lay down a basic grass layer
-    lay_grass(&mut tile_preps, width, height, &noise, 0.2);
+    lay_grass(&mut map, width, height, &noise, 0.2);
 
     // draw a road
-    place_horizontal_road(&mut tile_preps, width, height, &noise, 0.1, 0.8);
+    place_horizontal_road(&mut map, width, height, &noise, 0.1, 0.8);
 
     // place trees (ok for them to grow through the road, it's been a long time)
-    place_trees(&mut tile_preps, width, height, &noise, 0.2);
+    place_trees(&mut map, width, height, &noise, 0.2);
 
     // connect connectable tiles
     // tiles.connect_tiles();
 
-    // use specs::{Builder};
-    for (pos, prep) in tile_preps {
-      let tile = entities.build_entity()
-        .with(Tile, &mut tiles)
-        .with(prep.icon, &mut icons)
-        .with(pos, &mut positions)
-        .with(prep.colors, &mut colors)
-        .with(prep.description, &mut descriptions)
-        .build();
-      if prep.solid { solids.insert(tile, Solid).expect("foo"); }
-      if prep.opaque { opaques.insert(tile, Opaque).expect("foo"); }
-   }
 
     map_gen_requested.0 = false;
   }

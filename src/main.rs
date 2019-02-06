@@ -5,21 +5,20 @@ extern crate frappe;
 #[macro_use]
 extern crate specs_derive;
 
-use tcod::input::Key;
-// use tcod::input::KeyCode::{F11, Escape};
 use tcod::colors::Color;
 use rand::prelude::*;
-use specs::{World, DispatcherBuilder, System, RunNow};
+use specs::{World, DispatcherBuilder, RunNow};
 
-mod ui;
-mod game_state;
-mod constants;
-mod util;
-mod display;
-mod cursor;
+mod area_map;
 mod component;
-mod system;
+mod constants;
+mod cursor;
+mod game_state;
+mod display;
 mod resource;
+mod system;
+mod ui;
+mod util;
 use self::component::Position;
 use self::display::Display;
 use self::resource::*;
@@ -110,6 +109,7 @@ fn main() {
   world.add_resource(self::resource::MapGenRequested(true));
   world.add_resource(self::resource::WindowClosed(false));
   world.add_resource(UserInput{key: None});
+  world.add_resource(area_map::AreaMap::default());
 
   let mut window_closed = false;
 

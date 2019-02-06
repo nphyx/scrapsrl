@@ -6,6 +6,7 @@ use super::game_state::GameState;
 use super::util::colors::*;
 use super::util::{clamp, distance};
 use super::WindowClosed;
+use super::area_map::AreaMap;
 
 use super::constants::{
   MAP_WIDTH,
@@ -15,20 +16,13 @@ use super::constants::{
   DEFAULT_BG,
   DEFAULT_FG};
 
-/*
-pub trait DrawSelf {
-  fn draw(&self, console: &mut Console);
-  fn draw_at(&self, console: &mut Console, x: i32, y: i32);
-}
-*/
-
 pub struct Display {
   pub root: RootConsole,
   pub map: Map,
 }
 
 
-impl<'a> Display {
+impl Display {
   /// initialize the display
   pub fn new() -> Display {
     let mut root = RootConsole::initializer()
@@ -53,12 +47,10 @@ impl<'a> System<'a> for Display {
   type SystemData  = (
     ReadStorage<'a, Player>,
     ReadStorage<'a, Position>,
-    ReadStorage<'a, Opaque>,
-    ReadStorage<'a, Solid>,
     ReadStorage<'a, Icon>,
     ReadStorage<'a, Colors>,
-    ReadStorage<'a, Tile>,
     Read<'a, GameState>,
+    Read<'a, AreaMap<'static>>,
     Write<'a, WindowClosed>,
     Write<'a, UserInput>
   );
@@ -68,12 +60,10 @@ impl<'a> System<'a> for Display {
       (
         players,
         positions,
-        opaques,
-        solids,
         icons,
         colors,
-        tiles,
         state,
+        map,
         mut window_closed,
         mut keypress
       ): Self::SystemData) {
@@ -91,20 +81,8 @@ impl<'a> System<'a> for Display {
     }
 
     // update map before computing fov
-    for (pos, ..) in (&positions, &opaques, &solids).join() {
-      self.map.set(pos.x, pos.y, false, false);
-    }
-
-    for (pos, ..) in (&positions, !&opaques, &solids).join() {
-      self.map.set(pos.x, pos.y, true, false);
-    }
-
-    for (pos, ..) in (&positions, &opaques, !&solids).join() {
-      self.map.set(pos.x, pos.y, false, true);
-    }
-
-    for (pos, ..) in (&positions, !&opaques, !&solids).join() {
-      self.map.set(pos.x, pos.y, true, true);
+    for (pos, tile) in map.iter() {
+      self.map.set(pos.x, pos.y, tile.transparent, tile.walkable)
     }
 
     // Compute the FOV
@@ -114,12 +92,12 @@ impl<'a> System<'a> for Display {
     self.root.clear();
 
     // draw all tiles
-    for(pos, icon, colors, _tile) in (&positions, &icons, &colors, &tiles).join() {
-      self.root.put_char_ex(pos.x, pos.y, icon.ch, colors.fg, colors.bg);
+    for (pos, tile) in map.iter() {
+      self.root.put_char_ex(pos.x, pos.y, tile.icon, tile.fg, tile.bg);
     }
 
     // draw all npcs
-    for(pos, icon, color, ..) in (&positions, &icons, &colors, !&players, !&tiles).join() {
+    for(pos, icon, color, ..) in (&positions, &icons, &colors, !&players).join() {
       if self.map.is_in_fov(pos.x, pos.y) {
         self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
         self.root.set_char_foreground(pos.x, pos.y, color.fg);
@@ -130,12 +108,12 @@ impl<'a> System<'a> for Display {
     let time_of_day_rel = state.world_time_relative();
 
     // lighting pass SUPER SLOW
-    for pos  in (&positions).join() {
+    for (pos, _) in map.iter() {
       let orig_fg = self.root.get_char_foreground(pos.x, pos.y);
       let orig_bg = self.root.get_char_background(pos.x, pos.y);
       let mut fg = orig_fg.clone();
       let mut bg = orig_bg.clone();
-      let dist = distance(player_pos, *pos);
+      let dist = distance(player_pos, pos);
 
       let rel_dist = clamp(
         0.0,

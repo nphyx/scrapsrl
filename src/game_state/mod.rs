@@ -1,5 +1,3 @@
-// use crate::mapgen::Tiles;
-// use tcod::map::Map;
 use std::collections::HashMap;
 
 #[derive(Default)]
@@ -10,7 +8,7 @@ pub struct GameState {
   pub close_game: bool,
   pub world_time: f32,
   pub world_day: u32,
-  pub world_year: u32
+  pub world_year: u32,
 }
 
 impl GameState {
