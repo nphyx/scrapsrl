@@ -148,7 +148,9 @@ impl<'a> System<'a> for Display {
     // self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
     self.root.flush();
 
-    keypress.key = Some(self.root.wait_for_keypress(true));
-    *window_closed = WindowClosed(self.root.window_closed() || state.close_game);
+    if !state.skip_next_frame {
+      keypress.key = Some(self.root.wait_for_keypress(true));
+      *window_closed = WindowClosed(self.root.window_closed() || state.close_game);
+    }
   }
 }

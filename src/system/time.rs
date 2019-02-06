@@ -7,6 +7,7 @@ impl<'a> System<'a> for Time {
   type SystemData = Write<'a, GameState>;
 
   fn run(&mut self, mut state: Self::SystemData) {
+    state.skip_next_frame = false; // coordinates map gen passes, TODO event system
     state.world_time = state.world_time + (100.0 / 60.0) / 100.0;
     if state.world_time >= 24.0 {
       state.world_time = 0.0;

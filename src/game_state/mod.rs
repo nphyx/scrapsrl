@@ -9,6 +9,7 @@ pub struct GameState {
   pub fullscreen: bool,
 
   pub map_gen_queued: bool,
+  pub skip_next_frame: bool,
   pub world_seed: u32,
 
   pub area_offset: [i32; 2],
@@ -27,6 +28,7 @@ impl GameState {
       fullscreen: false,
 
       map_gen_queued: false,
+      skip_next_frame: false,
       world_seed: 0,
 
       area_offset: [0, 0],
@@ -46,5 +48,6 @@ impl GameState {
     self.area_offset[0] += x_change * MAP_WIDTH;
     self.area_offset[0] += y_change * MAP_HEIGHT;
     self.map_gen_queued = true;
+    self.skip_next_frame = true;
   }
 }
