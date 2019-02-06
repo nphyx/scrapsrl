@@ -1,9 +1,11 @@
 use tcod::colors::Color;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::component::Position;
+mod iterators;
+use iterators::{AreaMapIter};
 
-const WIDTH: usize = MAP_WIDTH as usize;
-const HEIGHT: usize = MAP_HEIGHT as usize;
+pub const WIDTH: usize = MAP_WIDTH as usize;
+pub const HEIGHT: usize = MAP_HEIGHT as usize;
 
 #[derive(Copy,Clone)]
 pub struct Tile<'a> {
@@ -31,36 +33,17 @@ impl<'a> Default for Tile<'a> {
 }
 
 pub struct AreaMap<'a> {
-  tiles: [[Tile<'a>; HEIGHT]; WIDTH]
-}
-
-pub struct AreaMapIter<'a> {
-  map: &'a AreaMap<'a>,
-  cur: [usize; 2]
-}
-
-impl <'a>Iterator for AreaMapIter<'a> {
-  type Item = (Position, Tile<'a>);
-
-  fn next(&mut self) -> Option<(Position, Tile<'a>)> {
-    let [x, y] = &mut self.cur;
-    if *x >= WIDTH {
-      *x = 0;
-      *y += 1;
-    }
-    if *y >= HEIGHT {
-      return None; 
-    }
-    let r = (Position{x:*x as i32, y:*y as i32}, self.map.tiles[*x][*y]);
-    *x += 1;
-    Some(r)
-  }
+  tiles: [[Tile<'a>; HEIGHT]; WIDTH],
+  default_tile: Tile<'a>,
+  pub width: i32,
+  pub height: i32
 }
 
 impl<'a> Default for AreaMap<'a> {
   fn default() -> AreaMap<'a> {
     let tiles = [[Tile::default(); HEIGHT]; WIDTH];
-    AreaMap{tiles}
+    AreaMap{tiles, width: WIDTH as i32, height: HEIGHT as i32,
+      default_tile: Tile::default()}
   }
 }
 
@@ -74,16 +57,42 @@ impl<'a> AreaMap<'a> {
     }
   }
 
-  pub fn get(&self, pos: Position) -> &Tile {
-    &(self.tiles[pos.x as usize][pos.y as usize])
+  pub fn get<'b>(&self, pos: Position) -> Option<Tile> {
+    if 0 > pos.x || pos.x >= self.width || 
+       0 > pos.y || pos.y >= self.height {
+         return None 
+    }
+    Some(self.tiles[pos.x as usize][pos.y as usize])
   }
 
-  pub fn get_mut(&mut self, pos: Position) -> &mut Tile<'a> {
-    &mut(self.tiles[pos.x as usize][pos.y as usize])
+  /*
+  pub fn get_mut<'b>(&mut self, pos: Position) -> &mut Tile<'b> {
+    if 0 > pos.x || pos.x >= self.width || 
+       0 > pos.y || pos.y >= self.height {
+         return &mut Tile::default()
+    }
+    &mut self.tiles[pos.x as usize][pos.y as usize]
+  }
+  */
+
+  pub fn get_icon(&self, pos: Position) -> Option<char> {
+    if 0 > pos.x || pos.x >= self.width || 
+       0 > pos.y || pos.y >= self.height {
+         return None 
+    }
+    Some(self.tiles[pos.x as usize][pos.y as usize].icon)
   }
 
   pub fn set(&mut self, pos: Position, tile: Tile<'a>) {
+    if 0 > pos.x || pos.x >= self.width || 
+       0 > pos.y || pos.y >= self.height { return; }
     self.tiles[pos.x as usize][pos.y as usize] = tile;
+  }
+
+  pub fn set_icon(&mut self, pos: Position, icon: char) {
+    if 0 > pos.x || pos.x >= self.width || 
+       0 > pos.y || pos.y >= self.height { return; }
+    self.tiles[pos.x as usize][pos.y as usize].icon = icon;
   }
 
   pub fn iter(&'a self) -> AreaMapIter<'a> {
@@ -92,4 +101,14 @@ impl<'a> AreaMap<'a> {
       cur: [0, 0]
     }
   }
+
+  /*
+   * this is broken right now so skip it
+  pub fn iter_mut(&'a mut self) -> AreaMapIterMut<'a> {
+    AreaMapIterMut{
+      map: self,
+      cur: [0, 0]
+    }
+  }
+  */
 }

@@ -44,10 +44,10 @@ impl ConnectableChars {
       t_u: LINE_T_U,
       t_d: LINE_T_D,
       cross: LINE,
-      cap_l: '<',
-      cap_r: '>',
-      cap_u: '^',
-      cap_d: 'v' 
+      cap_l: LINE_HORIZ,
+      cap_r: LINE_HORIZ,
+      cap_u: LINE_VERT,
+      cap_d: LINE_VERT 
     });
     map.insert(LINE_DBL, ConnectableChar{
       base: LINE_DBL,
@@ -62,10 +62,10 @@ impl ConnectableChars {
       t_u: LINE_DBL_T_U,
       t_d: LINE_DBL_T_D,
       cross: LINE_DBL,
-      cap_l: 'O',
-      cap_r: 'O',
-      cap_u: 'O',
-      cap_d: 'O' 
+      cap_l: LINE_DBL_HORIZ,
+      cap_r: LINE_DBL_HORIZ,
+      cap_u: LINE_DBL_VERT,
+      cap_d: LINE_DBL_VERT 
     });
     ConnectableChars{map}
   }
@@ -73,7 +73,7 @@ impl ConnectableChars {
   /// checks whether a character can be connected
   pub fn can_connect(&self, orig: &char) -> bool {
     match self.map.get(&orig) {
-      Some(ch) => true,
+      Some(_) => true,
       None => false
     }
   }
@@ -88,7 +88,7 @@ impl ConnectableChars {
     left: Option<char>,
     right: Option<char>) -> Option<char> {
     let chosen: char;
-    match self.map.get(&orig) {
+    match self.map.get(orig) {
       Some(connectable) => {
         let mut matched = (false, false, false, false);
         match up {

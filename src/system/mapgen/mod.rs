@@ -9,6 +9,10 @@ use crate::area_map::{AreaMap, Tile};
 use crate::resource::*;
 use crate::component::*;
 
+mod connect_tiles;
+
+use connect_tiles::connect;
+
 const SEED: u32 = 2234567891;
 
 pub fn rand_up(v: f32) -> f32 { (v + 1.0) / 2.0 }
@@ -120,7 +124,7 @@ fn place_tree(map: &mut AreaMap, cx: i32, cy: i32) {
   let fg = Color{r:86, g:50, b:32};
   let bg = Color{r:32, g:24, b:12};
   let tree_bark = prep_tile(LINE, fg, bg, true, true, "tree bark", "The bark of a tree.");
-  let tree_trunk = prep_tile(LINE, fg, bg, true, true, "tree trunk", "The trunk of a tree.");
+  let tree_trunk = prep_tile('o', fg, bg, true, true, "tree trunk", "The trunk of a tree.");
 
   for x in min_x..max_x {
     for y in min_y..max_y {
@@ -223,7 +227,7 @@ impl<'a> System<'a> for MapGenerator {
     place_trees(&mut map, width, height, &noise, 0.2);
 
     // connect connectable tiles
-    // tiles.connect_tiles();
+    connect(&mut map);
 
 
     map_gen_requested.0 = false;
