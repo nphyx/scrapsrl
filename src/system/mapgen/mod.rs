@@ -40,16 +40,15 @@ impl<'a> System<'a> for MapGenerator {
     let rng = Rng::new_with_seed(Algo::CMWC, state.world_seed);
     let width  = self.width;
     let height = self.height;
-    // let (width, height) = (&map_width, &map_height).join();
     let noise = Noise::init_with_dimensions(2)
       .noise_type(NoiseType::Simplex)
       .random(rng)
       .init();
 
     // lay down a basic grass layer
-    ground_cover::lay_grass(&noise, &mut map, width, height, state.area_offset, 0.2);
+    ground_cover::grass(&noise, &mut map, width, height, state.area_offset, 0.2);
 
-    // place trees (ok for them to grow through the road, it's been a long time)
+    // place trees
     trees::place_trees(&noise, &mut map, width, height, state.area_offset, 0.2, 0.7);
 
     // draw a road
@@ -57,7 +56,6 @@ impl<'a> System<'a> for MapGenerator {
 
     // connect connectable tiles
     connect(&mut map);
-
 
     state.map_gen_queued = false;
   }

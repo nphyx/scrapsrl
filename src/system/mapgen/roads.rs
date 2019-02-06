@@ -5,6 +5,7 @@ use crate::component::Position;
 use super::util::*;
 use crate::util::{icons::*};
 use super::tile_types::*;
+use super::ground_cover::grass_bg_color;
 
 const VEHICLES: [char; 9] = [
   ICON_BUS,
@@ -19,20 +20,25 @@ const VEHICLES: [char; 9] = [
 ];
 
 /// places a car
-fn place_car(map: &mut AreaMap, pos:[i32; 2], offset: [i32; 2], noise: &Noise, scale: f32, damage_factor: f32, bg: Color) {
+fn place_car(map: &mut AreaMap, pos:[i32; 2], offset: [i32; 2], noise: &Noise, scale: f32, damage_factor: f32) {
   let color_good = Color::new(68, 68, 68);
   let color_bad = Color::new(72, 40, 36);
-  let v = rand_up(fbm_offset(noise, pos, offset, 1.0, 32));
+  let v = rand_up(fbm_offset(noise, pos, offset, 1.0, 1));
   let ch = VEHICLES[(v * VEHICLES.len() as f32).floor() as usize];
   let i = turb_offset(noise, pos, offset, scale, 32);
   let fg = lerp(color_good, color_bad, i * damage_factor);
-  map.set(Position{x: pos[0], y: pos[1]}, Tile::new(ch, fg, bg, true, false, TYPE_VEHICLE))
+  let pos = Position{x: pos[0], y: pos[1]};
+  match map.get(pos) {
+    Some(tile) => {
+      map.set(pos, Tile::new(ch, fg, tile.bg, true, false, TYPE_VEHICLE))
+    },
+    None => {}
+  }
 }
 
-fn damaged_road(road_bg: Color, blend_factor: f32) -> Tile {
-  let grass_bg = Color{r:48, g:44, b:26};
+fn damaged_road(grass_bg: Color, road_bg: Color, blend_factor: f32) -> Tile {
   let grass_fg = Color{r:102, g:161, b:94};
-  let bg = lerp(grass_bg, road_bg, blend_factor * 0.25);
+  let bg = lerp(grass_bg, road_bg, blend_factor * 0.5);
   Tile::new(',', grass_fg, bg, true, true, TYPE_ROAD_CRACKED)
 }
 
@@ -62,16 +68,10 @@ pub fn place_horizontal_roads(noise: &Noise, map: &mut AreaMap, offset: [i32; 2]
     for cy in y_min..y_max+1 {
       let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
       let pos = Position{x: cx, y: cy};
-      /*
-      match map.get(pos) {
-        // don't overwrite solid tiles already placed
-        Some(tile) => if !tile.walkable { continue; },
-        _ => {}
-      }
-      */
       if y > 0 && y < map.height {
         if i < damage_factor {
-          map.set(pos, damaged_road(road_bg, i)); 
+          let grass_bg = grass_bg_color(noise, pos.to_array(), offset, noise_scale, 32);
+          map.set(pos, damaged_road(grass_bg, road_bg, i)); 
         } else if cy == y_min || cy == y_max { // outer line
           map.set(pos, road_segment(LINE_HORIZ, road_line_fg, road_bg));
         } else if cy == y { // center line
@@ -85,7 +85,7 @@ pub fn place_horizontal_roads(noise: &Noise, map: &mut AreaMap, offset: [i32; 2]
       }
       let car_chance = fbm_offset(noise, [cx, cy], offset, 1.0, 32);
       if car_chance > 0.95 {
-        place_car(map, [cx, cy], offset, noise, noise_scale, damage_factor, road_bg);
+        place_car(map, [cx, cy], offset, noise, noise_scale, damage_factor);
       }
     }
   }
