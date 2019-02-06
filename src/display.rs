@@ -52,7 +52,6 @@ use specs::{System, Read, Write, ReadStorage, Join};
 impl<'a> System<'a> for Display {
   type SystemData  = (
     ReadStorage<'a, Player>,
-    ReadStorage<'a, Character>,
     ReadStorage<'a, Position>,
     ReadStorage<'a, Opaque>,
     ReadStorage<'a, Solid>,
@@ -68,7 +67,6 @@ impl<'a> System<'a> for Display {
       &mut self,
       (
         players,
-        characters,
         positions,
         opaques,
         solids,
@@ -129,7 +127,7 @@ impl<'a> System<'a> for Display {
     }
 
     // TODO compute time of day adjustment, sunset gradient, and moon phase :D
-    let time_of_day_rel = 0.0; //state.world_time_relative();
+    let time_of_day_rel = state.world_time_relative();
 
     // lighting pass SUPER SLOW
     for pos  in (&positions).join() {

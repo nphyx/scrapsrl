@@ -190,6 +190,7 @@ fn main() {
 
   let mut display = Display::new();
   let mut dispatcher = DispatcherBuilder::new()
+    .with(Time, "", &[])
     .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &[])
     .with(CollisionMap, "collision_map", &["map_gen"])
     .with(HandleSystemInput, "system_input", &["map_gen"])
