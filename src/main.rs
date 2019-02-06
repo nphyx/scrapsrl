@@ -105,10 +105,13 @@ fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player:
 */
 
 fn main() {
-
+  let mut rng = rand::thread_rng();
   let mut world = World::new();
+  let mut state = GameState::new();
+  state.world_seed = rng.gen_range(0, std::u32::MAX);
+  state.map_gen_queued = true;
   component::init(&mut world);
-  world.add_resource(GameState::new());
+  world.add_resource(state);
   world.add_resource(ui::UI::new());
   world.add_resource(self::resource::WindowClosed(false));
   world.add_resource(UserInput{key: None});

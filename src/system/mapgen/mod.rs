@@ -205,6 +205,7 @@ impl<'a> System<'a> for MapGenerator {
 
   fn run(&mut self, (mut map, mut state): Self::SystemData) {
     if !(state.map_gen_queued) { return; }
+    println!("Generating new map with world seed {}", state.world_seed);
     map.wipe();
     let rng = Rng::new_with_seed(Algo::CMWC, state.world_seed);
     let width  = self.width;

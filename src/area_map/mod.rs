@@ -21,7 +21,7 @@ pub struct Tile<'a> {
 impl<'a> Default for Tile<'a> {
   fn default() -> Tile<'a> {
     Tile{
-      icon: '?',
+      icon: ' ',
       fg: Color::new(255, 255, 255),
       bg: Color::new(0, 0, 0),
       transparent: true,
@@ -34,7 +34,6 @@ impl<'a> Default for Tile<'a> {
 
 pub struct AreaMap<'a> {
   tiles: [[Tile<'a>; HEIGHT]; WIDTH],
-  default_tile: Tile<'a>,
   pub width: i32,
   pub height: i32
 }
@@ -42,8 +41,7 @@ pub struct AreaMap<'a> {
 impl<'a> Default for AreaMap<'a> {
   fn default() -> AreaMap<'a> {
     let tiles = [[Tile::default(); HEIGHT]; WIDTH];
-    AreaMap{tiles, width: WIDTH as i32, height: HEIGHT as i32,
-      default_tile: Tile::default()}
+    AreaMap{tiles, width: WIDTH as i32, height: HEIGHT as i32}
   }
 }
 
