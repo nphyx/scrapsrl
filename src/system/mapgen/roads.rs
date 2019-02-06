@@ -56,37 +56,39 @@ fn road_segment<'a>(icon: char, fg: Color, bg: Color) -> Tile<'a> {
     road_long_desc)
 }
 
+/// determines the vertical offset of a horizontal road at a given x position 
+fn road_lat(noise: &Noise, map: &AreaMap, x: i32, offset: [i32; 2]) -> f32 {
+  let hh = map.height / 2;
+  rand_up(fbm_offset(noise, [x, hh], offset, 0.01, 1)) * map.height as f32
+}
+
 /// generates a horizontal road on the map. Damage factor is a range from 0 = pristine
 /// to +1 = completely wrecked.
-pub fn place_horizontal_road(noise: &Noise, map: &mut AreaMap, width: i32, height: i32, offset: [i32; 2], noise_scale: f32, damage_factor: f32) {
-  let mut y = height / 2;
-  let y_mod = fbm_offset(noise, [0, y], [0, offset[1]], noise_scale, 32);
-  y = clamp(0, MAP_HEIGHT, y + (y as f32 * y_mod) as i32);
+pub fn place_horizontal_roads(noise: &Noise, map: &mut AreaMap, offset: [i32; 2],
+    noise_scale: f32, damage_factor: f32, lanes: i32) {
   let road_line_fg = Color{r: 102, g: 92, b: 81};
+  let road_line_center = Color{r: 104, g: 90, b: 61};
   let road_bg = Color{r: 22, g: 20, b: 16};
   let road_rubble_fg = Color{r: 26, g: 23, b: 20};
-  for cx in 0..width {
-    let wander = fbm_offset(noise, [cx, y], offset, noise_scale, 32);
-    if wander > 0.8 {
-      y += 1;
-    }
-    else if wander < -0.8 {
-      y -= 1;
-    }
-    for cy in y-2..y+3 {
+  for cx in 0..map.width {
+    let y = road_lat(noise, map, cx, offset).floor() as i32;
+    let y_min = y - (lanes);
+    let y_max = y + (lanes);
+    for cy in y_min..y_max+1 {
       let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
       let pos = Position{x: cx, y: cy};
-      if i < damage_factor {
-        map.set(pos, damaged_road(road_bg, i)); 
-      } else {
-        if y > 0 && y < height {
-          if cy == y - 2 || cy == y + 2 { // outer line
-            map.set(pos, road_segment(LINE_HORIZ, road_line_fg, road_bg));
-          } else if cy == y { // center line
-            map.set(pos, road_segment('-', road_line_fg, road_bg));
-          } else {
-            map.set(pos, road_segment('\u{e35d}', road_rubble_fg, road_bg));
-          }
+      if y > 0 && y < map.height {
+        if i < damage_factor {
+          map.set(pos, damaged_road(road_bg, i)); 
+        } else if cy == y_min || cy == y_max { // outer line
+          map.set(pos, road_segment(LINE_HORIZ, road_line_fg, road_bg));
+        } else if cy == y { // center line
+          let icon = if lanes > 2 { LINE_DBL_HORIZ } else { '-' };
+          map.set(pos, road_segment(icon, road_line_center, road_bg));
+        } else if (cy - y) % 2 == 0 { // lane seperator
+          map.set(pos, road_segment('-', road_line_fg, road_bg));
+        } else {
+          map.set(pos, road_segment('\u{e35d}', road_rubble_fg, road_bg));
         }
       }
       let car_chance = fbm_offset(noise, [cx, cy], offset, 1.0, 32);

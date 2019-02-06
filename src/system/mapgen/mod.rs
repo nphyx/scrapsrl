@@ -95,7 +95,7 @@ impl<'a> System<'a> for MapGenerator {
     ground_cover::lay_grass(&noise, &mut map, width, height, state.area_offset, 0.2);
 
     // draw a road
-    roads::place_horizontal_road(&noise, &mut map, width, height, state.area_offset, 0.1, 0.8);
+    roads::place_horizontal_roads(&noise, &mut map, state.area_offset, 0.1, 0.8, 8);
 
     // place trees (ok for them to grow through the road, it's been a long time)
     place_trees(&noise, &mut map, width, height, state.area_offset, 0.2);
