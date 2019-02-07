@@ -8,6 +8,10 @@ use super::util::{clamp, distance};
 use super::WindowClosed;
 use super::area_map::AreaMap;
 
+mod ui;
+
+use ui::UI;
+
 use super::constants::{
   MAP_WIDTH,
   MAP_HEIGHT,
@@ -19,6 +23,7 @@ use super::constants::{
 pub struct Display {
   pub root: RootConsole,
   pub map: Map,
+  pub ui: UI
 }
 
 
@@ -33,12 +38,13 @@ impl Display {
       .title("SCRAPS: Bug Hunter")
       .init();
     let map = Map::new(MAP_WIDTH, MAP_HEIGHT);
+    let ui = UI::new();
 
     root.set_default_background(DEFAULT_BG);
     root.set_default_foreground(DEFAULT_FG);
     root.clear();
 
-    return Display{root, map}
+    return Display{root, map, ui}
   }
 }
 
@@ -46,6 +52,7 @@ use specs::{System, Read, Write, ReadStorage, Join};
 impl<'a> System<'a> for Display {
   type SystemData  = (
     ReadStorage<'a, Player>,
+    ReadStorage<'a, Character>,
     ReadStorage<'a, Position>,
     ReadStorage<'a, Icon>,
     ReadStorage<'a, Colors>,
@@ -59,6 +66,7 @@ impl<'a> System<'a> for Display {
       &mut self,
       (
         players,
+        characters,
         positions,
         icons,
         colors,
@@ -71,14 +79,16 @@ impl<'a> System<'a> for Display {
 
     let light = Color::new(255, 240, 128);
     let ambient = Color::new(0, 6, 18);
+    let mut pc = Character::default();
 
     // TODO calculate relative contrast and maintain for out-of-vis objects
     let bg_gray = Color::new(8, 8, 8);
     let fg_gray = Color::new(24, 24, 24);
 
     let mut player_pos: Position = Position::default();
-    for (pos, _player) in (&positions, &players).join() {
+    for (character, pos, _player) in (&characters, &positions, &players).join() {
       player_pos = pos.clone();
+      pc = character.clone();
     }
 
     // update map before computing fov
@@ -144,7 +154,7 @@ impl<'a> System<'a> for Display {
       self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
       self.root.set_char_foreground(pos.x, pos.y, color.fg)
     }
-    // interface.draw(&self.root, player, state, entities);
+    self.ui.draw(&self.root, &pc, &state);
     self.root.set_alignment(TextAlignment::Right);
     // self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
     self.root.flush();

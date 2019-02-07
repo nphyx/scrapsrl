@@ -17,7 +17,6 @@ mod game_state;
 mod display;
 mod resource;
 mod system;
-mod ui;
 mod util;
 use self::component::Position;
 use self::display::Display;
@@ -112,7 +111,7 @@ fn main() {
   state.map_gen_queued = true;
   component::init(&mut world);
   world.add_resource(state);
-  world.add_resource(ui::UI::new());
+  // world.add_resource(ui::UI::new());
   world.add_resource(self::resource::WindowClosed(false));
   world.add_resource(UserInput{key: None});
   world.add_resource(area_map::AreaMap::default());

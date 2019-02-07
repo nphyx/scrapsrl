@@ -1,8 +1,8 @@
 use tcod::console::{Console, TextAlignment, BackgroundFlag};
 use tcod::colors::Color;
-use crate::entity::{Player, EntityCollection};
 use crate::game_state::GameState;
 use crate::constants::{SIDEBAR_WIDTH, MAP_WIDTH, MAP_HEIGHT, DIALOG_WIDTH};
+use crate::component::Character;
 use crate::util::icons::*;
 
 const TEXT_COLOR: Color = Color{r: 255, g: 255, b: 255};
@@ -91,9 +91,7 @@ pub fn draw_status_bar(mut console: &Console, text: String) {
   console.print_rect(x, y, width, height, text);
 }
 
-pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState, entities: &EntityCollection) {
-  /*
-  let pc = &player.character;
+pub fn draw_sidebar(mut console: &Console, pc: &Character, state: &GameState) {
   reset_colors(&console);
   console.set_alignment(TextAlignment::Left);
   let x = console.width() - SIDEBAR_WIDTH;
@@ -126,6 +124,7 @@ pub fn draw_sidebar(mut console: &Console, player: &Player, state: &GameState, e
       pc.will());
 
   console.print_rect(x + 2, y, width - 2, height, text);
+  /*
   if player.cursor.active {
     if state.map.is_in_fov(player.cursor.pos.x, player.cursor.pos.y) {
       for entity in entities.iter() {
