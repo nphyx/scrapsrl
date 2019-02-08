@@ -15,7 +15,7 @@ impl<'a> System<'a> for PreTick {
     let mut cursor_mode: bool = false;
     let mut has_input: bool = false;
     for _ in cursors.join() {
-      cursor_mode = false; // if there's a cursor in play, we don't tick
+      cursor_mode = true; // if there's a cursor in play, we don't tick
     }
 
     match input.get() {
