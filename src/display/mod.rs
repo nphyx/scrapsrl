@@ -1,4 +1,5 @@
-use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, TextAlignment, Map};
+use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, TextAlignment, Map, input::KeyPressFlags, input::{Key, KeyCode::*}};
+use tcod::console::Root;
 use tcod::colors::{lerp, Color};
 use tcod::map::FovAlgorithm;
 use super::component::*;
@@ -21,7 +22,7 @@ use super::constants::{
   DEFAULT_FG};
 
 pub struct Display {
-  pub root: RootConsole,
+  pub root: Root,
   pub map: Map,
   pub ui: UI
 }
@@ -52,6 +53,7 @@ use specs::{System, Read, Write, ReadStorage, Join};
 impl<'a> System<'a> for Display {
   type SystemData  = (
     ReadStorage<'a, Player>,
+    ReadStorage<'a, Cursor>,
     ReadStorage<'a, Character>,
     ReadStorage<'a, Position>,
     ReadStorage<'a, Icon>,
@@ -66,6 +68,7 @@ impl<'a> System<'a> for Display {
       &mut self,
       (
         players,
+        cursors,
         characters,
         positions,
         icons,
@@ -154,14 +157,37 @@ impl<'a> System<'a> for Display {
       self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
       self.root.set_char_foreground(pos.x, pos.y, color.fg)
     }
+    for (pos, ..) in (&positions, &cursors).join() {
+      self.root.set_char_background(pos.x, pos.y, Color::new(110, 180, 144), BackgroundFlag::Overlay);
+    }
     self.ui.draw(&self.root, &pc, &state);
     self.root.set_alignment(TextAlignment::Right);
     // self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
     self.root.flush();
 
-    if !state.skip_next_frame {
-      keypress.key = Some(self.root.wait_for_keypress(true));
-      *window_closed = WindowClosed(self.root.window_closed() || state.close_game);
+    let key_input = self.root.check_for_keypress(KeyPressFlags::all());
+    match key_input {
+      // we don't match modifier keys as an input
+      Some(Key { code: Control, .. }) |
+      Some(Key { code: Alt, .. }) |
+      Some(Key { code: Shift, .. }) => { },
+      // only match when pressed = on, tcod fires on down + up
+      Some(Key { pressed: true, ..}) => {
+        keypress.set(key_input);
+        match keypress.get() {
+          Some(_) => { // flush the rest of the key queue manually
+            loop {
+              match self.root.check_for_keypress(KeyPressFlags::all()) {
+                None => { break; },
+                _ => {}
+              }
+            }
+          },
+          _ => {}
+        }
+      },
+      _ => {}
     }
+    *window_closed = WindowClosed(self.root.window_closed() || state.close_game);
   }
 }

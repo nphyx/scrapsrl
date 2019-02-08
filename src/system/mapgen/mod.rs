@@ -57,6 +57,7 @@ impl<'a> System<'a> for MapGenerator {
     // connect connectable tiles
     connect(&mut map);
 
+    // mark map generation done
     state.map_gen_queued = false;
   }
 }

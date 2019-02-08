@@ -15,8 +15,6 @@ pub const LINE_T_L: char = '\u{2524}';
 pub const LINE_T_R: char = '\u{251c}';
 pub const LINE_T_U: char = '\u{2534}';
 pub const LINE_T_D: char = '\u{252c}';
-/*
-*/
 
 pub const LINE_DBL: char = '\u{256c}';
 pub const LINE_DBL_TL: char = '\u{2554}';
@@ -32,6 +30,7 @@ pub const LINE_DBL_T_D: char = '\u{2566}';
 
 // objects
 pub const ICON_OLD_COMPUTER: char = '\u{fcbe}';
+pub const ICON_TABLET: char = '\u{f9f7}';
 /*
 pub const ICON_SERVER_STACK: char = '\u{f98a}';
 pub const ICON_CIRCUIT_BOARD: char = '\u{f93e}';
@@ -48,7 +47,6 @@ pub const ICON_PROJECTOR_SCREEN: char = '\u{f92e}';
 pub const ICON_LAPTOP_1: char = '\u{f821}';
 pub const ICON_LAPTOP_2: char = '\u{f822}';
 pub const ICON_LAPTOP_3: char = '\u{f823}';
-pub const ICON_TABLET: char = '\u{f9f7}';
 pub const ICON_LAVALAMP: char = '\u{fcd3}';
 pub const ICON_KEY: char = '\u{f805}';
 pub const ICON_PISTOL: char = '\u{fc01}';

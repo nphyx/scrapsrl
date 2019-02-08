@@ -1,6 +1,7 @@
 use specs::{System, ReadStorage, WriteStorage, Read, Join};
 use crate::component::*;
 use crate::area_map::AreaMap;
+use crate::game_state::GameState;
 use crate::component::ai_brain::MovementBehavior;
 use rand::prelude::*;
 
@@ -10,11 +11,13 @@ impl<'a> System<'a> for AI {
     WriteStorage<'a, AIBrain>,
     ReadStorage<'a, Position>,
     WriteStorage<'a, MovePlan>,
-    Read<'a, AreaMap>
+    Read<'a, AreaMap>,
+    Read<'a, GameState>
   );
 
-  fn run(&mut self, (mut brains, positions, mut plans, map): Self::SystemData) {
+  fn run(&mut self, (mut brains, positions, mut plans, map, state): Self::SystemData) {
     let mut rng = rand::thread_rng();
+    if !state.ticking { return; } // AI only runs on ticks
     for(mut brain, pos, mut plan) in (&mut brains, &positions, &mut plans).join() {
       match brain.movement_state {
         MovementBehavior::BrownianWalk => {

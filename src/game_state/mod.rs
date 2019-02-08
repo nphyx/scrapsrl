@@ -1,17 +1,37 @@
 use std::collections::HashMap;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 
+/// game state collects a bunch of globally needed data and coordination info in one
+/// place. Doesn't make a lot of sense to make these individual resources, causes too
+/// much boilerplate in Systems
 #[derive(Default)]
 pub struct GameState {
+  /// if true, game will close on next game loop pass
   pub close_game: bool,
+  /// a boolean map of solid entities, for checking entity collision
   pub collision_map: HashMap<(i32, i32), bool>,
+  /// frame counter
   pub frame: u32,
+  /// tick counter
+  pub tick: u32,
+  /// fullscreen state
   pub fullscreen: bool,
-
+  /// the game is completely paused. Nothing happens except system-level input
+  /// (main menu, close game, etc)
+  pub paused: bool,
+  /// the game is being fast-forwarded, and will not accept player motion
+  pub fast_forward: bool,
+  /// when the game is not ticking, AI doesn't take its turn and time doesn't advance
+  /// but some player actions can still be taken (navigate menus, inventory, look around)
+  pub ticking: bool,
+  /// game controls enabled (does not affect system-level input: fullscreen, quit, etc)
+  pub input_enabled: bool,
+  /// a new map will be generated on next pass if true
   pub map_gen_queued: bool,
-  pub skip_next_frame: bool,
+  /// global RNG seed
   pub world_seed: u32,
 
+  /// tracks the X,Y offset of the current map from 0, 0
   pub area_offset: [i32; 2],
 
   pub world_day: u32,
@@ -25,10 +45,15 @@ impl GameState {
       close_game: false,
       collision_map: HashMap::new(),
       frame: 0,
+      tick: 0,
+
       fullscreen: false,
+      paused: false,
+      fast_forward: false,
+      input_enabled: false,
+      ticking: true,
 
       map_gen_queued: false,
-      skip_next_frame: false,
       world_seed: 0,
 
       area_offset: [0, 0],
@@ -48,6 +73,5 @@ impl GameState {
     self.area_offset[0] += x_change * MAP_WIDTH;
     self.area_offset[0] += y_change * MAP_HEIGHT;
     self.map_gen_queued = true;
-    self.skip_next_frame = true;
   }
 }

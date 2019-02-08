@@ -22,26 +22,23 @@ use self::component::Position;
 use self::display::Display;
 use self::resource::*;
 use self::system::*;
+use self::system::input::*;
 use self::util::icons::*;
 use self::game_state::GameState;
 use self::component::*;
-use self::constants::{
-  MAP_WIDTH,
-  MAP_HEIGHT};
+use self::constants::{MAP_WIDTH, MAP_HEIGHT};
 
 fn make_bug(world: &mut World) {
   let mut rng = rand::thread_rng();
+  let x = rng.gen_range(0, MAP_WIDTH);
+  let y = rng.gen_range(0, MAP_HEIGHT);
   world.create_entity()
     .with(Solid)
     .with(AIBrain::default())
     .with(Character::blank())
     .with(Icon{ch: ICON_BUG})
-    .with(Position{
-      x: rng.gen_range(0, MAP_WIDTH),
-      y: rng.gen_range(0, MAP_HEIGHT)})
-    .with(MovePlan{
-      x: rng.gen_range(0, MAP_WIDTH),
-      y: rng.gen_range(0, MAP_HEIGHT)})
+    .with(Position{x, y})
+    .with(MovePlan{x: 0, y: 0})
     .with(Colors{
       fg: Color{r: 32, g: 128, b: 225},
       bg: Color{r: 32, g: 128, b: 225}})
@@ -113,7 +110,7 @@ fn main() {
   world.add_resource(state);
   // world.add_resource(ui::UI::new());
   world.add_resource(self::resource::WindowClosed(false));
-  world.add_resource(UserInput{key: None});
+  world.add_resource(UserInput::default());
   world.add_resource(area_map::AreaMap::default());
 
   let mut window_closed = false;
@@ -121,6 +118,7 @@ fn main() {
   // set up player
   world.create_entity()
     .with(Player)
+    .with(Solid)
     .with(Position{x:MAP_WIDTH/2, y:MAP_HEIGHT/2})
     .with(MovePlan{x:MAP_WIDTH/2, y:MAP_HEIGHT/2})
     .with(Icon{ch:ICON_MALE})
@@ -135,9 +133,10 @@ fn main() {
   make_computer(&mut world);
     
 
-  /*
   world.create_entity()
-    .with(Position{x:0, y:0})
+    .with(Position{
+      x: rng.gen_range(0, MAP_WIDTH),
+      y: rng.gen_range(0, MAP_HEIGHT)})
     .with(Icon{ch:ICON_TABLET})
     .with(Colors{
       fg: Color{r: 128, g: 128, b:128},
@@ -150,7 +149,9 @@ fn main() {
     .build();
 
   world.create_entity()
-    .with(Position{x:0, y:0})
+    .with(Position{
+      x: rng.gen_range(0, MAP_WIDTH),
+      y: rng.gen_range(0, MAP_HEIGHT)})
     .with(Icon{ch:ICON_HATCHBACK})
     .with(Colors{
       fg: Color{r: 128, g: 128, b:128},
@@ -161,25 +162,8 @@ fn main() {
       long: "A kind of vehicle with a door on the back.".to_string()
     })
     .build();
-    */
-  /*
-  */
 
   /*
-  player.set_pos(Coord{x: cx, y: cy});
-  player.character.set_body_layout(body_layout::humanoid());
-  player.character.set_ch(ICON_MALE);
-
-  entities.push(Box::new(make_computer()));
-  for _ in 0..3 {
-    entities.push(Box::new(make_bug()));
-  }
-  */
-
-  // Compute the FOV starting from the coordinates 20,20. Where we'll put the '@'
-  // Use a max_radius of 10 and light the walls.
-  /* state.map.compute_fov(20,20, TORCH_RADIUS, true, FovAlgorithm::Basic);
-
   interface.open_menu(
     ui::Chain::new(vec![
         Box::new(ui::Notification::new(
@@ -195,14 +179,20 @@ fn main() {
 
   let mut display = Display::new();
   let mut dispatcher = DispatcherBuilder::new()
-    .with(HandleSystemInput, "system_input", &[])
-    .with(HandlePlayerInput, "player_input", &["system_input"])
-    .with(HandleFallthroughInput, "fallthrough_input", &["player_input"])
-    .with(Time, "", &[])
+    // do game state maintenance
+    .with(PreTick, "", &[])
+    // handle user input first
+    .with(SystemInput, "system_input", &[])
+    .with(CursorInput, "cursor_input", &["system_input"])
+    .with(PlayerInput, "player_input", &["cursor_input"])
+    .with(FallthroughInput, "fallthrough_input", &["player_input"])
     .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &["fallthrough_input"])
     .with(CollisionMap, "collision_map", &["map_gen"])
+    // let AI decide what it wants to do
     .with(AI, "ai", &["collision_map"])
+    // process AI and player actions
     .with(Movement, "movement", &["ai", "player_input", "collision_map"])
+    .with(PostTick, "", &["movement"])
     .build();
 
   dispatcher.setup(&mut world.res);
