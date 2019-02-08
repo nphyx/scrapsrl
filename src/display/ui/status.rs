@@ -1,6 +1,6 @@
 use tcod::console::{Console, TextAlignment};
 use crate::component::Character;
-use crate::game_state::GameState;
+use crate::resource::GameState;
 use super::util::*;
 
 pub fn draw_status_bar(mut console: &Console, pc: &Character, state: &GameState) {

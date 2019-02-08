@@ -57,7 +57,7 @@ pub fn draw_entity_info(console: &Console, icon: &Icon, colors: &Colors,
   draw_info(console, icon.ch, colors.fg, DEFAULT_BG, description.short.clone(), description.long.clone());
 }
 
-use crate::area_map::{Tile, get_tile_descriptions};
+use crate::resource::{Tile, get_tile_descriptions};
 /// draw tile in info box area of sidebar
 pub fn draw_tile_info(console: &Console, tile: Tile) {
   let t = &get_tile_descriptions()[tile.type_id as usize];

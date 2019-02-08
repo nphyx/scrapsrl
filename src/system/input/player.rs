@@ -1,7 +1,8 @@
 use tcod::input::Key;
 use tcod::input::KeyCode::*;
 use specs::{System, Write, WriteStorage, ReadStorage, Join, Entities};
-use crate::component::{MovePlan, Player, UserInput, Position, Cursor};
+use crate::component::{MovePlan, Player, Position, Cursor};
+use crate::resource::UserInput;
 
 use super::movement_util::get_movement;
 

@@ -1,7 +1,6 @@
 use specs::{System, ReadStorage, WriteStorage, Read, Join};
 use crate::component::*;
-use crate::area_map::AreaMap;
-use crate::game_state::GameState;
+use crate::resource::{AreaMap, GameState};
 use crate::component::ai_brain::MovementBehavior;
 use rand::prelude::*;
 

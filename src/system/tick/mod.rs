@@ -1,6 +1,7 @@
 use specs::{System, ReadStorage, Read, Write, Join};
-use crate::game_state::GameState;
-use crate::component::{Cursor, UserInput};
+use crate::resource::GameState;
+use crate::component::Cursor;
+use crate::resource::UserInput;
 
 /// handles game state maintenance before a tick runs
 pub struct PreTick;

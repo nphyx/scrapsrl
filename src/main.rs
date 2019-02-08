@@ -9,11 +9,8 @@ use tcod::colors::Color;
 use rand::prelude::*;
 use specs::{World, DispatcherBuilder, RunNow};
 
-mod area_map;
 mod component;
 mod constants;
-mod cursor;
-mod game_state;
 mod display;
 mod resource;
 mod system;
@@ -24,7 +21,6 @@ use self::resource::*;
 use self::system::*;
 use self::system::input::*;
 use self::util::icons::*;
-use self::game_state::GameState;
 use self::component::*;
 use self::constants::{MAP_WIDTH, MAP_HEIGHT};
 
@@ -76,10 +72,8 @@ fn main() {
   state.map_gen_queued = true;
   component::init(&mut world);
   world.add_resource(state);
-  // world.add_resource(ui::UI::new());
-  world.add_resource(self::resource::WindowClosed(false));
   world.add_resource(UserInput::default());
-  world.add_resource(area_map::AreaMap::default());
+  world.add_resource(AreaMap::default());
 
   let mut window_closed = false;
 
@@ -169,8 +163,6 @@ fn main() {
     display.run_now(&mut world.res);
     dispatcher.dispatch(&mut world.res);
     world.maintain();
-    window_closed = 
-      world.read_resource::<WindowClosed>().clone().0 ||
-      world.read_resource::<GameState>().close_game;
+    window_closed = world.read_resource::<GameState>().close_game;
   }
 }

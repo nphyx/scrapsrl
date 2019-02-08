@@ -3,11 +3,9 @@ use tcod::console::Root;
 use tcod::colors::{lerp, Color};
 use tcod::map::FovAlgorithm;
 use super::component::*;
-use super::game_state::GameState;
+use super::resource::*;
 use super::util::colors::*;
 use super::util::{clamp, distance};
-use super::WindowClosed;
-use super::area_map::AreaMap;
 
 mod ui;
 use ui::Menus;
@@ -50,7 +48,7 @@ impl Display {
   }
 }
 
-use specs::{System, Read, Write, ReadStorage, Join, Entities};
+use specs::{System, Read, Write, ReadStorage, Join};
 impl<'a> System<'a> for Display {
   type SystemData  = (
     // I'll take one of everything
@@ -62,9 +60,8 @@ impl<'a> System<'a> for Display {
     ReadStorage<'a, Colors>,
     ReadStorage<'a, Description>,
 
-    Read<'a, GameState>,
+    Write<'a, GameState>,
     Read<'a, AreaMap>,
-    Write<'a, WindowClosed>,
     Write<'a, UserInput>
   );
 
@@ -81,9 +78,8 @@ impl<'a> System<'a> for Display {
       colors,
       descriptions,
 
-      state,
+      mut state,
       map,
-      mut window_closed,
       mut keypress,
     ) = data;
 
@@ -239,6 +235,6 @@ impl<'a> System<'a> for Display {
       },
       _ => {}
     }
-    *window_closed = WindowClosed(self.root.window_closed() || state.close_game);
+    state.close_game = self.root.window_closed() || state.close_game;
   }
 }

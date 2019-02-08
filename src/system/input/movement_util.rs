@@ -1,5 +1,6 @@
 use tcod::input::{Key, KeyCode::*};
-use crate::component::{UserInput, MovePlan};
+use crate::resource::UserInput;
+use crate::component::MovePlan;
 
 pub fn get_movement(input: &UserInput) -> Option<MovePlan> {
   let mut speed = 1;

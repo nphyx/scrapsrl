@@ -1,9 +1,8 @@
 use tcod::noise::*;
 use tcod::colors::{Color};
-use crate::area_map::{AreaMap, Tile};
 use crate::util::icons::*;
 use crate::component::Position;
-use crate::area_map::tile_types::*;
+use crate::resource::{AreaMap, Tile, tile_types::*};
 use super::util::*;
 
 fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {

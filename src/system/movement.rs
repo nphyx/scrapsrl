@@ -2,8 +2,7 @@ use specs::{System, ReadStorage, WriteStorage, Write, Read, Join, Entities};
 use crate::util::clamp;
 use crate::component::*;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
-use crate::game_state::GameState;
-use crate::area_map::AreaMap;
+use crate::resource::{GameState, AreaMap};
 
 pub struct Movement;
 impl<'a> System<'a> for Movement {

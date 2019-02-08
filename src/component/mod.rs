@@ -13,7 +13,6 @@ mod opaque;
 mod player;
 mod position;
 mod solid;
-mod user_input; 
 
 pub use self::ai_brain::AIBrain;
 pub use self::character::Character;
@@ -26,7 +25,6 @@ pub use self::opaque::Opaque;
 pub use self::player::Player;
 pub use self::position::Position;
 pub use self::solid::Solid;
-pub use self::user_input::UserInput;
 
 /// initializes all components
 pub fn init(world: &mut World) {
@@ -41,5 +39,4 @@ pub fn init(world: &mut World) {
   world.register::<Position>();
   world.register::<Opaque>();
   world.register::<Solid>();
-  world.register::<UserInput>();
 }

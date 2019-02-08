@@ -1,5 +1,5 @@
 use tcod::noise::Noise;
-use crate::area_map::{AreaMap, Tile};
+use crate::resource::{AreaMap, Tile};
 use crate::component::Position;
 use crate::util::clamp;
 

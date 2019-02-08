@@ -1,38 +1,4 @@
 use specs::{Component, VecStorage};
-//use std::collections::HashSet;
-//use tcod::{Console, BackgroundFlag};
-//use tcod::colors::Color;
-
-/*
-use crate::entity::{Entity, Coord};
-use crate::game_state::GameState;
-use super::entity_part::{
-  EntityComponent,
-  EntityComponentVariety,
-  EntityComponentSide
-};
-*/
-
-/*
-
-pub struct Vital {
-  buffs: HashSet<VitalMod>,
-  debuffs: HashSet<VitalMod>
-}
-
-pub enum Capability {
-}
-
-pub struct Feature {
-  capabilities: Vec<Capability>
-}
-
-pub struct Item {
-}
-
-pub struct Skill {
-}
-*/
 
 #[derive(Hash, Eq, PartialEq)]
 pub enum VitalMod {
@@ -62,14 +28,6 @@ pub struct Character {
   cur_stamina: u8,
   cur_focus: u8,
   cur_grit: u8,
-
-  /*
-  skills: Vec<Skill>,
-  features: Vec<Feature>,
-  // body_layout: EntityComponent,
-  gear: Vec<Item>,
-  vitals: Vec<Vital>
-  */
 }
 
 impl Component for Character {
@@ -84,24 +42,8 @@ impl Character {
       intellect: 1, wits: 2, resolve: 3,
       charisma: 1, empathy: 2, will: 3,
       cur_stamina: 1, cur_focus: 1, cur_grit: 1,
-      /*
-      skills: Vec::new(),
-      features: Vec::new(),
-      body_layout: EntityComponent::new(EntityComponentVariety::Torso, EntityComponentSide::NoSide),
-      gear: Vec::new(),
-      vitals: Vec::new()}
-      */
     }
   }
-
-  /*
-  pub fn get_body_layout(&self) -> &EntityComponent {
-    &self.body_layout
-  }
-  pub fn set_body_layout(&mut self, layout: EntityComponent) {
-    self.body_layout = layout;
-  }
-  */
 
   pub fn body(&self) -> u8 { self.body }
   pub fn set_body(&mut self, val:u8) { self.body = val }
@@ -188,36 +130,4 @@ impl Character {
     }
     return false;
   }
-  /*
-  pub fn pos(&self) -> Coord { self.pos }
-  pub fn set_pos(&mut self, pos: Coord) { self.pos = pos }
-  pub fn tick(&mut self, _state: &GameState) {
-    if self.cur_stamina < self.compute_stamina() {
-      self.cur_stamina += 1;
-    }
-    if self.cur_focus < self.compute_focus() {
-      self.cur_focus += 1;
-    }
-    if self.cur_grit < self.compute_grit() {
-      self.cur_grit += 1;
-    }
-  }
-
-  pub fn has_capability(&self, _capability: Capability) -> bool {
-    true
-  }
-  */
 }
-
-/*
-impl DrawSelf for Character {
-  fn draw(&self, console: &mut Console) {
-    console.put_char(self.pos().x, self.pos().y, self.ch, BackgroundFlag::None);
-    console.set_char_foreground(self.pos().x, self.pos().y, self.color);
-  }
-  fn draw_at(&self, console: &mut Console, x: i32, y: i32) {
-    console.put_char(x, y, self.ch, BackgroundFlag::None);
-    console.set_char_foreground(x, y, self.color);
-  }
-}
-*/

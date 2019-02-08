@@ -1,7 +1,6 @@
 use tcod::random::{Rng, Algo};
 use tcod::noise::*;
-use crate::area_map::*;
-use crate::game_state::GameState;
+use crate::resource::{AreaMap, GameState};
 
 mod connect_tiles;
 mod ground_cover;

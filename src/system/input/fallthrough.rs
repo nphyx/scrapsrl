@@ -1,9 +1,7 @@
 use tcod::input::Key;
 use tcod::input::KeyCode::*;
 use specs::{System,Write};
-use crate::component::{UserInput};
-
-use crate::game_state::GameState;
+use crate::resource::{UserInput, GameState};
 
 /// handle hotkeys that should work only if nothing else has consumed them
 pub struct FallthroughInput;

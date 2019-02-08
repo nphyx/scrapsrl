@@ -1,10 +1,9 @@
-use crate::area_map::{AreaMap, Tile};
+use crate::resource::{AreaMap, Tile, tile_types::*};
 use tcod::noise::Noise;
 use tcod::colors::{Color, lerp};
 use crate::component::Position;
 use super::util::*;
 use crate::util::{icons::*};
-use super::tile_types::*;
 use super::ground_cover::grass_bg_color;
 
 const VEHICLES: [char; 9] = [

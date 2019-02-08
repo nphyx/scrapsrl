@@ -1,4 +1,4 @@
-use crate::area_map::{AreaMap, Tile};
+use crate::resource::AreaMap;
 use crate::util::ConnectableChars;
 use crate::component::Position;
 

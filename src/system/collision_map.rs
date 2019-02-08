@@ -1,6 +1,6 @@
 use specs::{System, ReadStorage, Write, Join};
 use crate::component::*;
-use crate::game_state::GameState;
+use crate::resource::GameState;
 
 pub struct CollisionMap;
 impl<'a> System<'a> for CollisionMap {

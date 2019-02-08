@@ -2,8 +2,7 @@ use tcod::input::Key;
 use tcod::input::KeyCode::*;
 use specs::{System,Write};
 
-use crate::game_state::GameState;
-use crate::component::*;
+use crate::resource::{GameState, UserInput};
 
 /// handle input that should work regardless of game state
 pub struct SystemInput;

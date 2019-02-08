@@ -1,9 +1,5 @@
-use tcod::console::{Console, TextAlignment, BackgroundFlag};
-use tcod::colors::Color;
-use crate::game_state::GameState;
-use crate::constants::{SIDEBAR_WIDTH, MAP_WIDTH, MAP_HEIGHT, DIALOG_WIDTH};
-use crate::component::Character;
-use crate::util::icons::*;
+use tcod::console::{Console};
+use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 
 pub fn draw_dialog(
   mut console: &Console,
