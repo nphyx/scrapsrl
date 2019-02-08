@@ -24,6 +24,8 @@ pub struct GameState {
   /// when the game is not ticking, AI doesn't take its turn and time doesn't advance
   /// but some player actions can still be taken (navigate menus, inventory, look around)
   pub ticking: bool,
+  /// player is using a cursor to look around
+  pub looking: bool,
   /// game controls enabled (does not affect system-level input: fullscreen, quit, etc)
   pub input_enabled: bool,
   /// a new map will be generated on next pass if true
@@ -52,6 +54,8 @@ impl GameState {
       fast_forward: false,
       input_enabled: false,
       ticking: true,
+
+      looking: false,
 
       map_gen_queued: false,
       world_seed: 0,

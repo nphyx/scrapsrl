@@ -2,6 +2,7 @@ use tcod::input::Key;
 use tcod::input::KeyCode::*;
 use specs::{System, Write, WriteStorage, Join, Entities};
 use crate::component::{MovePlan, UserInput, Cursor};
+use crate::game_state::GameState;
 
 use super::movement_util::get_movement;
 
@@ -12,6 +13,7 @@ impl<'a> System<'a> for CursorInput {
     WriteStorage<'a, MovePlan>,
     WriteStorage<'a, Cursor>,
     Write<'a, UserInput>,
+    Write<'a, GameState>,
     Entities<'a>
   );
 
@@ -19,8 +21,13 @@ impl<'a> System<'a> for CursorInput {
       mut plans,
       cursors,
       mut input,
+      mut state,
       entities): Self::SystemData) {
+    state.looking = false;
+
     for (to, entity, _) in (&mut plans, &entities, &cursors).join() {
+      state.looking = true;
+
       match get_movement(&input) {
         Some(plan) => {
           to.x = plan.x;
