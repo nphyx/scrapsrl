@@ -50,11 +50,10 @@ fn make_bug(world: &mut World) {
 
 use specs::{Builder};
 fn make_computer(world: &mut World) {
-  // let mut rng = rand::thread_rng();
   world.create_entity()
     .with(Position{
-      x: MAP_WIDTH / 2 + 1, //rng.gen_range(0, MAP_WIDTH), 
-      y: MAP_HEIGHT / 2 + 1 // rng.gen_range(0, MAP_HEIGHT)})
+      x: MAP_WIDTH / 2 + 1,
+      y: MAP_HEIGHT / 2 + 1
     })
     .with(Icon{ch: ICON_OLD_COMPUTER})
     .with(Solid)
@@ -67,38 +66,7 @@ fn make_computer(world: &mut World) {
       long: "An old-world electronic device. Looks like it's still working.".to_string()
     })
     .build();
-    /*
-  computer.set_pos(Coord);
-  computer.set_notification(
-    Notification::new(
-      format!(" {} ", ICON_OLD_COMPUTER).to_string(),
-      "Bleep, bloop!".to_string())
-  );
-  computer.set_desc();
-  return computer;
-  */
 }
-
-/*
-fn handle_player_interact(state: &mut GameState, interface: &mut ui::UI, player: &mut Player, entities: &mut EntityCollection) {
-  match player.wants_interact_at {
-    Some(coord) => {
-      for entity in entities.iter_mut() {
-        if entity.pos() == coord {
-          match entity.player_interact(player, state) {
-            EntityInteraction::Notification(notice) => {
-              interface.open_menu(notice);
-              break;
-            },
-            EntityInteraction::None => {}
-          }
-        }
-      }
-    },
-    None => {}
-  }
-}
-*/
 
 fn main() {
   let mut rng = rand::thread_rng();

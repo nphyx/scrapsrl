@@ -3,25 +3,25 @@
 /// to be updated every time we add a new type... but it'll do for now.
 
 pub struct TileType {
-  id: u32,
-  short_desc: &'static str,
-  long_desc: &'static str
+  pub id: usize,
+  pub short_desc: &'static str,
+  pub long_desc: &'static str
 }
 
 impl TileType {
   pub fn new(id: u32, short_desc: &'static str, long_desc: &'static str) -> TileType {
-    TileType{id, short_desc, long_desc}
+    TileType{id: id as usize, short_desc, long_desc}
   }
 }
 
-pub const TYPE_TREE: u32 = 0;
-pub const TYPE_ROAD: u32 = 1;
-pub const TYPE_ROAD_CRACKED: u32 = 2;
-pub const TYPE_VEHICLE: u32 = 3;
-pub const TYPE_GRASS: u32 = 4;
-pub const TYPE_GRASS_LONG: u32 = 5;
+pub const TYPE_TREE: u32 = 1;
+pub const TYPE_ROAD: u32 = 2;
+pub const TYPE_ROAD_CRACKED: u32 = 3;
+pub const TYPE_VEHICLE: u32 = 4;
+pub const TYPE_GRASS: u32 = 5;
+pub const TYPE_GRASS_LONG: u32 = 6;
 
-pub fn get_tile_descriptors() -> Vec<TileType> {
+pub fn get_tile_descriptions() -> Vec<TileType> {
   vec![
     TileType::new(0, "", ""),
     TileType::new(TYPE_TREE, "tree", "A big tree. It seems to be thriving."),

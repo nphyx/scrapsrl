@@ -1,6 +1,6 @@
 use tcod::random::{Rng, Algo};
 use tcod::noise::*;
-use crate::area_map::{AreaMap};
+use crate::area_map::*;
 use crate::game_state::GameState;
 
 mod connect_tiles;
@@ -8,7 +8,6 @@ mod ground_cover;
 mod roads;
 mod util;
 mod trees;
-mod tile_types;
 
 use connect_tiles::connect;
 

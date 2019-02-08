@@ -1,7 +1,10 @@
 use tcod::colors::Color;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::component::Position;
+
 mod iterators;
+pub mod tile_types;
+pub use tile_types::{TileType, get_tile_descriptions};
 use iterators::{AreaMapIter};
 
 pub const WIDTH: usize = MAP_WIDTH as usize;

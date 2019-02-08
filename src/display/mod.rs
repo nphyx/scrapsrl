@@ -1,4 +1,4 @@
-use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, TextAlignment, Map, input::KeyPressFlags, input::{Key, KeyCode::*}};
+use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, Map, input::KeyPressFlags, input::{Key, KeyCode::*}};
 use tcod::console::Root;
 use tcod::colors::{lerp, Color};
 use tcod::map::FovAlgorithm;
@@ -10,8 +10,7 @@ use super::WindowClosed;
 use super::area_map::AreaMap;
 
 mod ui;
-
-use ui::UI;
+use ui::Menus;
 
 use super::constants::{
   MAP_WIDTH,
@@ -24,7 +23,7 @@ use super::constants::{
 pub struct Display {
   pub root: Root,
   pub map: Map,
-  pub ui: UI
+  pub menus: Menus 
 }
 
 
@@ -38,63 +37,100 @@ impl Display {
       .size(SCREEN_WIDTH, SCREEN_HEIGHT)
       .title("SCRAPS: Bug Hunter")
       .init();
-    let map = Map::new(MAP_WIDTH, MAP_HEIGHT);
-    let ui = UI::new();
 
     root.set_default_background(DEFAULT_BG);
     root.set_default_foreground(DEFAULT_FG);
     root.clear();
 
-    return Display{root, map, ui}
+    Display{
+      root,
+      map: Map::new(MAP_WIDTH, MAP_HEIGHT),
+      menus: Menus::new()
+    }
   }
 }
 
-use specs::{System, Read, Write, ReadStorage, Join};
+use specs::{System, Read, Write, ReadStorage, Join, Entities};
 impl<'a> System<'a> for Display {
   type SystemData  = (
+    // I'll take one of everything
     ReadStorage<'a, Player>,
     ReadStorage<'a, Cursor>,
     ReadStorage<'a, Character>,
     ReadStorage<'a, Position>,
     ReadStorage<'a, Icon>,
     ReadStorage<'a, Colors>,
+    ReadStorage<'a, Description>,
+
     Read<'a, GameState>,
     Read<'a, AreaMap>,
     Write<'a, WindowClosed>,
     Write<'a, UserInput>
   );
 
+  /// the drawing the game megafunction, what a disaster area
   fn run(
       &mut self,
-      (
-        players,
-        cursors,
-        characters,
-        positions,
-        icons,
-        colors,
-        state,
-        map,
-        mut window_closed,
-        mut keypress
-      ): Self::SystemData) {
+      data: Self::SystemData) {
+    let (
+      players,
+      cursors,
+      characters,
+      positions,
+      icons,
+      colors,
+      descriptions,
+
+      state,
+      map,
+      mut window_closed,
+      mut keypress,
+    ) = data;
+
     self.root.set_fullscreen(state.fullscreen);
 
-    let light = Color::new(255, 240, 128);
-    let ambient = Color::new(0, 6, 18);
-    let mut pc = Character::default();
+    // wipe screen and prepare for new draw
+    self.root.clear();
 
-    // TODO calculate relative contrast and maintain for out-of-vis objects
-    let bg_gray = Color::new(8, 8, 8);
-    let fg_gray = Color::new(24, 24, 24);
-
+    let mut cursor_pos: Position = Position::default();
     let mut player_pos: Position = Position::default();
-    for (character, pos, _player) in (&characters, &positions, &players).join() {
-      player_pos = pos.clone();
-      pc = character.clone();
+    let mut has_cursor: bool = false;
+
+    for (pos, character, _player)
+    in (&positions, &characters, &players).join() {
+      ui::draw_stats(&self.root, character);
+      ui::draw_status_bar(&self.root, character, &state);
+      player_pos.x = pos.x;
+      player_pos.y = pos.y;
     }
 
-    // update map before computing fov
+    // find the cursor position
+    for (pos, _cursor) in (&positions, &cursors).join() {
+      cursor_pos.x = pos.x;
+      cursor_pos.y = pos.y;
+      has_cursor = true;
+    }
+
+    // find an entity under the cursor, if it exists
+    if has_cursor && self.map.is_in_fov(cursor_pos.x, cursor_pos.y) {
+      let mut found_entity = false;
+      for(pos, icon, color, desc)
+      in (&positions, &icons, &colors, &descriptions).join() {
+        if pos.x == cursor_pos.x && pos.y == cursor_pos.y {
+          ui::draw_entity_info(&self.root, icon, color, desc);
+          found_entity = true;
+        }
+      }
+      if !found_entity {
+        let tile = map.get(cursor_pos);
+        match tile {
+          Some(tile) => { ui::draw_tile_info(&self.root, tile); },
+          _ => {}
+        }
+      }
+    }
+
+    // update fov map before computing fov
     for (pos, tile) in map.iter() {
       self.map.set(pos.x, pos.y, tile.transparent, tile.walkable)
     }
@@ -102,15 +138,12 @@ impl<'a> System<'a> for Display {
     // Compute the FOV
     self.map.compute_fov(player_pos.x, player_pos.y, SCREEN_WIDTH, true, FovAlgorithm::Basic);
 
-    // prep map
-    self.root.clear();
-
     // draw all tiles
     for (pos, tile) in map.iter() {
       self.root.put_char_ex(pos.x, pos.y, tile.icon, tile.fg, tile.bg);
     }
 
-    // draw all npcs
+    // draw all npcs, also snag the one under the cursor if applicable
     for(pos, icon, color, ..) in (&positions, &icons, &colors, !&players).join() {
       if self.map.is_in_fov(pos.x, pos.y) {
         self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
@@ -120,6 +153,13 @@ impl<'a> System<'a> for Display {
 
     // TODO compute time of day adjustment, sunset gradient, and moon phase :D
     let time_of_day_rel = state.world_time_relative();
+
+    let light = Color::new(255, 240, 128);
+    let ambient = Color::new(0, 6, 18);
+
+    // TODO calculate relative contrast and maintain for out-of-vis objects
+    let bg_gray = Color::new(8, 8, 8);
+    let fg_gray = Color::new(24, 24, 24);
 
     // lighting pass SUPER SLOW
     for (pos, _) in map.iter() {
@@ -163,13 +203,18 @@ impl<'a> System<'a> for Display {
       self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
       self.root.set_char_foreground(pos.x, pos.y, color.fg)
     }
+
     for (pos, ..) in (&positions, &cursors).join() {
       self.root.set_char_background(pos.x, pos.y, Color::new(110, 180, 144), BackgroundFlag::Overlay);
     }
-    self.ui.draw(&self.root, &pc, &state);
+
+    /*
     self.root.set_alignment(TextAlignment::Right);
-    // self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
+    self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
+    */
+
     self.root.flush();
+
 
     let key_input = self.root.check_for_keypress(KeyPressFlags::all());
     match key_input {

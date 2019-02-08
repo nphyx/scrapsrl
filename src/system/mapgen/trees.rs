@@ -3,8 +3,8 @@ use tcod::colors::{Color};
 use crate::area_map::{AreaMap, Tile};
 use crate::util::icons::*;
 use crate::component::Position;
+use crate::area_map::tile_types::*;
 use super::util::*;
-use super::tile_types::*;
 
 fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
   let fg = Color{r:86, g:50, b:32};

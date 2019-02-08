@@ -2,13 +2,6 @@ use crate::area_map::{AreaMap, Tile};
 use crate::util::ConnectableChars;
 use crate::component::Position;
 
-fn some_icon(tile: Option<Tile>) -> Option<char> {
-  match tile {
-    Some(t) => Some(t.icon),
-    None => None
-  }
-}
-
 pub fn connect(map: &mut AreaMap) {
   let connectables = ConnectableChars::new();
   let mut queue: Vec<(i32, i32, char)> = Vec::new();

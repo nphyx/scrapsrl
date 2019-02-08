@@ -67,7 +67,7 @@ impl<'a> System<'a> for PostTick {
     Write<'a, GameState>
   );
 
-  fn run(&mut self, mut state: Self::SystemData) {
+  fn run(&mut self, mut _state: Self::SystemData) {
     /*
     state.map_gen_queued = false; // should have happened already
     state.ticking = true; // by default re-enable ticking
