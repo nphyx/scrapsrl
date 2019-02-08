@@ -129,12 +129,18 @@ impl<'a> System<'a> for Display {
       let mut bg = orig_bg.clone();
       let dist = distance(player_pos, pos);
 
+      // this figures out the radius of the player-emitted light area
       let rel_dist = clamp(
         0.0,
         1.0,
         dist.powf(1.25) / (MAP_WIDTH as f32)
       ).sqrt();
-      let blend = lerp(light, ambient, rel_dist);
+      // ignore the trigonometric man behind the curtain
+      let frame = (state.frame % 360) as f32 / 8.0;
+      let flicker_mod = frame.cos() * 0.005;
+
+      let blend = lerp(light, ambient, clamp(0.0, 1.0, rel_dist - flicker_mod));
+
       if self.map.is_in_fov(pos.x, pos.y) {
         bg = soft_light(&soft_light(&bg, &blend), &blend); 
         fg = soft_light(&soft_light(&fg, &blend), &blend);

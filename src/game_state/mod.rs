@@ -59,7 +59,7 @@ impl GameState {
       area_offset: [0, 0],
 
       world_day: 0,
-      world_time: 6.0,
+      world_time: 18.0,
       world_year: 0
     }
   }
