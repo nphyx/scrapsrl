@@ -120,7 +120,7 @@ fn main() {
     .with(Player)
     .with(Solid)
     .with(Position{x:MAP_WIDTH/2, y:MAP_HEIGHT/2})
-    .with(MovePlan{x:MAP_WIDTH/2, y:MAP_HEIGHT/2})
+    .with(MovePlan{x:0, y:0})
     .with(Icon{ch:ICON_MALE})
     .with(Colors{
       fg: Color::new(255, 255, 255),

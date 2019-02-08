@@ -27,32 +27,39 @@ impl<'a> System<'a> for Movement {
       entities): Self::SystemData) {
     // handle the case where the player is changing to a new map
     // TODO? maybe this should be its own system
-    for(_player, plan, pos) in (&players, &plans, &mut positions).join() {
+    for(_player, plan, pos) in (&players, &mut plans, &mut positions).join() {
       let mut area_changed = false;
-      let target = Position{
-        x: plan.x + pos.x,
-        y: plan.y + pos.y
-      };
-      if target.x >= MAP_WIDTH {
-        state.change_area(1, 0);
-        pos.x = 0;
-        area_changed = true;
+      if plan.x != 0 || plan.y != 0 {
+        let target = Position{
+          x: plan.x + pos.x,
+          y: plan.y + pos.y
+        };
+        if target.x >= MAP_WIDTH {
+          state.change_area(1, 0);
+          pos.x = 0;
+          area_changed = true;
+        }
+        if target.x < 0 {
+          state.change_area(-1, 0);
+          pos.x = MAP_WIDTH - 1;
+          area_changed = true;
+        }
+        if target.y >= MAP_HEIGHT {
+          state.change_area(0, 1);
+          pos.y = 0;
+          area_changed = true;
+        }
+        if target.y < 0 {
+          state.change_area(0, -1);
+          pos.y = MAP_HEIGHT - 1;
+          area_changed = true;
+        }
+        if area_changed {
+          plan.x = 0;
+          plan.y = 0;
+          return;
+        }
       }
-      if target.x < 0 {
-        state.change_area(-1, 0);
-        pos.x = MAP_WIDTH - 1;
-      }
-      if target.y >= MAP_HEIGHT {
-        state.change_area(0, 1);
-        pos.y = 0;
-        area_changed = true;
-      }
-      if target.y < 0 {
-        state.change_area(0, -1);
-        pos.y = MAP_HEIGHT - 1;
-        area_changed = true;
-      }
-      if area_changed { return }
     }
     for(plan, pos, entity) in (&mut plans, &mut positions, &entities).join() {
       let new_position = Position{
