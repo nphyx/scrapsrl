@@ -1,8 +1,9 @@
 use specs::{Component, VecStorage};
 
+/// An interaction response that raises a notification
 #[derive(Clone,Component,Debug,Default)]
 #[storage(VecStorage)]
-struct NotificationBody {
-  header: String,
-  body: String
+pub struct NotificationInteraction {
+  pub header: String,
+  pub body: String
 }

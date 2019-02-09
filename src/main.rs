@@ -61,6 +61,10 @@ fn make_computer(world: &mut World) {
       short: "an old computer".to_string(),
       long: "An old-world electronic device. Looks like it's still working.".to_string()
     })
+    .with(NotificationInteraction{
+      header: ICON_OLD_COMPUTER.to_string(),
+      body: "Bleep, bloop!".to_string()
+    })
     .build();
 }
 
@@ -137,6 +141,10 @@ fn main() {
       short: "a hatchback".to_string(),
       long: "A kind of vehicle with a door on the back.".to_string()
     })
+    .with(NotificationInteraction{
+      header: ICON_HATCHBACK.to_string(),
+      body: "There's nothing inside.".to_string()
+    })
     .build();
 
   
@@ -158,6 +166,7 @@ fn main() {
     // process AI and player actions
     .with(Movement, "movement", &["ai", "player_input", "collision_map"])
     .with(PostTick, "", &["movement"])
+    .with(Notify, "interact_notify", &[])
     .build();
 
   dispatcher.setup(&mut world.res);

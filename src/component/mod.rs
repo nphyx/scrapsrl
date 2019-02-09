@@ -21,6 +21,7 @@ pub use self::cursor::Cursor;
 pub use self::description::Description;
 pub use self::icon::Icon;
 pub use self::move_plan::MovePlan;
+pub use self::notification::NotificationInteraction;
 pub use self::opaque::Opaque;
 pub use self::player::Player;
 pub use self::position::Position;
@@ -35,6 +36,7 @@ pub fn init(world: &mut World) {
   world.register::<Description>();
   world.register::<Icon>();
   world.register::<MovePlan>();
+  world.register::<NotificationInteraction>();
   world.register::<Player>();
   world.register::<Position>();
   world.register::<Opaque>();
