@@ -1,11 +1,17 @@
 use std::collections::HashMap;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 
+pub enum GameStage {
+  LoadingAssets,
+  Initializing,
+  Playing
+}
+
 /// game state collects a bunch of globally needed data and coordination info in one
 /// place. Doesn't make a lot of sense to make these individual resources, causes too
 /// much boilerplate in Systems
-#[derive(Default)]
 pub struct GameState {
+  pub stage: GameStage,
   /// if true, game will close on next game loop pass
   pub close_game: bool,
   /// a boolean map of solid entities, for checking entity collision
@@ -41,15 +47,16 @@ pub struct GameState {
   pub world_year: u32,
 }
 
-impl GameState {
-  pub fn new() -> GameState {
+impl Default for GameState {
+  fn default() -> GameState {
     GameState{
+      stage: GameStage::LoadingAssets,
       close_game: false,
       collision_map: HashMap::new(),
       frame: 0,
       tick: 0,
 
-      fullscreen: false,
+      fullscreen: true,
       paused: false,
       fast_forward: false,
       input_enabled: false,
@@ -67,7 +74,9 @@ impl GameState {
       world_year: 0
     }
   }
+}
 
+impl GameState {
   /// 1.0 is noon, 0.0 is midnight
   pub fn world_time_relative(&self) -> f32 {
     ((self.world_time * 15.0 * (std::f32::consts::PI / 180.0)).sin() + 1.0) / 2.0

@@ -1,5 +1,5 @@
 use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, Map,
-  input::KeyPressFlags, input::{Key, KeyCode::*}};
+  input::KeyPressFlags, input::{Key, KeyCode::*}, TextAlignment};
 use tcod::console::Root;
 use tcod::colors::{lerp, Color};
 use tcod::map::FovAlgorithm;
@@ -38,6 +38,9 @@ impl Display {
     root.set_default_background(DEFAULT_BG);
     root.set_default_foreground(DEFAULT_FG);
     root.clear();
+
+    use tcod::system::set_fps;
+    set_fps(60);
 
     Display{
       root,
@@ -87,6 +90,39 @@ impl<'a> System<'a> for Display {
 
     // wipe screen and prepare for new draw
     self.root.clear();
+    self.root.set_default_background(DEFAULT_BG);
+    self.root.set_default_foreground(DEFAULT_FG);
+
+    let dot_dot_dot = (((state.frame / 15) % 4)) as usize;
+    match state.stage {
+      GameStage::LoadingAssets => {
+        self.root.set_alignment(TextAlignment::Left);
+        self.root.print_rect(
+          SCREEN_WIDTH / 2 - 9,
+          SCREEN_HEIGHT / 2,
+          SCREEN_WIDTH,
+          1,
+          format!("Loading assets{:.<1$}", "", dot_dot_dot)
+        );
+        self.root.flush();
+        self.accept_input(&mut keypress, &mut state);
+        return;
+      },
+      GameStage::Initializing => {
+        self.root.set_alignment(TextAlignment::Left);
+        self.root.print_rect(
+          SCREEN_WIDTH / 2 - 7,
+          SCREEN_HEIGHT / 2,
+          SCREEN_WIDTH,
+          1,
+          format!("Initializing{:.<1$}", "", dot_dot_dot)
+        );
+        self.root.flush();
+        self.accept_input(&mut keypress, &mut state);
+        return;
+      },
+      _ => {/* other stages all follow main draw setup below */}
+    }
 
     let mut cursor_pos: Position = Position::default();
     let mut player_pos: Position = Position::default();
@@ -217,6 +253,12 @@ impl<'a> System<'a> for Display {
     self.root.flush();
 
 
+    self.accept_input(&mut keypress, &mut state);
+  }
+}
+
+impl Display {
+  fn accept_input(&mut self, keypress: &mut UserInput, state: &mut GameState) {
     let key_input = self.root.check_for_keypress(KeyPressFlags::all());
     match key_input {
       // we don't match modifier keys as an input

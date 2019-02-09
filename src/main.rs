@@ -71,7 +71,7 @@ fn make_computer(world: &mut World) {
 fn main() {
   let mut rng = rand::thread_rng();
   let mut world = World::new();
-  let mut state = GameState::new();
+  let mut state = GameState::default();
   state.world_seed = rng.gen_range(0, std::u32::MAX);
   state.map_gen_queued = true;
   component::init(&mut world);
@@ -157,6 +157,7 @@ fn main() {
     .with(Movement, "movement", &["ai", "player_input", "collision_map"])
     .with(PostTick, "", &["movement"])
     .with(Notify, "interact_notify", &[])
+    .with(Stage, "game_stage", &[])
     .build();
 
   dispatcher.setup(&mut world.res);
