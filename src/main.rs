@@ -77,16 +77,6 @@ fn main() {
   component::init(&mut world);
 
   let mut ui_queue = UIQueue::default();
-  ui_queue.add(
-    Notification::new(
-      format!("SCRAPS: Bug Hunter"),
-      format!("Your task, should you choose to accept it, is to catch bugs."),
-    ));
-  ui_queue.add(
-    Notification::new(
-      format!("Start Game"),
-      format!("Find and catch the bugs!"),
-    ));
 
   world.add_resource(state);
   world.add_resource(UserInput::default());
