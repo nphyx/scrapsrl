@@ -1,4 +1,5 @@
-use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, Map, input::KeyPressFlags, input::{Key, KeyCode::*}};
+use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, Map,
+  input::KeyPressFlags, input::{Key, KeyCode::*}};
 use tcod::console::Root;
 use tcod::colors::{lerp, Color};
 use tcod::map::FovAlgorithm;
@@ -8,7 +9,6 @@ use super::util::colors::*;
 use super::util::{clamp, distance};
 
 mod ui;
-use ui::Menus;
 
 use super::constants::{
   MAP_WIDTH,
@@ -21,7 +21,6 @@ use super::constants::{
 pub struct Display {
   pub root: Root,
   pub map: Map,
-  pub menus: Menus 
 }
 
 
@@ -42,8 +41,7 @@ impl Display {
 
     Display{
       root,
-      map: Map::new(MAP_WIDTH, MAP_HEIGHT),
-      menus: Menus::new()
+      map: Map::new(MAP_WIDTH, MAP_HEIGHT)
     }
   }
 }
@@ -62,6 +60,7 @@ impl<'a> System<'a> for Display {
 
     Write<'a, GameState>,
     Read<'a, AreaMap>,
+    Read<'a, UIQueue>,
     Write<'a, UserInput>
   );
 
@@ -80,6 +79,7 @@ impl<'a> System<'a> for Display {
 
       mut state,
       map,
+      ui_queue,
       mut keypress,
     ) = data;
 
@@ -208,6 +208,11 @@ impl<'a> System<'a> for Display {
     self.root.set_alignment(TextAlignment::Right);
     self.root.print_rect(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 12, 1, format!("time: {:.*}", 2, state.world_time_relative()));
     */
+
+    match ui_queue.get() {
+      Some(widget) => { ui::draw_centered_dialog(&self.root, widget); },
+      _ => {}
+    }
 
     self.root.flush();
 

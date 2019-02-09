@@ -1,5 +1,5 @@
 use specs::{System, ReadStorage, Read, Write, Join};
-use crate::resource::GameState;
+use crate::resource::{GameState, UIQueue};
 use crate::component::Cursor;
 use crate::resource::UserInput;
 
@@ -9,10 +9,20 @@ impl<'a> System<'a> for PreTick {
   type SystemData = (
     ReadStorage<'a, Cursor>,
     Read<'a, UserInput>,
+    Read<'a, UIQueue>,
     Write<'a, GameState>
   );
 
-  fn run(&mut self, (cursors, input, mut state): Self::SystemData) {
+  fn run(&mut self, (cursors, input, ui_queue, mut state): Self::SystemData) {
+    if ui_queue.len() > 0 {
+      state.ticking = false;
+      state.paused = true;
+      return;
+    } else {
+      state.ticking = true;
+      state.paused = false;
+    }
+
     let mut cursor_mode: bool = false;
     let mut has_input: bool = false;
     for _ in cursors.join() {

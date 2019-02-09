@@ -71,9 +71,23 @@ fn main() {
   state.world_seed = rng.gen_range(0, std::u32::MAX);
   state.map_gen_queued = true;
   component::init(&mut world);
+
+  let mut ui_queue = UIQueue::default();
+  ui_queue.add(
+    Notification::new(
+      format!("SCRAPS: Bug Hunter"),
+      format!("Your task, should you choose to accept it, is to catch bugs."),
+    ));
+  ui_queue.add(
+    Notification::new(
+      format!("Start Game"),
+      format!("Find and catch the bugs!"),
+    ));
+
   world.add_resource(state);
   world.add_resource(UserInput::default());
   world.add_resource(AreaMap::default());
+  world.add_resource(ui_queue);
 
   let mut window_closed = false;
 
@@ -125,26 +139,15 @@ fn main() {
     })
     .build();
 
-  /*
-  interface.open_menu(
-    ui::Chain::new(vec![
-        Box::new(ui::Notification::new(
-          format!("SCRAPS: Bug Hunter"), format!("Your task, should you choose to accept it, is to catch bugs."),
-        )),
-        Box::new(ui::Notification::new(
-          format!("Start Game"),
-          format!("Find and catch the bugs!"),
-        )),
-    ])
-  );
-  */
-
+  
   let mut display = Display::new();
   let mut dispatcher = DispatcherBuilder::new()
-    // do game state maintenance
+    // do game state maintenance. sadly not really taking advantage
+    // of parallelism but maybe eventually it can
     .with(PreTick, "", &[])
     // handle user input first
-    .with(SystemInput, "system_input", &[])
+    .with(UIInput, "ui_input", &[])
+    .with(SystemInput, "system_input", &["ui_input"])
     .with(CursorInput, "cursor_input", &["system_input"])
     .with(PlayerInput, "player_input", &["cursor_input"])
     .with(FallthroughInput, "fallthrough_input", &["player_input"])

@@ -11,7 +11,6 @@ pub fn draw_stats(mut console: &Console, pc: &Character) {
   let y = 0;
   let width = SIDEBAR_WIDTH;
   let height = console.height();
-  let mut did_cursor_draw = false;
   vert_line(console, x, y, height, LINE_DBL_VERT);
   let text = format!(
     concat!(
