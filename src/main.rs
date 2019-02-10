@@ -89,7 +89,7 @@ fn main() {
   state.map_gen_queued = true;
   component::init(&mut world);
 
-  let mut ui_queue = UIQueue::default();
+  let ui_queue = UIQueue::default();
 
   world.add_resource(state);
   world.add_resource(UserInput::default());
@@ -168,7 +168,8 @@ fn main() {
     // let AI decide what it wants to do
     .with(AI, "ai", &["collision_map"])
     // process AI and player actions
-    .with(Movement, "movement", &["ai", "player_input", "collision_map"])
+    .with(AreaChange, "area_change", &["ai", "player_input", "collision_map"])
+    .with(Movement, "movement", &["area_change"])
     .with(PostTick, "", &["movement"])
     .with(Notify, "interact_notify", &[])
     .with(Stage, "game_stage", &[])
