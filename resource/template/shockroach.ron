@@ -1,0 +1,34 @@
+(
+    brain: Some((
+        movement_state: Idle,
+        attitude: Passive,
+    )),
+    character: Some((
+        body: 3,
+        mind: 1,
+        soul: 1,
+        strength: 1,
+        grace: 4,
+        toughness: 3,
+        intellect: 1,
+        wits: 1,
+        resolve: 1,
+        charisma: 1,
+        empathy: 1,
+        will: 1,
+        cur_stamina: 6,
+        cur_focus: 2,
+        cur_grit: 2,
+    )),
+    colors: Some((
+        fg: (r: 32, g: 128, b: 225),
+        bg: (r: 32, g: 128, b: 225),
+    )),
+    description: Some((
+        short: "a shockroach",
+        long: "A housecat-sized cockroach. Electric sparks arc between its antenna.",
+    )),
+    icon: Some((ch: '',)),
+    notification: None,
+    solid: Some(()),
+)
