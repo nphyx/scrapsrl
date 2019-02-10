@@ -12,7 +12,8 @@ pub fn draw_status_bar(mut console: &Console, pc: &Character, state: &GameState)
   let height = 1;
   let mut text: String;
 
-  if state.paused { text = format!("-- PAUSED --") }
+  if state.paused { text = format!("-- PAUSED --"); }
+  else if state.fast_forward { text = format!("-- FAST-FORWARDING --"); }
   else if state.looking {
     text = format!("-- LOOKING --   [Enter] interact   [Esc] cancel")
   } else {
