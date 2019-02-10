@@ -46,7 +46,6 @@ impl<'a> System<'a> for CursorInput {
         },
         Some(Key { code: Enter, .. }) |
         Some(Key { code: NumPadEnter, ..}) => {
-          println!("interacting at {:?}", pos);
           target.pos = Some(pos.clone());
           entities.delete(entity).expect("tried to delete a non-existent cursor");
         }

@@ -29,11 +29,9 @@ impl<'a> System<'a> for BumpInteract {
       p_pos = *pos;
       p_plan = *plan; 
     }
-    println!("check interaction at {:?}", p_plan + p_pos);
     // handle the case where the player is changing to a new map
     for(pos, _interaction, _solid) in (&mut positions, &interactions, &solids).join() {
       if p_plan + p_pos == *pos {
-        println!("interacting at {:?}", pos);
         target.pos = Some(pos.clone());
       }
     }

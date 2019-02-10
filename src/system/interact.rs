@@ -18,7 +18,6 @@ impl<'a> System<'a> for Notify {
     let mut matched: bool = false;
     match target.pos {
       Some(t_pos) => {
-        println!("has interaction at {:?}", t_pos);
         for (e_pos, notice) in (&positions, &notifications).join() {
           if matched { break; }
           match target.method {
