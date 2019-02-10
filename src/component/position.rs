@@ -1,4 +1,5 @@
 use specs::{Component, VecStorage};
+use serde::Serialize;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
 
@@ -6,7 +7,7 @@ use crate::util::clamp;
  * A positional coordinate.
  */
 
-#[derive(Copy,Clone,Debug,Hash,Default,Component)]
+#[derive(Copy,Clone,Debug,Hash,Default,Component,Serialize)]
 #[storage(VecStorage)]
 pub struct Position {
   pub x: i32,

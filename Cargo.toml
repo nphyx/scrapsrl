@@ -9,8 +9,10 @@ tcod = "0.13"
 specs = "0.14.0"
 shred = "0.7.1"
 specs-derive = "0.4.0"
-frappe = "0.4.4"
+serde = { version = "*", features = ["derive"] }
+serde_derive = "*"
 rand = "*"
+ron = "*"
 
 [features]
 nightly = ["shred/nightly"]

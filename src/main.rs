@@ -1,7 +1,6 @@
 extern crate rand;
 extern crate tcod;
 extern crate specs;
-extern crate frappe;
 #[macro_use]
 extern crate specs_derive;
 
@@ -28,9 +27,22 @@ fn make_bug(world: &mut World) {
   let mut rng = rand::thread_rng();
   let x = rng.gen_range(0, MAP_WIDTH);
   let y = rng.gen_range(0, MAP_HEIGHT);
+  let template = EntityTemplate::create()
+    .brain()
+    .solid()
+    .character(Character::blank())
+    .icon(ICON_BUG)
+    .colors(Color{r: 32, g: 128, b: 225}, Color{r: 32, g: 128, b: 225})
+    .description("a shockroach", "A housecat-sized cockroach. Electric sparks arc between its antenna.")
+    .build();
+
+  template.to_world(world)
+    .with(Position{x, y})
+    .with(MovePlan{x: 0, y: 0})
+    .build();
+    /*
   world.create_entity()
     .with(Solid)
-    .with(AIBrain::default())
     .with(Character::blank())
     .with(Icon{ch: ICON_BUG})
     .with(Position{x, y})
@@ -42,6 +54,7 @@ fn make_bug(world: &mut World) {
       short: "a shockroach".to_string(),
       long: "A housecat-sized cockroach. Electric sparks arc between its antenna.".to_string()})
   .build();
+  */
 }
 
 use specs::{Builder};
@@ -82,6 +95,7 @@ fn main() {
   world.add_resource(UserInput::default());
   world.add_resource(AreaMap::default());
   world.add_resource(ui_queue);
+  world.add_resource(Templates::default());
 
   let mut window_closed = false;
 
