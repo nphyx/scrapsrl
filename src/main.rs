@@ -133,6 +133,7 @@ fn main() {
     .build();
 
   world.create_entity()
+    .with(Solid)
     .with(Position{
       x: rng.gen_range(0, MAP_WIDTH),
       y: rng.gen_range(0, MAP_HEIGHT)})
@@ -169,7 +170,8 @@ fn main() {
     .with(AI, "ai", &["collision_map"])
     // process AI and player actions
     .with(AreaChange, "area_change", &["ai", "player_input", "collision_map"])
-    .with(Movement, "movement", &["area_change"])
+    .with(BumpInteract, "bump_interact", &["collision_map"])
+    .with(Movement, "movement", &["area_change", "bump_interact"])
     .with(PostTick, "", &["movement"])
     .with(Notify, "interact_notify", &[])
     .with(Stage, "game_stage", &[])

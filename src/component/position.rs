@@ -2,6 +2,7 @@ use specs::{Component, VecStorage};
 use serde::Serialize;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
+use super::MovePlan;
 
 /**
  * A positional coordinate.
@@ -25,6 +26,19 @@ impl std::ops::Add<Position> for Position {
   type Output = Position;
   fn add(self, coord: Position) -> Position {
     Position{x: self.x + coord.x, y: self.y + coord.y}
+  }
+}
+
+impl std::ops::Add<MovePlan> for Position {
+  type Output = Position;
+  fn add(self, coord: MovePlan) -> Position {
+    Position{x: self.x + coord.x, y: self.y + coord.y}
+  }
+}
+
+impl std::cmp::PartialEq<MovePlan> for Position {
+  fn eq(&self, &cmp: &MovePlan) -> bool {
+    return self.x == cmp.x && self.y == cmp.y;
   }
 }
 

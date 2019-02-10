@@ -7,7 +7,6 @@ use crate::resource::{GameState, AreaMap};
 pub struct Movement;
 impl<'a> System<'a> for Movement {
   type SystemData = (
-    ReadStorage<'a, Player>,
     WriteStorage<'a, MovePlan>,
     ReadStorage<'a, Solid>,
     WriteStorage<'a, Position>,
@@ -17,7 +16,6 @@ impl<'a> System<'a> for Movement {
   );
 
   fn run(&mut self, (
-      players,
       mut plans,
       solids,
       mut positions,
