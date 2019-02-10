@@ -1,4 +1,4 @@
-use tcod::colors::Color;
+use crate::component::Color;
 
 fn to_fcel(a: u8) -> f32 { if a == 0 { 0.0 } else { a as f32/255.0 } }
 fn to_ucel(a: f32) -> u8 { (a * 255.0).floor() as u8 }
@@ -65,4 +65,18 @@ pub fn desaturate(a: &Color) -> Color {
     (to_fcel(a.r) + to_fcel(a.g) + to_fcel(a.b)) / 3.0
   );
   Color::new(desat, desat, desat)
+}
+
+fn lerp_cel(a: u8, b: u8, i: f32) -> u8 {
+  let af = to_fcel(a);
+  let bf = to_fcel(b);
+  return to_ucel(af + i * (bf - af))
+}
+
+pub fn lerp(a: Color, b: Color, i: f32) -> Color {
+  Color::new(
+    lerp_cel(a.r, b.r, i),
+    lerp_cel(a.g, b.g, i),
+    lerp_cel(a.b, b.b, i)
+  )
 }

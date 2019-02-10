@@ -1,7 +1,6 @@
 use tcod::{Console, RootConsole, FontLayout, FontType, BackgroundFlag, Map,
   input::KeyPressFlags, input::{Key, KeyCode::*}, TextAlignment};
 use tcod::console::Root;
-use tcod::colors::{lerp, Color};
 use tcod::map::FovAlgorithm;
 use super::component::*;
 use super::resource::*;
@@ -9,6 +8,8 @@ use super::util::colors::*;
 use super::util::{clamp, distance};
 
 mod ui;
+
+type TColor = tcod::colors::Color;
 
 use super::constants::{
   MAP_WIDTH,
@@ -179,7 +180,7 @@ impl<'a> System<'a> for Display {
     for(pos, icon, color, ..) in (&positions, &icons, &colors, !&players).join() {
       if self.map.is_in_fov(pos.x, pos.y) {
         self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
-        self.root.set_char_foreground(pos.x, pos.y, color.fg);
+        self.root.set_char_foreground(pos.x, pos.y, TColor::from(color.fg));
       }
     }
 
@@ -195,10 +196,10 @@ impl<'a> System<'a> for Display {
 
     // lighting pass SUPER SLOW
     for (pos, _) in map.iter() {
-      let orig_fg = self.root.get_char_foreground(pos.x, pos.y);
-      let orig_bg = self.root.get_char_background(pos.x, pos.y);
-      let mut fg = orig_fg.clone();
-      let mut bg = orig_bg.clone();
+      let orig_fg = Color::from(self.root.get_char_foreground(pos.x, pos.y));
+      let orig_bg = Color::from(self.root.get_char_background(pos.x, pos.y));
+      let mut fg = orig_fg;
+      let mut bg = orig_bg;
       let dist = distance(player_pos, pos);
 
       // this figures out the radius of the player-emitted light area
@@ -226,18 +227,18 @@ impl<'a> System<'a> for Display {
       }
       // fg = screen(&fg, &ambient);
       // bg = screen(&bg, &ambient);
-      self.root.set_char_foreground(pos.x, pos.y, fg);
-      self.root.set_char_background(pos.x, pos.y, bg, BackgroundFlag::Set);
+      self.root.set_char_foreground(pos.x, pos.y, TColor::from(fg));
+      self.root.set_char_background(pos.x, pos.y, TColor::from(bg), BackgroundFlag::Set);
     }
 
     // draw player last, make sure it ends up on top
     for (pos, icon, color, ..) in (&positions, &icons, &colors, &players).join() {
       self.root.put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
-      self.root.set_char_foreground(pos.x, pos.y, color.fg)
+      self.root.set_char_foreground(pos.x, pos.y, TColor::from(color.fg))
     }
 
     for (pos, ..) in (&positions, &cursors).join() {
-      self.root.set_char_background(pos.x, pos.y, Color::new(110, 180, 144), BackgroundFlag::Overlay);
+      self.root.set_char_background(pos.x, pos.y, TColor::new(110, 180, 144), BackgroundFlag::Overlay);
     }
 
     /*

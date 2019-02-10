@@ -1,10 +1,10 @@
 use specs::{Component, VecStorage};
-use serde::Serialize;
+use serde::{Deserialize,Serialize};
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
 use super::Position; // ha!
 
-#[derive(Copy,Clone,Debug,Hash,Default,Component,Serialize)]
+#[derive(Copy,Clone,Debug,Hash,Default,Component,Deserialize,Serialize)]
 #[storage(VecStorage)]
 pub struct MovePlan {
   pub x: i32,

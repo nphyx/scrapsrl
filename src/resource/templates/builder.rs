@@ -1,5 +1,4 @@
 use crate::component::*;
-use tcod::colors::Color;
 use super::EntityTemplate;
 
 pub struct EntityTemplateBuilder {

@@ -4,7 +4,6 @@ extern crate specs;
 #[macro_use]
 extern crate specs_derive;
 
-use tcod::colors::Color;
 use rand::prelude::*;
 use specs::{World, DispatcherBuilder, RunNow};
 

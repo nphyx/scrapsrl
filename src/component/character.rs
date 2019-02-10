@@ -1,14 +1,14 @@
 use specs::{Component, VecStorage};
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(Hash, Eq, PartialEq,Serialize)]
+#[derive(Hash, Eq, PartialEq,Serialize,Deserialize)]
 pub enum VitalMod {
   Stamina,
   Focus,
   Grit 
 }
 
-#[derive(Copy,Clone,Default,Debug,Serialize)]
+#[derive(Copy,Clone,Default,Debug,Serialize,Deserialize)]
 pub struct Character {
   body: u8,
   mind: u8,

@@ -1,8 +1,10 @@
-use tcod::{Console, TextAlignment};
+use tcod::{Console,TextAlignment};
 use crate::component::Character;
 use crate::constants::{SIDEBAR_WIDTH, DEFAULT_BG};
 use crate::util::icons::*;
 use super::util::*;
+
+type TColor = tcod::colors::Color;
 
 pub fn draw_stats(mut console: &Console, pc: &Character) {
   reset_colors(&console);
@@ -53,7 +55,7 @@ use crate::component::{Icon, Colors, Description};
 /// draw entity in infobox area of sidebar
 pub fn draw_entity_info(console: &Console, icon: &Icon, colors: &Colors,
                         description: &Description) {
-  draw_info(console, icon.ch, colors.fg, DEFAULT_BG, description.short.clone(), description.long.clone());
+  draw_info(console, icon.ch, TColor::from(colors.fg), DEFAULT_BG, description.short.clone(), description.long.clone());
 }
 
 use crate::resource::{Tile, get_tile_descriptions};

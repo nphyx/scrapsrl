@@ -16,7 +16,7 @@ mod solid;
 
 pub use self::ai_brain::AIBrain;
 pub use self::character::Character;
-pub use self::colors::Colors;
+pub use self::colors::*;
 pub use self::cursor::Cursor;
 pub use self::description::Description;
 pub use self::icon::Icon;
