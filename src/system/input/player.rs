@@ -1,8 +1,8 @@
 use tcod::input::Key;
 use tcod::input::KeyCode::*;
-use specs::{System, Write, WriteStorage, ReadStorage, Join, Entities};
+use specs::{System, Read, Write, WriteStorage, ReadStorage, Join, Entities};
 use crate::component::{MovePlan, Player, Position, Cursor};
-use crate::resource::UserInput;
+use crate::resource::{GameState,UserInput};
 
 use super::movement_util::get_movement;
 
@@ -14,6 +14,7 @@ impl<'a> System<'a> for PlayerInput {
     WriteStorage<'a, Position>,
     WriteStorage<'a, MovePlan>,
     ReadStorage<'a, Player>,
+    Read<'a, GameState>,
     Write<'a, UserInput>,
     Entities<'a>
   );
@@ -23,9 +24,11 @@ impl<'a> System<'a> for PlayerInput {
       mut positions,
       mut plans,
       players,
+      state,
       mut input,
       entities): Self::SystemData) {
     let mut player_pos: Position = Position::default();
+    if state.paused { return; } // no moving while paused
     for (pos, to, ..) in (&positions, &mut plans, &players).join() {
       player_pos.x = pos.x;
       player_pos.y = pos.y;
