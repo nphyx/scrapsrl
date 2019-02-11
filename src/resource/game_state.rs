@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
+use crate::resource::area_map::Offset;
 
 pub enum GameStage {
   LoadingAssets,
@@ -34,13 +35,11 @@ pub struct GameState {
   pub looking: bool,
   /// game controls enabled (does not affect system-level input: fullscreen, quit, etc)
   pub input_enabled: bool,
-  /// a new map will be generated on next pass if true
-  pub map_gen_queued: bool,
   /// global RNG seed
   pub world_seed: u32,
 
   /// tracks the X,Y offset of the current map from 0, 0
-  pub area_offset: [i32; 2],
+  pub area_offset: Offset,
 
   pub world_day: u32,
   pub world_time: f32,
@@ -64,7 +63,6 @@ impl Default for GameState {
 
       looking: false,
 
-      map_gen_queued: false,
       world_seed: 0,
 
       area_offset: [0, 0],
@@ -85,6 +83,5 @@ impl GameState {
   pub fn change_area(&mut self, x_change: i32, y_change: i32) {
     self.area_offset[0] += x_change * MAP_WIDTH;
     self.area_offset[0] += y_change * MAP_HEIGHT;
-    self.map_gen_queued = true;
   }
 }

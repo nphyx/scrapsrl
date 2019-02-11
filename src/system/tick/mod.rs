@@ -1,5 +1,5 @@
 use specs::{System, ReadStorage, Read, Write, Join};
-use crate::resource::{GameState, UIQueue};
+use crate::resource::{GameState, UIQueue, AreaMapCollection};
 use crate::component::Cursor;
 use crate::resource::UserInput;
 
@@ -10,10 +10,11 @@ impl<'a> System<'a> for PreTick {
     ReadStorage<'a, Cursor>,
     Read<'a, UserInput>,
     Read<'a, UIQueue>,
+    Read<'a, AreaMapCollection>,
     Write<'a, GameState>
   );
 
-  fn run(&mut self, (cursors, input, ui_queue, mut state): Self::SystemData) {
+  fn run(&mut self, (cursors, input, ui_queue, maps, mut state): Self::SystemData) {
     if ui_queue.len() > 0 {
       state.ticking = false;
       state.paused = true;
@@ -36,7 +37,7 @@ impl<'a> System<'a> for PreTick {
     }
 
     // FIXME this is getting junkier the more variables are in play 
-    if state.map_gen_queued {
+    if !maps.populated() {
       state.ticking = false;
       state.input_enabled = false;
     } else if state.fast_forward {
@@ -79,10 +80,6 @@ impl<'a> System<'a> for PostTick {
   );
 
   fn run(&mut self, mut _state: Self::SystemData) {
-    /*
-    state.map_gen_queued = false; // should have happened already
-    state.ticking = true; // by default re-enable ticking
-    // ticking may change in next pass based on state
-    */
+    /* TODO nothing so far */
   }
 }

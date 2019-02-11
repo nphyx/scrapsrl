@@ -1,8 +1,8 @@
 use crate::resource::{AreaMap, Tile, tile_types::*};
 use tcod::noise::Noise;
-use tcod::colors::{Color, lerp};
-use crate::component::Position;
+use crate::component::{Color,Position};
 use super::util::*;
+use crate::util::colors::lerp;
 
 /// we'll want to get grass color in other functions maybe
 pub fn grass_bg_color(noise: &Noise, pos: [i32; 2], offset: [i32; 2], noise_scale: f32, octaves: u32) -> Color {

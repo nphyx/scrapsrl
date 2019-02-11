@@ -1,6 +1,7 @@
 use specs::{System, ReadStorage, WriteStorage, Write, Read, Join};
 use crate::component::*;
-use crate::resource::{GameState, AreaMap};
+use crate::resource::{GameState, AreaMapCollection};
+use crate::constants::CHUNK_RADIUS;
 
 pub struct AreaChange;
 
@@ -10,7 +11,7 @@ impl<'a> System<'a> for AreaChange {
     ReadStorage<'a, Player>,
     WriteStorage<'a, MovePlan>,
     WriteStorage<'a, Position>,
-    Read<'a, AreaMap>,
+    Write<'a, AreaMapCollection>,
     Write<'a, GameState>
   );
 
@@ -18,36 +19,36 @@ impl<'a> System<'a> for AreaChange {
       players,
       mut plans,
       mut positions,
-      map,
+      mut maps,
       mut state): Self::SystemData) {
     for(_player, plan, pos) in (&players, &mut plans, &mut positions).join() {
-      let mut area_changed = false;
+      let map = maps.get(state.area_offset);
+      let mut change_x: i32 = 0;
+      let mut change_y: i32 = 0;
       if plan.x != 0 || plan.y != 0 {
         let target = Position{
           x: plan.x + pos.x,
           y: plan.y + pos.y
         };
         if target.x >= map.width {
-          state.change_area(1, 0);
+          change_x = 1;
           pos.x = 0;
-          area_changed = true;
         }
         if target.x < 0 {
-          state.change_area(-1, 0);
+          change_x = -1;
           pos.x = map.width - 1;
-          area_changed = true;
         }
         if target.y >= map.height {
-          state.change_area(0, 1);
+          change_y = 1;
           pos.y = 0;
-          area_changed = true;
         }
         if target.y < 0 {
-          state.change_area(0, -1);
+          change_y = -1;
           pos.y = map.height - 1;
-          area_changed = true;
         }
-        if area_changed {
+        if change_x != 0 && change_y != 0 {
+          state.change_area(change_x, change_y);
+          maps.init(state.area_offset, CHUNK_RADIUS);
           plan.x = 0;
           plan.y = 0;
           return;

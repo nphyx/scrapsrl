@@ -62,5 +62,5 @@ use crate::resource::{Tile, get_tile_descriptions};
 /// draw tile in info box area of sidebar
 pub fn draw_tile_info(console: &Console, tile: Tile) {
   let t = &get_tile_descriptions()[tile.type_id as usize];
-  draw_info(console, tile.icon, tile.fg, tile.bg, t.short_desc.to_string(), t.long_desc.to_string());
+  draw_info(console, tile.icon, TColor::from(tile.fg), TColor::from(tile.bg), t.short_desc.to_string(), t.long_desc.to_string());
 }

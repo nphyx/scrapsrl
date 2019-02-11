@@ -85,14 +85,16 @@ fn main() {
   let mut world = World::new();
   let mut state = GameState::default();
   state.world_seed = rng.gen_range(0, std::u32::MAX);
-  state.map_gen_queued = true;
   component::init(&mut world);
 
   let ui_queue = UIQueue::default();
 
+  let mut maps = AreaMapCollection::default();
+  maps.init([0,0], constants::CHUNK_RADIUS);
+
   world.add_resource(state);
   world.add_resource(UserInput::default());
-  world.add_resource(AreaMap::default());
+  world.add_resource(maps);
   world.add_resource(ui_queue);
   world.add_resource(Templates::default());
 

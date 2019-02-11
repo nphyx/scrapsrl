@@ -63,7 +63,7 @@ impl<'a> System<'a> for Display {
     ReadStorage<'a, Description>,
 
     Write<'a, GameState>,
-    Read<'a, AreaMap>,
+    Read<'a, AreaMapCollection>,
     Read<'a, UIQueue>,
     Write<'a, UserInput>
   );
@@ -82,7 +82,7 @@ impl<'a> System<'a> for Display {
       descriptions,
 
       mut state,
-      map,
+      maps,
       ui_queue,
       mut keypress,
     ) = data;
@@ -144,6 +144,9 @@ impl<'a> System<'a> for Display {
       has_cursor = true;
     }
 
+    // get the current map
+    let map = maps.get(state.area_offset);
+
     // find an entity under the cursor, if it exists
     if has_cursor && self.map.is_in_fov(cursor_pos.x, cursor_pos.y) {
       let mut found_entity = false;
@@ -173,7 +176,7 @@ impl<'a> System<'a> for Display {
 
     // draw all tiles
     for (pos, tile) in map.iter() {
-      self.root.put_char_ex(pos.x, pos.y, tile.icon, tile.fg, tile.bg);
+      self.root.put_char_ex(pos.x, pos.y, tile.icon, TColor::from(tile.fg), TColor::from(tile.bg));
     }
 
     // draw all npcs, also snag the one under the cursor if applicable

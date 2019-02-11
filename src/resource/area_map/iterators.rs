@@ -25,6 +25,24 @@ impl<'a> Iterator for AreaMapIter<'a> {
 }
 
 /*
+use std::collections::hash_map::IterMut;
+pub struct AreaMapCollectionIterMut<'a> {
+  pub iterator: IterMut<'a, Offset, AreaMap>
+}
+
+impl<'a> Iterator for AreaMapCollectionIterMut<'a> {
+  type Item = (&'a Offset, &'a mut AreaMap);
+
+  fn next(&mut self) -> Option<Self::Item> {
+    match self.iterator.next() {
+      Some((offset, &mut map)) => { return Some((offset, &mut map)); },
+      None => { return None; }
+    }
+  }
+}
+*/
+
+/*
 pub struct AreaMapIterMut {
   pub map: &'a mut AreaMap,
   pub cur: [usize; 2]

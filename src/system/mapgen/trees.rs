@@ -1,7 +1,6 @@
 use tcod::noise::*;
-use tcod::colors::{Color};
 use crate::util::icons::*;
-use crate::component::Position;
+use crate::component::{Color,Position};
 use crate::resource::{AreaMap, Tile, tile_types::*};
 use super::util::*;
 

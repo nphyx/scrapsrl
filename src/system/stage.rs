@@ -1,14 +1,17 @@
 /// stub game stage management
 
-use specs::{System, Write};
-use crate::resource::{GameState, GameStage};
+use specs::{System, Write, Read};
+use crate::resource::{GameState, GameStage, AreaMapCollection};
 
 pub struct Stage;
 
 impl<'a> System<'a> for Stage {
-  type SystemData = Write<'a, GameState>;
+  type SystemData = (
+    Read<'a, AreaMapCollection>,
+    Write<'a, GameState>
+  );
 
-  fn run(&mut self, mut state: Self::SystemData) {
+  fn run(&mut self, (maps, mut state): Self::SystemData) {
     match state.stage {
       GameStage::LoadingAssets => {
         if state.frame > 120 { // simulate loading :3
@@ -16,12 +19,12 @@ impl<'a> System<'a> for Stage {
         }
       }
       GameStage::Initializing => {
-        if state.frame > 180 && state.map_gen_queued == false {
+        if state.frame > 180 && maps.populated() {
           state.stage = GameStage::Playing;
         }
       }
       GameStage::Playing => {
-        if state.map_gen_queued {
+        if !maps.populated() {
           state.stage = GameStage::Initializing;
         }
       }

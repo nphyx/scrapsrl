@@ -16,3 +16,5 @@ pub const TORCH_RADIUS: i32 = 20;
 
 pub const DEFAULT_BG: Color = Color{r: 0, g:12, b:9};
 pub const DEFAULT_FG: Color = Color{r: 225, g: 255, b: 232};
+
+pub const CHUNK_RADIUS: u8 = 2;
