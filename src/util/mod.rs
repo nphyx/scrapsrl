@@ -9,5 +9,5 @@ pub fn clamp<T>(a: T, b: T, x: T) -> T  where T: std::cmp::PartialOrd {
 }
 
 pub fn distance(p: Position, d: Position) -> f32 {
-  return ((d.x as f32 - p.x as f32).powf(2.0) + (d.y as f32 - p.y as f32).powf(2.0)).sqrt()
+  ((d.x as f32 - p.x as f32).powf(2.0) + (d.y as f32 - p.y as f32).powf(2.0)).sqrt()
 }

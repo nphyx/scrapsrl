@@ -72,7 +72,7 @@ pub fn desaturate(a: Color) -> Color {
 fn lerp_cel(a: u8, b: u8, i: f32) -> u8 {
   let af = to_fcel(a);
   let bf = to_fcel(b);
-  return to_ucel(af + i * (bf - af))
+  to_ucel(af + i * (bf - af))
 }
 
 pub fn lerp(a: Color, b: Color, i: f32) -> Color {
