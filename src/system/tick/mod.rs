@@ -55,7 +55,8 @@ impl<'a> System<'a> for PreTick {
       if state.world_time >= 24.0 {
         state.world_time = 0.0;
         state.world_day += 1;
-      } if state.world_day >= 365 {
+      }
+      if state.world_day >= 365 {
         if (state.world_year + 1) % 4 == 0 { // it was a leap year! but don't make the first year a leap year, that would be lame
           if state.world_day >= 366 {
             state.world_day = 0;
