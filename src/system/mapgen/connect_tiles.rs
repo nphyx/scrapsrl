@@ -10,7 +10,7 @@ pub fn connect(map: &mut AreaMap) {
       match map.get(Position{x, y}) {
         Some(t) => {
           match connectables.connect(
-            &t.icon,
+            t.icon,
             map.get_icon(Position{x, y: y - 1}),
             map.get_icon(Position{x, y: y + 1}),
             map.get_icon(Position{x: x - 1, y}),

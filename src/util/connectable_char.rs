@@ -71,63 +71,47 @@ impl ConnectableChars {
   }
 
   /// checks whether a character can be connected
-  pub fn can_connect(&self, orig: &char) -> bool {
-    match self.map.get(&orig) {
-      Some(_) => true,
-      None => false
-    }
+  /* FIXME UNUSED
+  pub fn can_connect(&self, orig: char) -> bool {
+    self.map.get(&orig).is_some()
   }
+  */
 
   /// determines if the first char can be connected to adjacent chars and how to map it
   /// returns the appropriate char to use
   pub fn connect(
     &self,
-    orig: &char,
+    orig: char,
     up: Option<char>,
     down: Option<char>,
     left: Option<char>,
     right: Option<char>) -> Option<char> {
     let chosen: char;
-    match self.map.get(orig) {
-      Some(connectable) => {
-        let mut matched = (false, false, false, false);
-        match up {
-          Some(ch) => if ch == connectable.base { matched.0 = true; },
-          None => {}
-        }
-        match down {
-          Some(ch) => if ch == connectable.base { matched.1 = true; },
-          None => {}
-        }
-        match left {
-          Some(ch) => if ch == connectable.base { matched.2 = true; },
-          None => {}
-        }
-        match right {
-          Some(ch) => if ch == connectable.base { matched.3 = true; },
-          None => {}
-        }
-        match matched {
-          (true, true, false, false) => chosen = connectable.vert,
-          (false, false, true, true) => chosen = connectable.horiz,
-          (false, true, false, true) => chosen = connectable.corner_tl,
-          (false, true, true, false) => chosen = connectable.corner_tr,
-          (true, false, false, true) => chosen = connectable.corner_bl,
-          (true, false, true, false) => chosen = connectable.corner_br,
-          (true, true, true, false) => chosen = connectable.t_l,
-          (true, true, false, true) => chosen = connectable.t_r,
-          (true, false, true, true) => chosen = connectable.t_u,
-          (false, true, true, true) => chosen = connectable.t_d,
-          (true, true, true, true) => chosen = connectable.cross,
-          (false, false, false, true) => chosen = connectable.cap_l,
-          (false, false, true, false) => chosen = connectable.cap_r,
-          (false, true, false, false) => chosen = connectable.cap_u,
-          (true, false, false, false) => chosen = connectable.cap_d,
-          (false, false, false, false) => chosen = connectable.base
-        }
-        return Some(chosen);
-      },
-      None => {}
+    if let Some(connectable) = self.map.get(&orig) {
+      let mut matched = (false, false, false, false);
+      if let Some(ch) = up { if ch == connectable.base { matched.0 = true; } }
+      if let Some(ch) = down { if ch == connectable.base { matched.1 = true; } }
+      if let Some(ch) = left { if ch == connectable.base { matched.2 = true; } }
+      if let Some(ch) = right { if ch == connectable.base { matched.3 = true; } }
+      match matched {
+        (true, true, false, false) => chosen = connectable.vert,
+        (false, false, true, true) => chosen = connectable.horiz,
+        (false, true, false, true) => chosen = connectable.corner_tl,
+        (false, true, true, false) => chosen = connectable.corner_tr,
+        (true, false, false, true) => chosen = connectable.corner_bl,
+        (true, false, true, false) => chosen = connectable.corner_br,
+        (true, true, true, false) => chosen = connectable.t_l,
+        (true, true, false, true) => chosen = connectable.t_r,
+        (true, false, true, true) => chosen = connectable.t_u,
+        (false, true, true, true) => chosen = connectable.t_d,
+        (true, true, true, true) => chosen = connectable.cross,
+        (false, false, false, true) => chosen = connectable.cap_l,
+        (false, false, true, false) => chosen = connectable.cap_r,
+        (false, true, false, false) => chosen = connectable.cap_u,
+        (true, false, false, false) => chosen = connectable.cap_d,
+        (false, false, false, false) => chosen = connectable.base
+      }
+      return Some(chosen);
     }
     None
   }
