@@ -45,36 +45,31 @@ impl Character {
       cur_stamina: 1, cur_focus: 1, cur_grit: 1,
     }
   }
-
   pub fn body(&self) -> u8 { self.body }
-  pub fn set_body(&mut self, val:u8) { self.body = val }
   pub fn mind(&self) -> u8 { self.mind }
-  pub fn set_mind(&mut self, val:u8) { self.mind = val }
   pub fn soul(&self) -> u8 { self.soul }
-
   pub fn intellect(&self) -> u8 { self.intellect }
-  pub fn set_intellect(&mut self, val:u8) { self.intellect = val }
   pub fn wits(&self) -> u8 { self.wits }
-  pub fn set_wits(&mut self, val:u8) { self.wits = val }
   pub fn resolve(&self) -> u8 { self.resolve }
-  pub fn set_resolve(&mut self, val:u8) { self.resolve = val }
-
   pub fn strength(&self) -> u8 { self.strength }
-  pub fn set_strength(&mut self, val:u8) { self.strength = val }
   pub fn grace(&self) -> u8 { self.grace }
-  pub fn set_grace(&mut self, val:u8) { self.grace = val }
   pub fn toughness(&self) -> u8 { self.toughness }
-
   pub fn charisma(&self) -> u8 { self.charisma }
-  pub fn set_charisma(&mut self, val:u8) { self.charisma = val }
   pub fn empathy(&self) -> u8 { self.empathy }
-  pub fn set_empathy(&mut self, val:u8) { self.empathy = val }
   pub fn will(&self) -> u8 { self.will }
-  pub fn set_will(&mut self, val:u8) { self.will = val }
+
+  fn compute_focus(&self) -> u8 { self.mind + self.resolve }
+  pub fn focus(&self) -> (u8, u8, u8) {
+    (
+      self.compute_focus(),
+      self.cur_focus,
+      self.compute_vital_modifier(VitalMod::Focus)
+    )
+  }
 
   fn compute_vital_modifier(&self, _vital_type: VitalMod) -> u8 {
-    return 0
-    /*
+    0
+    /* TODO implement me
     let mut sum: u8 = 0;
     for vital in self.vitals.iter() {
       if vital.debuffs.contains(&vital_type) { sum += 1; }
@@ -92,29 +87,6 @@ impl Character {
       self.compute_vital_modifier(VitalMod::Stamina)
     )
   }
-  pub fn spend_stamina(&mut self, amt: u8) -> bool {
-    if amt <= self.cur_stamina {
-      self.cur_stamina -= amt;
-      return true;
-    }
-    return false;
-  }
-
-  fn compute_focus(&self) -> u8 { self.mind + self.resolve }
-  pub fn focus(&self) -> (u8, u8, u8) {
-    (
-      self.compute_focus(),
-      self.cur_focus,
-      self.compute_vital_modifier(VitalMod::Focus)
-    )
-  }
-  pub fn spend_focus(&mut self, amt: u8) -> bool {
-    if amt >= self.cur_focus {
-      self.cur_focus -= amt;
-      return true;
-    }
-    return false;
-  }
 
   fn compute_grit(&self) -> u8 { self.soul + self.will }
   pub fn grit(&self) -> (u8, u8, u8) {
@@ -124,6 +96,36 @@ impl Character {
       self.compute_vital_modifier(VitalMod::Focus)
     )
   }
+
+  /* TODO use when these are needed
+  pub fn set_body(&mut self, val:u8) { self.body = val }
+  pub fn set_mind(&mut self, val:u8) { self.mind = val }
+
+  pub fn set_intellect(&mut self, val:u8) { self.intellect = val }
+  pub fn set_wits(&mut self, val:u8) { self.wits = val }
+  pub fn set_resolve(&mut self, val:u8) { self.resolve = val }
+
+  pub fn set_strength(&mut self, val:u8) { self.strength = val }
+  pub fn set_grace(&mut self, val:u8) { self.grace = val }
+
+  pub fn set_charisma(&mut self, val:u8) { self.charisma = val }
+  pub fn set_empathy(&mut self, val:u8) { self.empathy = val }
+  pub fn set_will(&mut self, val:u8) { self.will = val }
+  pub fn spend_stamina(&mut self, amt: u8) -> bool {
+    if amt <= self.cur_stamina {
+      self.cur_stamina -= amt;
+      return true;
+    }
+    return false;
+  }
+
+  pub fn spend_focus(&mut self, amt: u8) -> bool {
+    if amt >= self.cur_focus {
+      self.cur_focus -= amt;
+      return true;
+    }
+    return false;
+  }
   pub fn spend_grit(&mut self, amt: u8) -> bool {
     if amt >= self.cur_grit {
       self.cur_grit -= amt;
@@ -131,4 +133,5 @@ impl Character {
     }
     return false;
   }
+  */
 }
