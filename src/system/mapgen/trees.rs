@@ -5,33 +5,46 @@ use crate::util::icons::*;
 use tcod::noise::*;
 
 fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
-    let fg = Color {
-        r: 86,
-        g: 50,
-        b: 32,
-    };
-    let bg = Color {
-        r: 32,
-        g: 24,
-        b: 12,
-    };
+    let pos = Position { x: cx, y: cy };
+    let fg = Color { r: 14, g: 10, b: 3 };
+    let bg: Color;
+    if let Some(tile) = map.get(pos) {
+        bg = tile.bg;
+    } else {
+        bg = Color {
+            r: 28,
+            g: 24,
+            b: 12,
+        };
+    }
 
+    /*
+    if size == 1 {
+        map.set(
+            Position { x: cx, y: cy },
+            Tile::new(TREE_STUMP, fg, bg, false, false, TYPE_TREE),
+        );
+        return;
+    }
+    */
     fill_rect(
         map,
         cx - (size / 2),
         cy - (size / 2),
         size,
         size,
-        Tile::new(LINE, fg, bg, false, false, TYPE_TREE),
+        Tile::new(TREE_STUMP, fg, bg, false, false, TYPE_TREE),
     );
+    /*
 
     // even sized trees don't get middles
     if size % 2 != 0 {
         map.set(
             Position { x: cx, y: cy },
-            Tile::new('o', fg, bg, false, false, TYPE_TREE),
+            Tile::new(TREE, fg, bg, false, false, TYPE_TREE),
         );
     }
+    */
 }
 
 fn check_tree_placement(tree_places: &[(i32, i32)], cx: i32, cy: i32, size: i32) -> bool {

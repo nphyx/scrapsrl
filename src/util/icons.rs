@@ -67,6 +67,19 @@ pub const ICON_SWIMMING: char = '\u{f9e2}';
 */
 
 // flora
+// lines
+pub const TREE: char = '\u{e00c}';
+pub const TREE_HORIZ: char = '\u{e00c}';
+pub const TREE_TL: char = '\u{e011}';
+pub const TREE_TR: char = '\u{e013}';
+pub const TREE_BL: char = '\u{e00e}';
+pub const TREE_BR: char = '\u{e010}';
+pub const TREE_VERT: char = '\u{e00c}';
+pub const TREE_T_L: char = '\u{e00d}';
+pub const TREE_T_R: char = '\u{e00b}';
+pub const TREE_T_U: char = '\u{e00f}';
+pub const TREE_T_D: char = '\u{e012}';
+pub const TREE_STUMP: char = '\u{e014}';
 /*
 pub const ICON_HERB: char = '\u{e22f}';
 pub const ICON_MUSHROOM_1: char = '\u{fcdd}';

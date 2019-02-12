@@ -53,6 +53,27 @@ impl ConnectableChars {
             },
         );
         map.insert(
+            TREE_STUMP,
+            ConnectableChar {
+                base: TREE_STUMP,
+                horiz: TREE_STUMP,
+                vert: TREE_STUMP,
+                corner_tl: TREE_TL,
+                corner_tr: TREE_TR,
+                corner_bl: TREE_BL,
+                corner_br: TREE_BR,
+                t_l: TREE_T_L,
+                t_r: TREE_T_R,
+                t_u: TREE_T_U,
+                t_d: TREE_T_D,
+                cross: TREE,
+                cap_l: TREE_STUMP,
+                cap_r: TREE_STUMP,
+                cap_u: TREE_STUMP,
+                cap_d: TREE_STUMP,
+            },
+        );
+        map.insert(
             LINE_DBL,
             ConnectableChar {
                 base: LINE_DBL,
