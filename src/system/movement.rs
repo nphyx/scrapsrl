@@ -26,11 +26,11 @@ impl<'a> System<'a> for Movement {
       entities): Self::SystemData) {
     for(region, plan, pos, entity) in (&regions, &mut plans, &mut positions, &entities).join() {
       // guard against entities outside currently loaded map
-      if !area_maps.has(region) { 
+      if !area_maps.has(*region) { 
         println!("skipping an entity because it's outside the loaded area");
         continue;
       } 
-      let map = area_maps.get(region);
+      let map = area_maps.get(*region);
       let new_pos = Position{
         x: clamp(0, MAP_WIDTH - 1, plan.x + pos.x),
         y: clamp(0, MAP_HEIGHT - 1, plan.y + pos.y)
@@ -45,13 +45,13 @@ impl<'a> System<'a> for Movement {
             None => { ok = false; } // there's no tile there? don't walk on it then...
           }
           // if we're still ok, check if there's a colliding object 
-          if ok { ok = !collision_maps.get(&region, &new_pos); }
+          if ok { ok = !collision_maps.get(*region, new_pos); }
         }
         None => { ok = true; } // always ok to move if not solid
       }
       if ok { // do the move if all checks passed
-        collision_maps.set(&region, &pos, false);
-        collision_maps.set(&region, &new_pos, true);
+        collision_maps.set(*region, *pos, false);
+        collision_maps.set(*region, new_pos, true);
         pos.x = new_pos.x;
         pos.y = new_pos.y;
       }

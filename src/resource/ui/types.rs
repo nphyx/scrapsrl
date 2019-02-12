@@ -1,4 +1,3 @@
 pub enum UIElementType {
-  Notification,
-  Chain
+  Notification
 }

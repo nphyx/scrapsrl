@@ -85,8 +85,8 @@ pub struct AreaMapCollection {
 impl AreaMapCollection {
   /// initialize new maps for a given <center> and <radius> radius
   /// Note that radius extends from the edge of the center, so a "size 2" map is 5x5
-  pub fn init(&mut self, center: &Region, size: u8) {
-    let s = size as i32; // size is only u8 to enforce an unsigned parameter
+  pub fn init(&mut self, center: Region, size: u8) {
+    let s = i32::from(size); // size is only u8 to enforce an unsigned parameter
     let mut count: i32 = 0;
     let min_x = center.x - s; 
     let max_x = center.x + s + 1;
@@ -95,10 +95,10 @@ impl AreaMapCollection {
     for x in min_x..max_x {
       for y in min_y..max_y {
         let region = Region::new(x, y);
-        if !self.maps.contains_key(&region) {
-          self.maps.insert(region, AreaMap::default());
+        self.maps.entry(region).or_insert_with(|| {
           count += 1;
-        }
+          AreaMap::default()
+        });
       }
     }
     if count > 0 { println!("initialized {} new maps at center {:?}, size {}", count, center, size); }
@@ -106,7 +106,7 @@ impl AreaMapCollection {
 
   /// get the map at the given location. Will probably die if the map doesn't exist, but
   /// we want that because it shouldn't have happened.
-  pub fn get(&self, region: &Region) -> &AreaMap {
+  pub fn get(&self, region: Region) -> &AreaMap {
     match self.maps.get(&region) {
       Some(map) => { return map; },
       None => { panic!(format!("no map for region {:?}", region)); }
@@ -114,7 +114,7 @@ impl AreaMapCollection {
   }
 
   /// checks whether a map is in play
-  pub fn has(&self, region: &Region) -> bool {
+  pub fn has(&self, region: Region) -> bool {
     match self.maps.get(&region) {
       Some(_) => { return true; }
       None => { return false; }
@@ -122,7 +122,7 @@ impl AreaMapCollection {
   }
 
   /// check if the map for the given region is ready for play.
-  pub fn ready(&self, region: &Region) -> bool {
+  pub fn ready(&self, region: Region) -> bool {
     match self.maps.get(&region) {
       Some(map) => { return map.populated; },
       None => { return false; }
@@ -138,8 +138,8 @@ impl AreaMapCollection {
   }
 
   /// prunes maps in collection farther than <size> maps from <center> in a square
-  pub fn prune(&mut self, center: &Region, size: u8) {
-    let s = size as i32;
+  pub fn prune(&mut self, center: Region, size: u8) {
+    let s = i32::from(size);
     let mut count: u32 = 0;
     let mut marked: Vec<Region> = Vec::new();
     for (region, _) in self.maps.iter() {

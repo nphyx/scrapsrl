@@ -195,7 +195,7 @@ impl Display {
       player_pos = *pos;
       player_region = *region;
     }
-    let map = maps.get(&player_region);
+    let map = maps.get(player_region);
 
     // update fov map before computing fov
     for (pos, tile) in map.iter() {
@@ -300,11 +300,11 @@ impl Display {
       ui::draw_status_bar(&self.root, character, &state);
       player_region = *region;
     }
-    let map = maps.get(&player_region);
+    let map = maps.get(player_region);
 
     // draw all tiles
     for (pos, tile) in map.iter() {
-      let collision = collisions.get(&player_region, &pos);
+      let collision = collisions.get(player_region, pos);
       let bg: Color =
         if !collision && tile.walkable { Color::new(32, 32, 32) }
         else { Color::new(180, 180, 180) };
@@ -373,7 +373,7 @@ impl Display {
     }
 
     // get the current map
-    let map = maps.get(&player_region);
+    let map = maps.get(player_region);
 
     // find an entity under the cursor, if it exists
     if has_cursor && self.map.is_in_fov(cursor_pos.x, cursor_pos.y) {

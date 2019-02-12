@@ -13,11 +13,14 @@ impl<'a> System<'a> for UIInput {
   fn run(&mut self, (mut queue, mut input): Self::SystemData) {
     if queue.len() > 0 {
       if let Some(key) = input.get() {
+        if let UIResponse::Completed = queue.next(key) { input.consume() }
+        /* FIXME unused
         match queue.next(key) {
           UIResponse::Consumed |
           UIResponse::Completed => { input.consume(); }
           _ => {}
         }
+        */
       }
     }
   }

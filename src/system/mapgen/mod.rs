@@ -2,7 +2,6 @@ use tcod::random::{Rng, Algo};
 use tcod::noise::*;
 use crate::resource::{AreaMap, AreaMapCollection, GameState, GameStage};
 use crate::component::Region;
-use crate::constants::CHUNK_RADIUS;
 
 mod connect_tiles;
 mod ground_cover;

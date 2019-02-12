@@ -19,12 +19,12 @@ impl<'a> System<'a> for Stage {
         }
       }
       GameStage::Initializing => {
-        if state.frame > 45 && maps.ready(&state.region) {
+        if state.frame > 45 && maps.ready(state.region) {
           state.stage = GameStage::Playing;
         }
       }
       GameStage::Playing => {
-        if !maps.ready(&state.region) {
+        if !maps.ready(state.region) {
           state.stage = GameStage::Initializing;
         }
       }

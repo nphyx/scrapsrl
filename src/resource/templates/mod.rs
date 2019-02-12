@@ -1,7 +1,6 @@
 /// Templates for game objects, to be serialized and deserialized from RON files
-use specs::{World, Component, VecStorage};
+use specs::{World};
 use serde::Serialize;
-use std::collections::HashMap;
 
 pub mod builder;
 
@@ -42,38 +41,20 @@ impl EntityTemplate {
 
   pub fn to_world<'a>(&self, world: &'a mut World) -> impl Builder + 'a {
     let mut builder = world.create_entity();
-    match &self.brain {
-      Some(brain) => { builder = builder.with(brain.clone()); }
-      _ => {}
-    }
-    match &self.character {
-      Some(character) => { builder = builder.with(character.clone()); }
-      _ => {}
-    }
-    match &self.colors {
-      Some(colors) => { builder = builder.with(colors.clone()); }
-      _ => {}
-    }
-    match &self.description {
-      Some(description) => { builder = builder.with(description.clone()); }
-      _ => {}
-    }
-    match &self.icon {
-      Some(icon) => { builder = builder.with(icon.clone()); }
-      _ => {}
-    }
-    match &self.notification {
-      Some(notification) => { builder = builder.with(notification.clone()); }
-      _ => {}
-    }
-    match &self.solid {
-      Some(_) => { builder = builder.with(Solid); }
-      _ => {}
-    }
+    if let Some(brain) = &self.brain { builder = builder.with(brain.clone()); }
+    if let Some(character) = &self.character { builder = builder.with(character.clone()); }
+    if let Some(colors) = &self.colors { builder = builder.with(colors.clone()); }
+    if let Some(description) = &self.description { builder = builder.with(description.clone()); }
+    if let Some(icon) = &self.icon { builder = builder.with(icon.clone()); }
+    if let Some(notification) = &self.notification { builder = builder.with(notification.clone()); }
+    if self.solid.is_some() { builder = builder.with(Solid); }
     builder
   }
 }
 
+/* FIXME unused
+use specs::{Component, VecStorage};
+use std::collections::HashMap;
 #[derive(Component)]
 #[storage(VecStorage)]
 pub struct Templates {
@@ -91,3 +72,4 @@ impl Templates {
     self.contents.insert(name, template);
   }
 }
+*/

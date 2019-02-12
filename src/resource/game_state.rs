@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::component::Region;
 
 #[derive(PartialEq, Eq)]

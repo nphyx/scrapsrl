@@ -36,7 +36,7 @@ impl<'a> System<'a> for RegionSystem {
         Some(_) => { is_player = true; },
         None => { is_player = false; }
       }
-      let map = maps.get(&state.region);
+      let map = maps.get(state.region);
       let mut change_x: i32 = 0;
       let mut change_y: i32 = 0;
       if plan.x != 0 || plan.y != 0 {
@@ -64,10 +64,10 @@ impl<'a> System<'a> for RegionSystem {
           if is_player {
             println!("changing region to {}, {}", change_x, change_y);
             state.change_region(change_x, change_y);
-            maps.init(&state.region, CHUNK_RADIUS);
-            maps.prune(&state.region, CHUNK_RADIUS);
-            collision_maps.init(&state.region, CHUNK_RADIUS);
-            collision_maps.prune(&state.region, CHUNK_RADIUS);
+            maps.init(state.region, CHUNK_RADIUS);
+            maps.prune(state.region, CHUNK_RADIUS);
+            collision_maps.init(state.region, CHUNK_RADIUS);
+            collision_maps.prune(state.region, CHUNK_RADIUS);
             player_changed_region = true;
           }
           region.x += change_x;
@@ -80,7 +80,7 @@ impl<'a> System<'a> for RegionSystem {
     // prune entities outside the currently loaded regions
     if player_changed_region {
       for (region, icon, entity) in (&regions, &icons, &entities).join() {
-        if !maps.has(region) {
+        if !maps.has(*region) {
           println!("pruning entity {} at {:?}", icon.ch, region);
           entities.delete(entity).expect("failed to delete entity");
         }

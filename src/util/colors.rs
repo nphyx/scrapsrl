@@ -13,6 +13,7 @@ pub fn screen(a: Color, b: Color) -> Color {
 }
 
 fn multiply_cel(a: u8, b: u8) -> u8 { ((f32::from(a)/255.0) * (f32::from(b)/255.0) * 255.0) as u8 }
+/* FIXME unused
 pub fn multiply(a: Color, b: Color) -> Color {
   Color::new(
     multiply_cel(a.r, b.r),
@@ -20,6 +21,7 @@ pub fn multiply(a: Color, b: Color) -> Color {
     multiply_cel(a.b, b.b)
   )
 }
+*/
 
 pub fn overlay(a: Color, b: Color) -> Color {
   Color::new(

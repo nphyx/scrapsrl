@@ -10,9 +10,11 @@ impl EntityTemplateBuilder {
     EntityTemplateBuilder{template: EntityTemplate::default()}
   }
 
+  /* FIXME unused impl From trait
   pub fn from<'a>(template: EntityTemplate) -> EntityTemplateBuilder {
     EntityTemplateBuilder{template}
   }
+  */
 
   pub fn brain(&mut self) -> &mut EntityTemplateBuilder {
     self.template.brain = Some(AIBrain::default());
@@ -44,10 +46,12 @@ impl EntityTemplateBuilder {
     self
   }
 
+  /* FIXME unused will use when porting interact objects
   pub fn notification(&mut self, header: String, body: String) -> &mut EntityTemplateBuilder {
     self.template.notification = Some(NotificationInteraction{header, body});
     self
   }
+  */
 
   pub fn build(&mut self) -> EntityTemplate {
     self.template.clone()

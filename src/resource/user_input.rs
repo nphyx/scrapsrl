@@ -19,7 +19,7 @@ impl UserInput {
 
   pub fn get(&self) -> Option<Key> {
     match self.key {
-      Some(key) => { return Some(key.clone()); },
+      Some(key) => { return Some(key); },
       None => { return None; }
     }
   }

@@ -78,15 +78,15 @@ fn main() {
 
   let mut maps = AreaMapCollection::default();
   let mut collisions = CollisionMaps::default();
-  maps.init(&Region::new(0, 0), constants::CHUNK_RADIUS);
-  collisions.init(&Region::new(0, 0), constants::CHUNK_RADIUS);
+  maps.init(Region::new(0, 0), constants::CHUNK_RADIUS);
+  collisions.init(Region::new(0, 0), constants::CHUNK_RADIUS);
 
   world.add_resource(state);
   world.add_resource(UserInput::default());
   world.add_resource(maps);
   world.add_resource(collisions);
   world.add_resource(ui_queue);
-  world.add_resource(Templates::default());
+  /* FIXME unused world.add_resource(Templates::default()); */
 
   let mut window_closed = false;
 

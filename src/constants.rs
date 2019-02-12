@@ -12,8 +12,6 @@ pub const SCREEN_WIDTH: i32 = 1920 / TILE_WIDTH;
 pub const MAP_WIDTH: i32 = SCREEN_WIDTH - SIDEBAR_WIDTH;
 pub const MAP_HEIGHT: i32 = SCREEN_HEIGHT - 1;
 
-pub const TORCH_RADIUS: i32 = 20;
-
 pub const DEFAULT_BG: Color = Color{r: 0, g:12, b:9};
 pub const DEFAULT_FG: Color = Color{r: 225, g: 255, b: 232};
 

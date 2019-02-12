@@ -8,7 +8,7 @@ pub use notification::*;
 use types::*;
 
 pub enum UIResponse {
-  Consumed,
+  /* Consumed, FIXME UNUSED */
   Completed,
   Unrecognized
 }
@@ -28,9 +28,11 @@ impl Default for UIQueue {
 }
 
 impl UIQueue {
+  /* FIXME unused 
   pub fn new() -> UIQueue {
     UIQueue{stack: Vec::new()}
   }
+  */
 
   pub fn add(&mut self, widget: impl Widget + 'static) {
     self.stack.push(Arc::new(Mutex::new(widget)));
@@ -47,14 +49,11 @@ impl UIQueue {
   pub fn next(&mut self, input: Key) -> UIResponse {
     let response: UIResponse;
     {
-      let mut top = self.stack.get_mut(0).unwrap().lock().unwrap();
+      let top = &mut self.stack[0].lock().unwrap();
       response = top.next(input);
     }
-    match response {
-      UIResponse::Completed => {
-        self.stack.remove(0);
-      },
-      _ => {}
+    if let UIResponse::Completed = response {
+      self.stack.remove(0);
     }
     return response
   }
