@@ -2,7 +2,7 @@ use tcod::input::Key;
 use tcod::input::KeyCode::*;
 use specs::{System,Write};
 
-use crate::resource::{GameState, UserInput, AreaMapCollection};
+use crate::resource::{GameState, RenderMode, UserInput, AreaMapCollection};
 
 /// handle input that should work regardless of game state
 pub struct SystemInput;
@@ -30,6 +30,13 @@ impl<'a> System<'a> for SystemInput {
         return;
       },
       // TODO command line switch to enable/disable debug keys
+      // debug render mode toggle
+      Some(Key { code: F9, .. }) => {
+        match state.render_mode {
+          RenderMode::Normal => { state.render_mode = RenderMode::Collision },
+          RenderMode::Collision => { state.render_mode = RenderMode::Normal }
+        }
+      }
       // regenerate the game map (debug only)
       Some(Key { code: F4, .. }) => {
         println!("DEBUG COMMAND: re-generating map");

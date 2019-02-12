@@ -12,6 +12,7 @@ mod notification;
 mod opaque;
 mod player;
 mod position;
+mod region;
 mod solid;
 
 pub use self::ai_brain::AIBrain;
@@ -25,6 +26,7 @@ pub use self::notification::NotificationInteraction;
 pub use self::opaque::Opaque;
 pub use self::player::Player;
 pub use self::position::Position;
+pub use self::region::Region;
 pub use self::solid::Solid;
 
 /// initializes all components
@@ -40,5 +42,6 @@ pub fn init(world: &mut World) {
   world.register::<Player>();
   world.register::<Position>();
   world.register::<Opaque>();
+  world.register::<Region>();
   world.register::<Solid>();
 }

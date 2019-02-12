@@ -14,17 +14,17 @@ impl<'a> System<'a> for Stage {
   fn run(&mut self, (maps, mut state): Self::SystemData) {
     match state.stage {
       GameStage::LoadingAssets => {
-        if state.frame > 120 { // simulate loading :3
+        if state.frame > 30 { // simulate loading :3
           state.stage = GameStage::Initializing;
         }
       }
       GameStage::Initializing => {
-        if state.frame > 180 && maps.populated() {
+        if state.frame > 45 && maps.ready(&state.region) {
           state.stage = GameStage::Playing;
         }
       }
       GameStage::Playing => {
-        if !maps.populated() {
+        if !maps.ready(&state.region) {
           state.stage = GameStage::Initializing;
         }
       }

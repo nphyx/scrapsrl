@@ -1,11 +1,17 @@
 use std::collections::HashMap;
-use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
-use crate::resource::area_map::Offset;
+use crate::component::Region;
 
+#[derive(PartialEq, Eq)]
 pub enum GameStage {
   LoadingAssets,
   Initializing,
   Playing
+}
+
+#[derive(PartialEq, Eq)]
+pub enum RenderMode {
+  Normal,
+  Collision
 }
 
 /// game state collects a bunch of globally needed data and coordination info in one
@@ -15,8 +21,6 @@ pub struct GameState {
   pub stage: GameStage,
   /// if true, game will close on next game loop pass
   pub close_game: bool,
-  /// a boolean map of solid entities, for checking entity collision
-  pub collision_map: HashMap<(i32, i32), bool>,
   /// frame counter
   pub frame: u32,
   /// tick counter
@@ -28,6 +32,7 @@ pub struct GameState {
   pub paused: bool,
   /// the game is being fast-forwarded, and will not accept player motion
   pub fast_forward: bool,
+
   /// when the game is not ticking, AI doesn't take its turn and time doesn't advance
   /// but some player actions can still be taken (navigate menus, inventory, look around)
   pub ticking: bool,
@@ -39,7 +44,10 @@ pub struct GameState {
   pub world_seed: u32,
 
   /// tracks the X,Y offset of the current map from 0, 0
-  pub area_offset: Offset,
+  pub region: Region,
+
+  /// rendering modes
+  pub render_mode: RenderMode,
 
   pub world_day: u32,
   pub world_time: f32,
@@ -51,7 +59,6 @@ impl Default for GameState {
     GameState{
       stage: GameStage::LoadingAssets,
       close_game: false,
-      collision_map: HashMap::new(),
       frame: 0,
       tick: 0,
 
@@ -65,7 +72,9 @@ impl Default for GameState {
 
       world_seed: 0,
 
-      area_offset: [0, 0],
+      region: Region::default(),
+
+      render_mode: RenderMode::Normal,
 
       world_day: 0,
       world_time: 18.0,
@@ -80,8 +89,13 @@ impl GameState {
     ((self.world_time * 15.0 * (std::f32::consts::PI / 180.0)).sin() + 1.0) / 2.0
   }
 
-  pub fn change_area(&mut self, x_change: i32, y_change: i32) {
-    self.area_offset[0] += x_change * MAP_WIDTH;
-    self.area_offset[0] += y_change * MAP_HEIGHT;
+  pub fn change_region(&mut self, x_change: i32, y_change: i32) {
+    self.region.x += x_change;
+    self.region.y += y_change;
+    /*
+    self.region[0] += x_change * MAP_WIDTH;
+    self.region[0] += y_change * MAP_HEIGHT;
+    */
+    println!("changed region to {:?}", self.region);
   }
 }

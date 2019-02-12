@@ -27,11 +27,11 @@ impl<'a> System<'a> for BumpInteract {
     for(plan, pos, _player) in (&plans, &positions, &players).join() {
       if plan.x == 0 && plan.y == 0 { return; } // player isn't moving
       p_pos = *pos;
-      p_plan = *plan; 
+      p_plan = *plan;
     }
-    // handle the case where the player is changing to a new map
     for(pos, _interaction, _solid) in (&mut positions, &interactions, &solids).join() {
       if p_plan + p_pos == *pos {
+        println!("found a bump interaction target at {:?}", pos);
         target.pos = Some(pos.clone());
       }
     }

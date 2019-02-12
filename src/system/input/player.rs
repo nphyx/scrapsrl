@@ -1,7 +1,7 @@
 use tcod::input::Key;
 use tcod::input::KeyCode::*;
 use specs::{System, Read, Write, WriteStorage, ReadStorage, Join, Entities};
-use crate::component::{MovePlan, Player, Position, Cursor};
+use crate::component::{MovePlan, Player, Position, Cursor, Region};
 use crate::resource::{GameState,UserInput};
 
 use super::movement_util::get_movement;
@@ -14,6 +14,7 @@ impl<'a> System<'a> for PlayerInput {
     WriteStorage<'a, Position>,
     WriteStorage<'a, MovePlan>,
     ReadStorage<'a, Player>,
+    WriteStorage<'a, Region>,
     Read<'a, GameState>,
     Write<'a, UserInput>,
     Entities<'a>
@@ -24,14 +25,16 @@ impl<'a> System<'a> for PlayerInput {
       mut positions,
       mut plans,
       players,
+      mut regions,
       state,
       mut input,
       entities): Self::SystemData) {
     let mut player_pos: Position = Position::default();
+    let mut player_region: Region = Region::default();
     if state.paused { return; } // no moving while paused
-    for (pos, to, ..) in (&positions, &mut plans, &players).join() {
-      player_pos.x = pos.x;
-      player_pos.y = pos.y;
+    for (pos, to, region, ..) in (&positions, &mut plans, &mut regions, &players).join() {
+      player_pos = *pos;
+      player_region = *region;
       match get_movement(&input) {
         Some(plan) => {
           to.x = plan.x;
@@ -49,6 +52,7 @@ impl<'a> System<'a> for PlayerInput {
       Some(Key { code: NumPad5, .. }) => {
         entities.build_entity()
           .with(Cursor, &mut cursors)
+          .with(Region{x:player_region.x, y:player_region.y}, &mut regions)
           .with(MovePlan::default(), &mut plans)
           .with(Position{x:player_pos.x, y:player_pos.y}, &mut positions)
           .build();

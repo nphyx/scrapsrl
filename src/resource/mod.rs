@@ -1,13 +1,15 @@
-mod game_state;
 mod area_map;
-mod user_input;
+mod collision_map;
+mod game_state;
 mod interaction_target;
 mod templates;
 mod ui;
+mod user_input;
 
-pub use game_state::*;
 pub use area_map::*;
-pub use user_input::*;
-pub use ui::*;
+pub use collision_map::*;
+pub use game_state::*;
 pub use interaction_target::*;
 pub use templates::*;
+pub use ui::*;
+pub use user_input::*;

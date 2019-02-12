@@ -37,23 +37,9 @@ fn make_bug(world: &mut World) {
 
   template.to_world(world)
     .with(Position{x, y})
+    .with(Region{x: 0, y: 0})
     .with(MovePlan{x: 0, y: 0})
     .build();
-    /*
-  world.create_entity()
-    .with(Solid)
-    .with(Character::blank())
-    .with(Icon{ch: ICON_BUG})
-    .with(Position{x, y})
-    .with(MovePlan{x: 0, y: 0})
-    .with(Colors{
-      fg: Color{r: 32, g: 128, b: 225},
-      bg: Color{r: 32, g: 128, b: 225}})
-    .with(Description{
-      short: "a shockroach".to_string(),
-      long: "A housecat-sized cockroach. Electric sparks arc between its antenna.".to_string()})
-  .build();
-  */
 }
 
 use specs::{Builder};
@@ -63,6 +49,7 @@ fn make_computer(world: &mut World) {
       x: MAP_WIDTH / 2 + 1,
       y: MAP_HEIGHT / 2 + 1
     })
+    .with(Region{x: 0, y: 0})
     .with(Icon{ch: ICON_OLD_COMPUTER})
     .with(Solid)
     .with(Colors{
@@ -90,11 +77,14 @@ fn main() {
   let ui_queue = UIQueue::default();
 
   let mut maps = AreaMapCollection::default();
-  maps.init([0,0], constants::CHUNK_RADIUS);
+  let mut collisions = CollisionMaps::default();
+  maps.init(&Region::new(0, 0), constants::CHUNK_RADIUS);
+  collisions.init(&Region::new(0, 0), constants::CHUNK_RADIUS);
 
   world.add_resource(state);
   world.add_resource(UserInput::default());
   world.add_resource(maps);
+  world.add_resource(collisions);
   world.add_resource(ui_queue);
   world.add_resource(Templates::default());
 
@@ -105,6 +95,7 @@ fn main() {
     .with(Player)
     .with(Solid)
     .with(Position{x:MAP_WIDTH/2, y:MAP_HEIGHT/2})
+    .with(Region{x: 0, y: 0})
     .with(MovePlan{x:0, y:0})
     .with(Icon{ch:ICON_MALE})
     .with(Colors{
@@ -122,6 +113,7 @@ fn main() {
     .with(Position{
       x: rng.gen_range(0, MAP_WIDTH),
       y: rng.gen_range(0, MAP_HEIGHT)})
+    .with(Region{x: 0, y: 0})
     .with(Icon{ch:ICON_TABLET})
     .with(Colors{
       fg: Color{r: 128, g: 128, b:128},
@@ -138,6 +130,7 @@ fn main() {
     .with(Position{
       x: rng.gen_range(0, MAP_WIDTH),
       y: rng.gen_range(0, MAP_HEIGHT)})
+    .with(Region{x: 0, y: 0})
     .with(Icon{ch:ICON_HATCHBACK})
     .with(Colors{
       fg: Color{r: 128, g: 128, b:128},
@@ -166,13 +159,13 @@ fn main() {
     .with(PlayerInput, "player_input", &["cursor_input"])
     .with(FallthroughInput, "fallthrough_input", &["player_input"])
     .with(MapGenerator::new(MAP_WIDTH, MAP_HEIGHT), "map_gen", &["fallthrough_input"])
-    .with(CollisionMap, "collision_map", &["map_gen"])
+    .with(CollisionSystem, "collision_system", &["map_gen"])
     // let AI decide what it wants to do
-    .with(AI, "ai", &["collision_map"])
+    .with(AI, "ai", &["collision_system"])
     // process AI and player actions
-    .with(AreaChange, "area_change", &["ai", "player_input", "collision_map"])
-    .with(BumpInteract, "bump_interact", &["collision_map"])
-    .with(Movement, "movement", &["area_change", "bump_interact"])
+    .with(RegionSystem, "region", &["ai", "player_input", "collision_system"])
+    .with(BumpInteract, "bump_interact", &["region", "collision_system"])
+    .with(Movement, "movement", &["region", "bump_interact"])
     .with(PostTick, "", &["movement"])
     .with(Notify, "interact_notify", &[])
     .with(Stage, "game_stage", &[])

@@ -1,5 +1,5 @@
 use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
-use crate::component::Position;
+use crate::component::{Region, Position};
 
 mod iterators;
 mod tile;
@@ -20,9 +20,6 @@ pub struct AreaMap {
   /// mark true when mapgen is complete
   pub populated: bool
 }
-
-pub type Offset = [i32; 2];
-
 
 impl Default for AreaMap {
   fn default() -> AreaMap {
@@ -82,30 +79,54 @@ use specs::{Component,VecStorage};
 #[derive(Clone,Default,Component)]
 #[storage(VecStorage)]
 pub struct AreaMapCollection {
-  maps: HashMap<Offset, AreaMap>
+  maps: HashMap<Region, AreaMap>
 }
 
 impl AreaMapCollection {
   /// initialize new maps for a given <center> and <radius> radius
   /// Note that radius extends from the edge of the center, so a "size 2" map is 5x5
-  pub fn init(&mut self, center: Offset, size: u8) {
+  pub fn init(&mut self, center: &Region, size: u8) {
     let s = size as i32; // size is only u8 to enforce an unsigned parameter
-    let min_x = center[0] - s; 
-    let max_x = center[0] + s + 1;
-    let min_y = center[1] - s; 
-    let max_y = center[1] + s + 1; 
+    let mut count: i32 = 0;
+    let min_x = center.x - s; 
+    let max_x = center.x + s + 1;
+    let min_y = center.y - s; 
+    let max_y = center.y + s + 1; 
     for x in min_x..max_x {
       for y in min_y..max_y {
-        let offset = [x, y];
-        if !self.maps.contains_key(&offset) {
-          self.maps.insert(offset, AreaMap::default());
+        let region = Region::new(x, y);
+        if !self.maps.contains_key(&region) {
+          self.maps.insert(region, AreaMap::default());
+          count += 1;
         }
       }
     }
+    if count > 0 { println!("initialized {} new maps at center {:?}, size {}", count, center, size); }
   }
 
-  pub fn get(&self, offset: Offset) -> &AreaMap {
-    return self.maps.get(&offset).unwrap();
+  /// get the map at the given location. Will probably die if the map doesn't exist, but
+  /// we want that because it shouldn't have happened.
+  pub fn get(&self, region: &Region) -> &AreaMap {
+    match self.maps.get(&region) {
+      Some(map) => { return map; },
+      None => { panic!(format!("no map for region {:?}", region)); }
+    }
+  }
+
+  /// checks whether a map is in play
+  pub fn has(&self, region: &Region) -> bool {
+    match self.maps.get(&region) {
+      Some(_) => { return true; }
+      None => { return false; }
+    }
+  }
+
+  /// check if the map for the given region is ready for play.
+  pub fn ready(&self, region: &Region) -> bool {
+    match self.maps.get(&region) {
+      Some(map) => { return map.populated; },
+      None => { return false; }
+    }
   }
 
   pub fn populated(&self) -> bool {
@@ -115,24 +136,27 @@ impl AreaMapCollection {
     }
     return result;
   }
+
   /// prunes maps in collection farther than <size> maps from <center> in a square
-  pub fn prune(&mut self, center: Offset, size: u8) {
-    let mut marked: Vec<Offset> = Vec::new();
-    for (offset, map) in self.maps.iter() {
-      if (center[0] - offset[0]).abs() > size as i32 ||
-         (center[1] - offset[1]).abs() > size as i32 {
-           marked.push(offset.clone());
+  pub fn prune(&mut self, center: &Region, size: u8) {
+    let s = size as i32;
+    let mut count: u32 = 0;
+    let mut marked: Vec<Region> = Vec::new();
+    for (region, _) in self.maps.iter() {
+      if (center.x - region.x).abs() > s ||
+         (center.y - region.y).abs() > s {
+           marked.push(region.clone());
       }
     }
     for mark in marked {
+      println!("pruning {:?}", mark);
       self.maps.remove(&mark);
+      count += 1;
     }
-  }
-  pub fn insert(&mut self, offset: Offset, map: AreaMap) {
-    self.maps.insert(offset, map);
+    if count > 0 { println!("pruned {} maps", count); }
   }
 
-  pub fn iter_mut(&mut self) -> IterMut<Offset, AreaMap> {
+  pub fn iter_mut(&mut self) -> IterMut<Region, AreaMap> {
     self.maps.iter_mut()
   }
 }
