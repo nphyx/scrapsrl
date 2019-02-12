@@ -12,10 +12,10 @@ pub fn draw_status_bar(mut console: &dyn Console, pc: &Character, state: &GameSt
   let height = 1;
   let mut text: String;
 
-  if state.paused { text = format!("-- PAUSED --"); }
-  else if state.fast_forward { text = format!("-- FAST-FORWARDING --"); }
+  if state.paused { text = "-- PAUSED --".to_string(); }
+  else if state.fast_forward { text = "-- FAST-FORWARDING --".to_string(); }
   else if state.looking {
-    text = format!("-- LOOKING --   [Enter] interact   [Esc] cancel")
+    text = "-- LOOKING --   [Enter] interact   [Esc] cancel".to_string();
   } else {
     let stamina: (u8, u8, u8) = pc.stamina();
     let focus: (u8, u8, u8) = pc.focus();

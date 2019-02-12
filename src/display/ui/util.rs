@@ -17,7 +17,7 @@ pub fn reset_colors(mut console: &dyn Console) {
 }
 
 /// Counts the number of lines a string will have to be at a given width
-pub fn count_lines(text: &String, max_length: i32) -> i32 {
+pub fn count_lines(text: &str, max_length: i32) -> i32 {
   let len:i32 = text.len() as i32;
   let mut lines = 0;
   for c in text.chars() {

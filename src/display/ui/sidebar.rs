@@ -53,7 +53,7 @@ fn draw_info(mut console: &dyn Console, ch: char, fg: Color, bg: Color, short: S
 
 use crate::component::{Icon, Colors, Description};
 /// draw entity in infobox area of sidebar
-pub fn draw_entity_info(console: &dyn Console, icon: &Icon, colors: &Colors,
+pub fn draw_entity_info(console: &dyn Console, icon: Icon, colors: Colors,
                         description: &Description) {
   draw_info(console, icon.ch, TColor::from(colors.fg), DEFAULT_BG, description.short.clone(), description.long.clone());
 }

@@ -52,6 +52,7 @@ impl Display {
 
 use specs::{System, Read, Write, ReadStorage, Join};
 impl<'a> System<'a> for Display {
+  #[allow(clippy::type_complexity)]
   type SystemData  = (
     // I'll take one of everything
     ReadStorage<'a, Character>,
@@ -145,16 +146,10 @@ impl Display {
       // only match when pressed = on, tcod fires on down + up
       Some(Key { pressed: true, ..}) => {
         keypress.set(key_input);
-        match keypress.get() {
-          Some(_) => { // flush the rest of the key queue manually
-            loop {
-              match self.root.check_for_keypress(KeyPressFlags::all()) {
-                None => { break; },
-                _ => {}
-              }
-            }
-          },
-          _ => {}
+        if keypress.get().is_some() {
+          loop {
+            if self.root.check_for_keypress(KeyPressFlags::all()).is_none() { break; }
+          }
         }
       },
       _ => {}
@@ -381,22 +376,15 @@ impl Display {
       for(region, pos, icon, color, desc)
       in (regions, positions, icons, colors, descriptions).join() {
         if *pos == cursor_pos && *region == player_region {
-          ui::draw_entity_info(&self.root, icon, color, desc);
+          ui::draw_entity_info(&self.root, *icon, *color, desc);
           found_entity = true;
         }
       }
       if !found_entity {
-        let tile = map.get(cursor_pos);
-        match tile {
-          Some(tile) => { ui::draw_tile_info(&self.root, tile); },
-          _ => {}
-        }
+        if let Some(tile) = map.get(cursor_pos) { ui::draw_tile_info(&self.root, tile); }
       }
     }
 
-    match ui_queue.get() {
-      Some(widget) => { ui::draw_centered_dialog(&self.root, widget); },
-      _ => {}
-    }
+    if let Some(widget) = ui_queue.get() { ui::draw_centered_dialog(&self.root, widget); }
   }
 }

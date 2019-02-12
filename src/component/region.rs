@@ -21,12 +21,14 @@ impl Region {
     Region{x, y}
   }
 
-  pub fn to_array(&self) -> [i32; 2] {
+  /* FIXME unused maybe not needed? replaced with to_offset
+  pub fn to_array(self) -> [i32; 2] {
     [self.x, self.y]
   }
+  */
 
   // used in map generation
-  pub fn to_offset(&self) -> [i32; 2] {
+  pub fn to_offset(self) -> [i32; 2] {
     [self.x * MAP_WIDTH, self.y * MAP_HEIGHT]
   }
 }
