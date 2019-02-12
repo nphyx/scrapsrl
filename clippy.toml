@@ -1,0 +1,2 @@
+type-complexity-threshold = 500 #specs sometimes results in unavoidable large types
+too-many-arguments-threshold = 13 #as above, display functions need lots of args
