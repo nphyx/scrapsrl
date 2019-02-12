@@ -249,15 +249,15 @@ impl Display {
       let blend = lerp(light, ambient, clamp(0.0, 1.0, rel_dist - flicker_mod));
 
       if self.map.is_in_fov(pos.x, pos.y) {
-        bg = soft_light(&soft_light(&bg, &blend), &blend); 
-        fg = soft_light(&soft_light(&fg, &blend), &blend);
-        fg = lerp(fg, lerp(orig_fg, color_dodge(&orig_fg, &light), 0.15), time_of_day_rel);
-        bg = lerp(bg, lerp(orig_bg, color_dodge(&orig_bg, &light), 0.1), time_of_day_rel);
+        bg = soft_light(soft_light(bg, blend), blend); 
+        fg = soft_light(soft_light(fg, blend), blend);
+        fg = lerp(fg, lerp(orig_fg, color_dodge(orig_fg, light), 0.15), time_of_day_rel);
+        bg = lerp(bg, lerp(orig_bg, color_dodge(orig_bg, light), 0.1), time_of_day_rel);
       } else {
-        fg = screen(&lerp(fg, fg_gray, rel_dist), &ambient);
-        bg = overlay(&lerp(bg, bg_gray, rel_dist), &ambient);
-        fg = lerp(fg, lerp(orig_fg, desaturate(&orig_fg), 0.25), time_of_day_rel);
-        bg = lerp(bg, lerp(orig_bg, desaturate(&orig_bg), 0.25), time_of_day_rel);
+        fg = screen(lerp(fg, fg_gray, rel_dist), ambient);
+        bg = overlay(lerp(bg, bg_gray, rel_dist), ambient);
+        fg = lerp(fg, lerp(orig_fg, desaturate(orig_fg), 0.25), time_of_day_rel);
+        bg = lerp(bg, lerp(orig_bg, desaturate(orig_bg), 0.25), time_of_day_rel);
       }
       // fg = screen(&fg, &ambient);
       // bg = screen(&bg, &ambient);

@@ -174,8 +174,8 @@ fn main() {
   dispatcher.setup(&mut world.res);
 
   while !window_closed {
-    display.run_now(&mut world.res);
-    dispatcher.dispatch(&mut world.res);
+    display.run_now(&world.res);
+    dispatcher.dispatch(&world.res);
     world.maintain();
     window_closed = world.read_resource::<GameState>().close_game;
   }
