@@ -31,17 +31,17 @@ pub use self::solid::Solid;
 
 /// initializes all components
 pub fn init(world: &mut World) {
-  world.register::<AIBrain>();
-  world.register::<Character>();
-  world.register::<Colors>();
-  world.register::<Cursor>();
-  world.register::<Description>();
-  world.register::<Icon>();
-  world.register::<MovePlan>();
-  world.register::<NotificationInteraction>();
-  world.register::<Player>();
-  world.register::<Position>();
-  world.register::<Opaque>();
-  world.register::<Region>();
-  world.register::<Solid>();
+    world.register::<AIBrain>();
+    world.register::<Character>();
+    world.register::<Colors>();
+    world.register::<Cursor>();
+    world.register::<Description>();
+    world.register::<Icon>();
+    world.register::<MovePlan>();
+    world.register::<NotificationInteraction>();
+    world.register::<Player>();
+    world.register::<Position>();
+    world.register::<Opaque>();
+    world.register::<Region>();
+    world.register::<Solid>();
 }

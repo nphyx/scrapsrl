@@ -1,3 +1,3 @@
 pub enum UIElementType {
-  Notification
+    Notification,
 }

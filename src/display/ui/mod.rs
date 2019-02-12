@@ -1,5 +1,5 @@
-mod status;
 mod sidebar;
+mod status;
 mod util;
 mod widget;
 

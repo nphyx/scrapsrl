@@ -18,4 +18,4 @@ pub use mapgen::*;
 pub use movement::Movement;
 pub use region::RegionSystem;
 pub use stage::*;
-pub use tick::{PreTick, PostTick};
+pub use tick::{PostTick, PreTick};
