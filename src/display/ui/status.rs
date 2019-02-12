@@ -3,7 +3,7 @@ use crate::component::Character;
 use crate::resource::GameState;
 use super::util::*;
 
-pub fn draw_status_bar(mut console: &Console, pc: &Character, state: &GameState) {
+pub fn draw_status_bar(mut console: &dyn Console, pc: &Character, state: &GameState) {
   reset_colors(&console);
   console.set_alignment(TextAlignment::Left);
   let x = 0;

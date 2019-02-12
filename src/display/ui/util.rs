@@ -11,7 +11,7 @@ pub fn horizontal_meter(max: u8, cur: u8,  cap: u8) -> String {
 }
 
 /// clears console colors
-pub fn reset_colors(mut console: &Console) {
+pub fn reset_colors(mut console: &dyn Console) {
   console.set_default_foreground(TEXT_COLOR);
   console.set_default_background(DIALOG_BG);
 }
@@ -28,7 +28,7 @@ pub fn count_lines(text: &String, max_length: i32) -> i32 {
 }
 
 /// fills a rectangular area
-pub fn fill(mut console: &Console, x:i32, y:i32, tx:i32, ty:i32, ch: char) {
+pub fn fill(mut console: &dyn Console, x:i32, y:i32, tx:i32, ty:i32, ch: char) {
   for cx in x..tx {
     for cy in y..ty {
       console.put_char(cx, cy, ch, BackgroundFlag::None);
@@ -37,11 +37,11 @@ pub fn fill(mut console: &Console, x:i32, y:i32, tx:i32, ty:i32, ch: char) {
 }
 
 /// draws a horizontal line
-pub fn horiz_line(console: &Console, x:i32, y:i32, width: i32, ch: char) {
+pub fn horiz_line(console: &dyn Console, x:i32, y:i32, width: i32, ch: char) {
   fill(console, x, y, x + width, y + 1, ch);
 }
 
 /// draws a vertical line
-pub fn vert_line(console: &Console, x:i32, y:i32, height: i32, ch: char) {
+pub fn vert_line(console: &dyn Console, x:i32, y:i32, height: i32, ch: char) {
   fill(console, x, y, x + 1, y + height, ch);
 }

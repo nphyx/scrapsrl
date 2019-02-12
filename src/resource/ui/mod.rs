@@ -14,7 +14,7 @@ pub enum UIResponse {
 }
 
 pub struct UIQueue {
-  stack: Vec<Arc<Mutex<Widget>>>
+  stack: Vec<Arc<Mutex<dyn Widget>>>
 }
 
 impl Component for UIQueue {
@@ -40,7 +40,7 @@ impl UIQueue {
     self.stack.len()
   }
 
-  pub fn get(&self) -> Option<&Arc<Mutex<Widget>>> {
+  pub fn get(&self) -> Option<&Arc<Mutex<dyn Widget>>> {
     self.stack.get(0)
   }
 

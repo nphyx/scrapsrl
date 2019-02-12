@@ -6,7 +6,7 @@ use super::util::*;
 
 type TColor = tcod::colors::Color;
 
-pub fn draw_stats(mut console: &Console, pc: &Character) {
+pub fn draw_stats(mut console: &dyn Console, pc: &Character) {
   reset_colors(&console);
   console.set_alignment(TextAlignment::Left);
   let x = console.width() - SIDEBAR_WIDTH;
@@ -42,7 +42,7 @@ pub fn draw_stats(mut console: &Console, pc: &Character) {
 
 use tcod::colors::Color;
 
-fn draw_info(mut console: &Console, ch: char, fg: Color, bg: Color, short: String, long: String) {
+fn draw_info(mut console: &dyn Console, ch: char, fg: Color, bg: Color, short: String, long: String) {
   let x = console.width() - SIDEBAR_WIDTH;
   let width = SIDEBAR_WIDTH;
   let y = 13;
@@ -53,14 +53,14 @@ fn draw_info(mut console: &Console, ch: char, fg: Color, bg: Color, short: Strin
 
 use crate::component::{Icon, Colors, Description};
 /// draw entity in infobox area of sidebar
-pub fn draw_entity_info(console: &Console, icon: &Icon, colors: &Colors,
+pub fn draw_entity_info(console: &dyn Console, icon: &Icon, colors: &Colors,
                         description: &Description) {
   draw_info(console, icon.ch, TColor::from(colors.fg), DEFAULT_BG, description.short.clone(), description.long.clone());
 }
 
 use crate::resource::{Tile, get_tile_descriptions};
 /// draw tile in info box area of sidebar
-pub fn draw_tile_info(console: &Console, tile: Tile) {
+pub fn draw_tile_info(console: &dyn Console, tile: Tile) {
   let t = &get_tile_descriptions()[tile.type_id as usize];
   draw_info(console, tile.icon, TColor::from(tile.fg), TColor::from(tile.bg), t.short_desc.to_string(), t.long_desc.to_string());
 }

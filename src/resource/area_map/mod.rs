@@ -65,7 +65,7 @@ impl AreaMap { pub fn wipe(&mut self) {
     self.tiles[pos.x as usize][pos.y as usize].icon = icon;
   }
 
-  pub fn iter(&self) -> AreaMapIter {
+  pub fn iter(&self) -> AreaMapIter<'_> {
     AreaMapIter{
       map: self,
       cur: [0, 0]
@@ -156,7 +156,7 @@ impl AreaMapCollection {
     if count > 0 { println!("pruned {} maps", count); }
   }
 
-  pub fn iter_mut(&mut self) -> IterMut<Region, AreaMap> {
+  pub fn iter_mut(&mut self) -> IterMut<'_, Region, AreaMap> {
     self.maps.iter_mut()
   }
 }

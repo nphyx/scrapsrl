@@ -1,6 +1,6 @@
-extern crate rand;
-extern crate tcod;
-extern crate specs;
+use rand;
+
+
 #[macro_use]
 extern crate specs_derive;
 

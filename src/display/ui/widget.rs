@@ -9,7 +9,7 @@ use std::sync::{Arc, Mutex};
 
 /// Draws a dialog box.
 pub fn draw_dialog(
-  mut console: &Console,
+  mut console: &dyn Console,
   cx: i32,
   cy:i32,
   title: String,
@@ -43,7 +43,7 @@ pub fn draw_dialog(
   console.print(cx + half_width - 2, cy + half_height, footer);
 }
 
-pub fn draw_centered_dialog(console: &Console, dialog: &Arc<Mutex<Widget>>) { 
+pub fn draw_centered_dialog(console: &dyn Console, dialog: &Arc<Mutex<dyn Widget>>) { 
   let cx = MAP_WIDTH / 2;
   let cy = MAP_HEIGHT / 2;
   let lock = dialog.lock().unwrap();
