@@ -38,7 +38,7 @@ impl std::ops::Add<MovePlan> for Position {
 
 impl std::cmp::PartialEq<MovePlan> for Position {
   fn eq(&self, &cmp: &MovePlan) -> bool {
-    return self.x == cmp.x && self.y == cmp.y;
+    self.x == cmp.x && self.y == cmp.y
   }
 }
 

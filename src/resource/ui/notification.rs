@@ -22,8 +22,8 @@ impl Widget for Notification {
   fn get_footer(&self) -> String { "[Esc] Close".to_string() }
   fn next(&mut self, input: Key) -> UIResponse {
     match input {
-      Key {code: Escape, .. } => { return UIResponse::Completed; },
-      _ => { return UIResponse::Unrecognized; }
+      Key {code: Escape, .. } => { UIResponse::Completed },
+      _ => { UIResponse::Unrecognized }
     }
   }
   fn done(&self) -> bool { self.done }

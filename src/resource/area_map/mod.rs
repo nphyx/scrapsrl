@@ -40,7 +40,7 @@ impl AreaMap { pub fn wipe(&mut self) {
   pub fn get(&self, pos: Position) -> Option<Tile> {
     if 0 > pos.x || pos.x >= self.width || 
        0 > pos.y || pos.y >= self.height {
-         return None 
+         return None;
     }
     Some(self.tiles[pos.x as usize][pos.y as usize])
   }
@@ -48,7 +48,7 @@ impl AreaMap { pub fn wipe(&mut self) {
   pub fn get_icon(&self, pos: Position) -> Option<char> {
     if 0 > pos.x || pos.x >= self.width || 
        0 > pos.y || pos.y >= self.height {
-         return None 
+         return None;
     }
     Some(self.tiles[pos.x as usize][pos.y as usize].icon)
   }
@@ -108,7 +108,7 @@ impl AreaMapCollection {
   /// we want that because it shouldn't have happened.
   pub fn get(&self, region: Region) -> &AreaMap {
     match self.maps.get(&region) {
-      Some(map) => { return map; },
+      Some(map) => { map },
       None => { panic!(format!("no map for region {:?}", region)); }
     }
   }
@@ -116,16 +116,16 @@ impl AreaMapCollection {
   /// checks whether a map is in play
   pub fn has(&self, region: Region) -> bool {
     match self.maps.get(&region) {
-      Some(_) => { return true; }
-      None => { return false; }
+      Some(_) => { true }
+      None => { false }
     }
   }
 
   /// check if the map for the given region is ready for play.
   pub fn ready(&self, region: Region) -> bool {
     match self.maps.get(&region) {
-      Some(map) => { return map.populated; },
-      None => { return false; }
+      Some(map) => { map.populated },
+      None => { false }
     }
   }
 
@@ -134,7 +134,7 @@ impl AreaMapCollection {
     for (_, map) in self.maps.iter() {
       result = result && map.populated
     }
-    return result;
+    result
   }
 
   /// prunes maps in collection farther than <size> maps from <center> in a square

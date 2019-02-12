@@ -18,9 +18,10 @@ impl UserInput {
   }
 
   pub fn get(&self) -> Option<Key> {
+    // FIXME was this supposed to do something besides passthrough?
     match self.key {
-      Some(key) => { return Some(key); },
-      None => { return None; }
+      Some(key) => { Some(key) },
+      None => { None }
     }
   }
   pub fn set(&mut self, key: Option<Key>) {

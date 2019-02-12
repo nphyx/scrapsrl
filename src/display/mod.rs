@@ -102,7 +102,7 @@ impl<'a> System<'a> for Display {
     self.root.set_default_background(DEFAULT_BG);
     self.root.set_default_foreground(DEFAULT_FG);
 
-    let dot_dot_dot = (((state.frame / 15) % 4)) as usize;
+    let dot_dot_dot = ((state.frame / 15) % 4) as usize;
     match state.stage {
       GameStage::LoadingAssets => {
         self.render_splash("Loading Assets", dot_dot_dot);

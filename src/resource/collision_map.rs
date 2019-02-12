@@ -15,7 +15,7 @@ impl CollisionMap {
   }
 
   pub fn get(&self, position: Position) -> bool {
-    return self.map[position.x as usize][position.y as usize]
+    self.map[position.x as usize][position.y as usize]
   }
 }
 
@@ -40,10 +40,10 @@ impl CollisionMaps {
   */
   pub fn get(&self, region: Region, position: Position) -> bool {
     match self.maps.get(&region) {
-      Some(region) => { return region.get(position); }
+      Some(region) => { region.get(position) }
       None => {
         println!("tried to get a collision map for {:?} but there wasn't one", region);
-        return true;
+        true
       }
     }
   }

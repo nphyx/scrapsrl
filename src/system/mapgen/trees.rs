@@ -21,7 +21,7 @@ fn check_tree_placement(tree_places: &[(i32, i32)], cx: i32, cy: i32, size: i32)
       if tree_places.contains(&(x, y)) { return false; }
     }
   }
-  return true;
+  true
 }
 
 /// place large trees on the map, density is 0-1 with 1 being very dense

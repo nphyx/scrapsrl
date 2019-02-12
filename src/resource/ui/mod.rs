@@ -55,7 +55,7 @@ impl UIQueue {
     if let UIResponse::Completed = response {
       self.stack.remove(0);
     }
-    return response
+    response
   }
 }
 
