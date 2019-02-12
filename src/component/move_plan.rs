@@ -4,7 +4,7 @@ use crate::constants::{MAP_WIDTH, MAP_HEIGHT};
 use crate::util::clamp;
 use super::Position; // ha!
 
-#[derive(Copy,Clone,Debug,Hash,Default,Component,Deserialize,Serialize)]
+#[derive(Copy,Clone,Component,Debug,Default,PartialEq,Eq,Hash,Deserialize,Serialize)]
 #[storage(VecStorage)]
 pub struct MovePlan {
   pub x: i32,
@@ -37,11 +37,3 @@ impl std::cmp::PartialEq<Position> for MovePlan {
     return self.x == cmp.x && self.y == cmp.y;
   }
 }
-
-impl std::cmp::PartialEq<MovePlan> for MovePlan {
-  fn eq(&self, &cmp: &MovePlan) -> bool {
-    return self.x == cmp.x && self.y == cmp.y;
-  }
-}
-
-impl std::cmp::Eq for MovePlan {}

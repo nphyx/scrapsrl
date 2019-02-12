@@ -8,7 +8,7 @@ use super::MovePlan;
  * A positional coordinate.
  */
 
-#[derive(Copy,Clone,Debug,Hash,Default,Component,Deserialize,Serialize)]
+#[derive(Copy,Clone,Debug,Eq,PartialEq,Hash,Default,Component,Deserialize,Serialize)]
 #[storage(VecStorage)]
 pub struct Position {
   pub x: i32,
@@ -42,16 +42,8 @@ impl std::cmp::PartialEq<MovePlan> for Position {
   }
 }
 
-impl std::cmp::PartialEq for Position {
-  fn eq(&self, &cmp: &Position) -> bool {
-    return self.x == cmp.x && self.y == cmp.y;
-  }
-}
-
-impl std::cmp::Eq for Position {}
-
 impl Position {
-  pub fn to_array(&self) -> [i32; 2] {
+  pub fn to_array(self) -> [i32; 2] {
     [self.x, self.y]
   }
 }
