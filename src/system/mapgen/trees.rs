@@ -15,9 +15,9 @@ fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
   if size % 2 != 0 { map.set(Position{x:cx, y:cy}, Tile::new('o', fg, bg, false, false, TYPE_TREE)); }
 }
 
-fn check_tree_placement(tree_places: &Vec<(i32, i32)>, cx: i32, cy: i32, size: i32) -> bool {
-  for x in cx-size-1..cx+size+1 {
-    for y in cy-size-1..cy+size+1 {
+fn check_tree_placement(tree_places: &[(i32, i32)], cx: i32, cy: i32, size: i32) -> bool {
+  for x in cx-size-1..=cx+size {
+    for y in cy-size-1..=cy+size {
       if tree_places.contains(&(x, y)) { return false; }
     }
   }

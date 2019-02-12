@@ -26,11 +26,8 @@ fn place_car(map: &mut AreaMap, pos:[i32; 2], offset: [i32; 2], noise: &Noise, s
   let i = turb_offset(noise, pos, offset, scale, 32);
   let fg = lerp(color_good, color_bad, i * damage_factor);
   let pos = Position{x: pos[0], y: pos[1]};
-  match map.get(pos) {
-    Some(tile) => {
-      map.set(pos, Tile::new(ch, fg, tile.bg, true, false, TYPE_VEHICLE))
-    },
-    None => {}
+  if let Some(tile) = map.get(pos) {
+    map.set(pos, Tile::new(ch, fg, tile.bg, true, false, TYPE_VEHICLE))
   }
 }
 
@@ -63,7 +60,7 @@ pub fn place_horizontal_roads(noise: &Noise, map: &mut AreaMap, offset: [i32; 2]
     let y = road_lat(noise, map, cx, offset).floor() as i32;
     let y_min = y - (lanes);
     let y_max = y + (lanes);
-    for cy in y_min..y_max+1 {
+    for cy in y_min..=y_max {
       let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
       let pos = Position{x: cx, y: cy};
       if y > 0 && y < map.height {

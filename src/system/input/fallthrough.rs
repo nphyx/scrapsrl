@@ -12,11 +12,8 @@ impl<'a> System<'a> for FallthroughInput {
   );
 
   fn run(&mut self, (mut input, mut state): Self::SystemData) {
-    match input.get() {
-      Some(Key { code: Escape, .. }) => {
-        state.close_game = true;
-      },
-      _ => {}
+    if let Some(Key { code: Escape, .. }) = input.get() {
+      state.close_game = true;
     }
     input.consume();
   }

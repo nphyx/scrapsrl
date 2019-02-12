@@ -32,7 +32,7 @@ impl<'a> System<'a> for BumpInteract {
     for(pos, _interaction, _solid) in (&mut positions, &interactions, &solids).join() {
       if p_plan + p_pos == *pos {
         println!("found a bump interaction target at {:?}", pos);
-        target.pos = Some(pos.clone());
+        target.pos = Some(*pos);
       }
     }
   }

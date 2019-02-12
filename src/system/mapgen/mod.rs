@@ -32,9 +32,9 @@ impl<'a> System<'a> for MapGenerator {
 
   fn run(&mut self, (mut maps, mut state): Self::SystemData) {
     if state.stage == GameStage::LoadingAssets { return; } // don't try to build map while assets loading
-    for (offset, map) in maps.iter_mut() {
+    for (region, map) in maps.iter_mut() {
       if !map.populated {
-        self.generate(offset, map, &mut state);
+        self.generate(*region, map, &mut state);
         return; // only do one per pass, so we can show progress
       }
     }
@@ -42,7 +42,7 @@ impl<'a> System<'a> for MapGenerator {
 }
 
 impl MapGenerator {
-  fn generate(&mut self, region: &Region, map: &mut AreaMap, state: &mut GameState) {
+  fn generate(&mut self, region: Region, map: &mut AreaMap, state: &mut GameState) {
     // let map = AreaMap::default();
     println!("Generating new map with world seed {} for region {:?}",
       state.world_seed,

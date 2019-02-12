@@ -18,21 +18,18 @@ impl<'a> System<'a> for Notify {
 
   fn run(&mut self, (regions, positions, notifications, mut target, mut queue, state): Self::SystemData) {
     let mut matched: bool = false;
-    match target.pos {
-      Some(t_pos) => {
-        for (e_region, e_pos, notice) in (&regions, &positions, &notifications).join() {
-          if matched { break; }
-          match target.method {
-            InteractionMethod::Check => {
-              if *e_pos == t_pos && *e_region == state.region {
-                queue.add(Notification::new(notice.header.clone(), notice.body.clone()));
-                matched = true;
-              }
+    if let Some(t_pos) = target.pos {
+      for (e_region, e_pos, notice) in (&regions, &positions, &notifications).join() {
+        if matched { break; }
+        match target.method {
+          InteractionMethod::Check => {
+            if *e_pos == t_pos && *e_region == state.region {
+              queue.add(Notification::new(notice.header.clone(), notice.body.clone()));
+              matched = true;
             }
           }
         }
-      },
-      None => {}
+      }
     }
     target.pos = None;
     target.entity = None;

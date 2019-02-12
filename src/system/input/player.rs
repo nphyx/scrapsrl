@@ -35,14 +35,11 @@ impl<'a> System<'a> for PlayerInput {
     for (pos, to, region, ..) in (&positions, &mut plans, &mut regions, &players).join() {
       player_pos = *pos;
       player_region = *region;
-      match get_movement(&input) {
-        Some(plan) => {
-          to.x = plan.x;
-          to.y = plan.y;
-          input.consume();
-          return;
-        },
-        _ => {}
+      if let Some(plan) = get_movement(&input) {
+        to.x = plan.x;
+        to.y = plan.y;
+        input.consume();
+        return;
       }
     }
 

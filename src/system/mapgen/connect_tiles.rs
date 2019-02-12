@@ -7,21 +7,15 @@ pub fn connect(map: &mut AreaMap) {
   let mut queue: Vec<(i32, i32, char)> = Vec::new();
   for x in 0..map.width {
     for y in 0..map.height {
-      match map.get(Position{x, y}) {
-        Some(t) => {
-          match connectables.connect(
-            t.icon,
-            map.get_icon(Position{x, y: y - 1}),
-            map.get_icon(Position{x, y: y + 1}),
-            map.get_icon(Position{x: x - 1, y}),
-            map.get_icon(Position{x: x + 1, y})) {
-            Some(icon) => {
-              queue.push((x, y, icon));
-            },
-            None => {}
-          }
-        },
-        None => {}
+      if let Some(t) = map.get(Position{x, y}) {
+        if let Some(icon) = connectables.connect(
+          t.icon,
+          map.get_icon(Position{x, y: y - 1}),
+          map.get_icon(Position{x, y: y + 1}),
+          map.get_icon(Position{x: x - 1, y}),
+          map.get_icon(Position{x: x + 1, y})) {
+            queue.push((x, y, icon));
+        }
       }
     }
   }

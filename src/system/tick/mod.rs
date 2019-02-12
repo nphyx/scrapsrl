@@ -30,10 +30,8 @@ impl<'a> System<'a> for PreTick {
       cursor_mode = true; // if there's a cursor in play, we don't tick
     }
 
-    match input.get() {
-      // don't tick if there's no key input this frame
-      Some(_) => { has_input = true; },
-      None => {}
+    if input.get().is_some() {
+      has_input = true;
     }
 
     // FIXME this is getting junkier the more variables are in play 
@@ -53,7 +51,7 @@ impl<'a> System<'a> for PreTick {
     state.frame += 1;
     if state.ticking {
       state.tick += 1;
-      state.world_time = state.world_time + (100.0 / 60.0) / 100.0;
+      state.world_time += (100.0 / 60.0) / 100.0;
       if state.world_time >= 24.0 {
         state.world_time = 0.0;
         state.world_day += 1;

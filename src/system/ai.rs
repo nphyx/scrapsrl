@@ -31,15 +31,12 @@ impl<'a> System<'a> for AI {
               x: pos.x + to.x,
               y: pos.y + to.y
             };
-            match map.get(target) {
-              Some(tile) => {
-                if tile.walkable {
-                  plan.x = to.x;
-                  plan.y = to.y;
-                  done = true;
-                }
-              },
-              None => {}
+            if let Some(tile) = map.get(target) {
+              if tile.walkable {
+                plan.x = to.x;
+                plan.y = to.y;
+                done = true;
+              }
             }
             tries += 1;
           }

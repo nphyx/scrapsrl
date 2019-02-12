@@ -32,12 +32,9 @@ impl<'a> System<'a> for CursorInput {
     for (pos, to, entity, _) in (&positions, &mut plans, &entities, &cursors).join() {
       state.looking = true;
 
-      match get_movement(&input) {
-        Some(plan) => {
-          to.x = plan.x;
-          to.y = plan.y;
-        },
-        _ => {}
+      if let Some(plan) = get_movement(&input) {
+        to.x = plan.x;
+        to.y = plan.y;
       }
 
       match input.get() {
@@ -46,7 +43,7 @@ impl<'a> System<'a> for CursorInput {
         },
         Some(Key { code: Enter, .. }) |
         Some(Key { code: NumPadEnter, ..}) => {
-          target.pos = Some(pos.clone());
+          target.pos = Some(*pos);
           entities.delete(entity).expect("tried to delete a non-existent cursor");
         }
         _ => {}
