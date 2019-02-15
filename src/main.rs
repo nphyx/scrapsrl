@@ -190,6 +190,7 @@ fn main() {
     let mut dispatcher = DispatcherBuilder::new()
         // do game state maintenance. sadly not really taking advantage
         // of parallelism but maybe eventually it can
+        .with(AssetLoader::default(), "", &[])
         .with(PreTick, "", &[])
         // handle user input first
         .with(UIInput, "ui_input", &[])

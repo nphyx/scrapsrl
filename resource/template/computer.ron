@@ -1,0 +1,13 @@
+(
+    colors: Some((
+        fg: (r:130, g:130, b:127),
+        bg: (r:35, g:35, b:32),
+    )),
+    description: Some((
+        short: "an old computer",
+        long: "An old-world electronic device. Looks like it's still working.",
+    )),
+    icon: Some((ch: '\u{fcbe}',)),
+    notification: Some((header: "\u{fcbe}", body: "Bleep, bloop!")),
+    solid: Some(()),
+)

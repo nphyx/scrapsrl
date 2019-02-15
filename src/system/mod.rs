@@ -1,4 +1,5 @@
 mod ai;
+mod assets;
 mod bump_interact;
 mod collision_system;
 mod interact;
@@ -11,6 +12,7 @@ mod tick;
 pub mod input;
 
 pub use ai::AI;
+pub use assets::AssetLoader;
 pub use bump_interact::BumpInteract;
 pub use collision_system::CollisionSystem;
 pub use interact::Notify;

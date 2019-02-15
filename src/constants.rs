@@ -20,3 +20,5 @@ pub const DEFAULT_FG: Color = Color {
 };
 
 pub const CHUNK_RADIUS: u8 = 2;
+
+pub const ENTITY_TEMPLATE_DIR: &str = "./resource/template";

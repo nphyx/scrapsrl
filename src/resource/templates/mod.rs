@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 /// Templates for game objects, to be serialized and deserialized from RON files
 use specs::World;
 
@@ -8,7 +8,7 @@ pub use builder::*;
 
 use crate::component::*;
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct EntityTemplate {
     brain: Option<AIBrain>,
     character: Option<Character>,
@@ -66,24 +66,30 @@ impl EntityTemplate {
     }
 }
 
-/* FIXME unused
 use specs::{Component, VecStorage};
 use std::collections::HashMap;
 #[derive(Component)]
 #[storage(VecStorage)]
 pub struct Templates {
-  contents: HashMap<String, EntityTemplate>
+    contents: HashMap<String, EntityTemplate>,
+    pub ready: bool,
 }
 
 impl Default for Templates {
-  fn default() -> Templates {
-    Templates{contents: HashMap::new()}
-  }
+    fn default() -> Templates {
+        Templates {
+            contents: HashMap::new(),
+            ready: false,
+        }
+    }
 }
 
 impl Templates {
-  fn add(&mut self, name: String, template: EntityTemplate) {
-    self.contents.insert(name, template);
-  }
+    pub fn add(&mut self, name: String, template: EntityTemplate) {
+        self.contents.insert(name, template);
+    }
+
+    pub fn len(&self) -> usize {
+        self.contents.len()
+    }
 }
-*/

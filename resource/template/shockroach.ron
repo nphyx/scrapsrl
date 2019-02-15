@@ -21,14 +21,14 @@
         cur_grit: 2,
     )),
     colors: Some((
-        fg: (r: 32, g: 128, b: 225),
-        bg: (r: 32, g: 128, b: 225),
+        fg: (r: 32, g: 128, b: 255),
+        bg: (r: 32, g: 128, b: 255)
     )),
     description: Some((
         short: "a shockroach",
         long: "A housecat-sized cockroach. Electric sparks arc between its antenna.",
     )),
-    icon: Some((ch: '',)),
+    icon: Some((ch: '\u{e269}',)),
     notification: None,
     solid: Some(()),
 )
