@@ -127,10 +127,7 @@ impl AreaMapCollection {
 
     /// checks whether a map is in play
     pub fn has(&self, region: Region) -> bool {
-        match self.maps.get(&region) {
-            Some(_) => true,
-            None => false,
-        }
+        self.maps.get(&region).is_some()
     }
 
     /// check if the map for the given region is ready for play.
