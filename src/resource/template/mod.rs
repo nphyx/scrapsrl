@@ -61,4 +61,33 @@ impl Templates {
     pub fn len(&self) -> usize {
         self.entities.len() + self.icons.len() + self.structures.len() + self.geographies.len()
     }
+    pub fn entity_len(&self) -> usize {
+        self.entities.len()
+    }
+    pub fn icon_len(&self) -> usize {
+        self.icons.len()
+    }
+    pub fn geography_len(&self) -> usize {
+        self.geographies.len()
+    }
+    pub fn structure_len(&self) -> usize {
+        self.structures.len()
+    }
+    /// chooses a random geography based on a random number <selector>
+    pub fn choose_geography(&self, selector: f32) -> GeographyTemplate {
+        let keys: Vec<String> = self.geographies.keys().map(|k| k.clone()).collect();
+        let len = keys.len() as f32;
+        self.geographies
+            .get(keys.get((len * (selector % len)).floor() as usize).unwrap())
+            .unwrap()
+            .clone()
+    }
+
+    pub fn get_icon(&self, name: String) -> IconTemplate {
+        println!("Looking up icon {}", name);
+        self.icons
+            .get(&name)
+            .unwrap_or(&IconTemplate::default())
+            .clone()
+    }
 }

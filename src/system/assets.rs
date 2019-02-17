@@ -86,9 +86,14 @@ impl AssetLoader {
     fn process_queue<'a>(&mut self, templates: &mut Write<'a, Templates>) {
         if let Some(queue) = &mut self.queue {
             if let Some((template_type, next)) = queue.pop() {
-                // TODO handle this without using strings
+                println!("reading template from file {:?}", next);
                 let path = next.path();
                 let name = path.file_stem().unwrap().to_str().unwrap().to_string();
+                let file_type = path.extension().unwrap().to_str().unwrap();
+                if file_type != "ron" {
+                    println!("not a ron file, skipping {:?}", next);
+                    return;
+                }
                 let mut file = File::open(path).expect("error: could not open template file");
                 let mut text = String::new();
                 file.read_to_string(&mut text)
@@ -113,7 +118,7 @@ impl AssetLoader {
                 }
             } else {
                 templates.ready = true;
-                println!("finished loading templates.");
+                println!("finished loading {} templates: {} entities, {} icons, {} geographies, {} structures.", templates.len(), templates.entity_len(), templates.icon_len(), templates.geography_len(), templates.structure_len());
             }
         }
     }

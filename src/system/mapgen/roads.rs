@@ -1,4 +1,4 @@
-use super::ground_cover::grass_bg_color;
+// use super::ground_cover::ground_bg_color;
 use super::util::*;
 use crate::component::{Color, Position};
 use crate::resource::{tile_types::*, AreaMap, Tile};
@@ -41,13 +41,13 @@ fn place_car(
     }
 }
 
-fn damaged_road(grass_bg: Color, road_bg: Color, blend_factor: f32) -> Tile {
+fn damaged_road(ground_bg: Color, road_bg: Color, blend_factor: f32) -> Tile {
     let grass_fg = Color {
         r: 102,
         g: 161,
         b: 94,
     };
-    let bg = lerp(grass_bg, road_bg, blend_factor * 0.5);
+    let bg = lerp(ground_bg, road_bg, blend_factor * 0.5);
     Tile::new(',', grass_fg, bg, true, true, TYPE_ROAD_CRACKED)
 }
 
@@ -82,16 +82,8 @@ pub fn place_horizontal_roads(
         g: 90,
         b: 61,
     };
-    let road_bg = Color {
-        r: 22,
-        g: 20,
-        b: 16,
-    };
-    let road_rubble_fg = Color {
-        r: 26,
-        g: 23,
-        b: 20,
-    };
+    let road_bg = Color { r: 4, g: 4, b: 4 };
+    let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
     for cx in 0..map.width {
         let y = road_lat(noise, map, cx, offset).floor() as i32;
         let y_min = y - (lanes);
@@ -99,10 +91,13 @@ pub fn place_horizontal_roads(
         for cy in y_min..=y_max {
             let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
             let pos = Position { x: cx, y: cy };
+            let mut ground_bg = Color::new(0, 0, 0);
             if y > 0 && y < map.height {
                 if i < damage_factor {
-                    let grass_bg = grass_bg_color(noise, pos.to_array(), offset, noise_scale, 32);
-                    map.set(pos, damaged_road(grass_bg, road_bg, i));
+                    if let Some(tile) = map.get(pos) {
+                        ground_bg = tile.bg;
+                    }
+                    map.set(pos, damaged_road(ground_bg, road_bg, i));
                 } else if cy == y_min || cy == y_max {
                     // outer line
                     map.set(pos, road_segment(LINE_HORIZ, road_line_fg, road_bg));

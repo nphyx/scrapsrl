@@ -76,7 +76,7 @@ impl Default for GameState {
             render_mode: RenderMode::Normal,
 
             world_day: 0,
-            world_time: 18.0,
+            world_time: 6.0,
             world_year: 0,
         }
     }

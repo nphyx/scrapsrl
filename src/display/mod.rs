@@ -273,7 +273,7 @@ impl Display {
         let bg_gray = Color::new(8, 8, 8);
         let fg_gray = Color::new(24, 24, 24);
 
-        // lighting pass SUPER SLOW
+        // lighting pass
         for (pos, _) in map.iter() {
             let orig_fg = Color::from(self.root.get_char_foreground(pos.x, pos.y));
             let orig_bg = Color::from(self.root.get_char_background(pos.x, pos.y));
@@ -294,17 +294,17 @@ impl Display {
                 fg = soft_light(soft_light(fg, blend), blend);
                 fg = lerp(
                     fg,
-                    lerp(orig_fg, color_dodge(orig_fg, light), 0.15),
+                    lerp(orig_fg, screen(orig_fg, light), 0.15),
                     time_of_day_rel,
                 );
                 bg = lerp(
                     bg,
-                    lerp(orig_bg, color_dodge(orig_bg, light), 0.1),
+                    lerp(orig_bg, screen(orig_bg, light), 0.1),
                     time_of_day_rel,
                 );
             } else {
                 fg = screen(lerp(fg, fg_gray, rel_dist), ambient);
-                bg = overlay(lerp(bg, bg_gray, rel_dist), ambient);
+                bg = screen(lerp(bg, bg_gray, rel_dist), ambient);
                 fg = lerp(
                     fg,
                     lerp(orig_fg, desaturate(orig_fg), 0.25),
@@ -316,8 +316,6 @@ impl Display {
                     time_of_day_rel,
                 );
             }
-            // fg = screen(&fg, &ambient);
-            // bg = screen(&bg, &ambient);
             self.root
                 .set_char_foreground(pos.x, pos.y, TColor::from(fg));
             self.root

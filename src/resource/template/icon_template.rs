@@ -79,4 +79,7 @@ impl IconTemplate {
             (false, false, false, false) => self.base,
         }
     }
+    pub fn base_ch(&self) -> char {
+        self.base
+    }
 }
