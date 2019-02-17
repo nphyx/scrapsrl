@@ -9,7 +9,7 @@ pub struct EntityTemplate {
     character: Option<Character>,
     colors: Option<Colors>,
     description: Option<Description>,
-    icon: Option<Icon>,
+    icon: Option<IconRef>,
     notification: Option<NotificationInteraction>,
     solid: Option<Solid>,
 }
@@ -106,8 +106,8 @@ impl EntityTemplateBuilder {
         self
     }
 
-    pub fn icon(&mut self, ch: char) -> &mut EntityTemplateBuilder {
-        self.template.icon = Some(Icon { ch });
+    pub fn icon(&mut self, name: String) -> &mut EntityTemplateBuilder {
+        self.template.icon = Some(IconRef { name });
         self
     }
 

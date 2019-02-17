@@ -31,7 +31,6 @@ impl<'a> System<'a> for Movement {
         {
             // guard against entities outside currently loaded map
             if !area_maps.has(*region) {
-                println!("skipping an entity because it's outside the loaded area");
                 continue;
             }
             let map = area_maps.get(*region);

@@ -1,5 +1,5 @@
 /// A collection of common codepoints for icons used in game.
-// ENABLE ICONS AS NEEDED
+// TODO IN PROGRESS MIGRATING TO ICON RESOURCES
 
 #[allow(unused_variables)]
 #[allow(dead_code)]
@@ -29,8 +29,6 @@ pub const LINE_DBL_T_U: char = '\u{2569}';
 pub const LINE_DBL_T_D: char = '\u{2566}';
 
 // objects
-pub const ICON_OLD_COMPUTER: char = '\u{fcbe}';
-pub const ICON_TABLET: char = '\u{f9f7}';
 /*
 pub const ICON_SERVER_STACK: char = '\u{f98a}';
 pub const ICON_CIRCUIT_BOARD: char = '\u{f93e}';
@@ -59,35 +57,17 @@ pub const ICON_SWORD: char = '\u{f9e4}';
 */
 
 // people
-pub const ICON_MALE: char = '\u{f183}';
 
 /*
-pub const ICON_FEMALE: char = '\u{f182}';
 pub const ICON_SWIMMING: char = '\u{f9e2}';
 */
 
-// flora
-// lines
-pub const TREE: char = '\u{e00c}';
-pub const TREE_HORIZ: char = '\u{e00c}';
-pub const TREE_TL: char = '\u{e011}';
-pub const TREE_TR: char = '\u{e013}';
-pub const TREE_BL: char = '\u{e00e}';
-pub const TREE_BR: char = '\u{e010}';
-pub const TREE_VERT: char = '\u{e00c}';
-pub const TREE_T_L: char = '\u{e00d}';
-pub const TREE_T_R: char = '\u{e00b}';
-pub const TREE_T_U: char = '\u{e00f}';
-pub const TREE_T_D: char = '\u{e012}';
-pub const TREE_STUMP: char = '\u{e014}';
 /*
 pub const ICON_HERB: char = '\u{e22f}';
 pub const ICON_MUSHROOM_1: char = '\u{fcdd}';
 pub const ICON_MUSHROOM_2: char = '\u{fcde}';
 */
 
-// fauna
-pub const ICON_BUG: char = '\u{e269}';
 /*
 pub const ICON_ELEPHANT: char = '\u{fcc4}';
 pub const ICON_PENGUIN: char = '\u{f83c}';
@@ -100,8 +80,6 @@ pub const ICON_SATELLITE: char = '\u{f790}';
 */
 
 // vehicles
-pub const ICON_BUS: char = '\u{fc9e}';
-pub const ICON_DBL_BUS: char = '\u{fc9c}';
 pub const ICON_SCHOOL_BUS: char = '\u{fc9d}';
 pub const ICON_CONVERTIBLE: char = '\u{fca5}';
 pub const ICON_SUV: char = '\u{fca6}';

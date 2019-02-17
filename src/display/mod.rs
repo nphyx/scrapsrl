@@ -57,13 +57,14 @@ impl<'a> System<'a> for Display {
         ReadStorage<'a, Colors>,
         ReadStorage<'a, Cursor>,
         ReadStorage<'a, Description>,
-        ReadStorage<'a, Icon>,
+        ReadStorage<'a, IconRef>,
         ReadStorage<'a, Player>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, Region>,
         ReadStorage<'a, Solid>,
         Write<'a, GameState>,
         Read<'a, AreaMapCollection>,
+        Read<'a, Assets>,
         Read<'a, CollisionMaps>,
         Read<'a, UIQueue>,
         Write<'a, UserInput>,
@@ -83,6 +84,7 @@ impl<'a> System<'a> for Display {
             solids,
             mut state,
             maps,
+            assets,
             collisions,
             ui_queue,
             mut keypress,
@@ -117,6 +119,7 @@ impl<'a> System<'a> for Display {
                         &players,
                         &positions,
                         &regions,
+                        &assets,
                         &mut state,
                         &maps,
                     );
@@ -130,6 +133,7 @@ impl<'a> System<'a> for Display {
                         &positions,
                         &regions,
                         &maps,
+                        &assets,
                         &mut state,
                         &ui_queue,
                     );
@@ -144,6 +148,7 @@ impl<'a> System<'a> for Display {
                         &positions,
                         &regions,
                         &solids,
+                        &assets,
                         &mut state,
                         &maps,
                         &collisions,
@@ -158,6 +163,7 @@ impl<'a> System<'a> for Display {
                         &positions,
                         &regions,
                         &maps,
+                        &assets,
                         &mut state,
                         &ui_queue,
                     );
@@ -209,11 +215,12 @@ impl Display {
         characters: &ReadStorage<'a, Character>,
         cursors: &ReadStorage<'a, Cursor>,
         colors: &ReadStorage<'a, Colors>,
-        icons: &ReadStorage<'a, Icon>,
+        icons: &ReadStorage<'a, IconRef>,
         players: &ReadStorage<'a, Player>,
         positions: &ReadStorage<'a, Position>,
         regions: &ReadStorage<'a, Region>,
 
+        assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
         maps: &Read<'a, AreaMapCollection>,
     ) {
@@ -256,8 +263,12 @@ impl Display {
         // draw all npcs, also snag the one under the cursor if applicable
         for (region, pos, icon, color, ..) in (regions, positions, icons, colors, !players).join() {
             if self.map.is_in_fov(pos.x, pos.y) && *region == player_region {
-                self.root
-                    .put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
+                self.root.put_char(
+                    pos.x,
+                    pos.y,
+                    assets.get_icon(&icon.name).base_ch(),
+                    BackgroundFlag::None,
+                );
                 self.root
                     .set_char_foreground(pos.x, pos.y, TColor::from(color.fg));
             }
@@ -324,8 +335,12 @@ impl Display {
 
         // draw player, make sure it ends up on top
         for (pos, icon, color, ..) in (positions, icons, colors, players).join() {
-            self.root
-                .put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
+            self.root.put_char(
+                pos.x,
+                pos.y,
+                assets.get_icon(&icon.name).base_ch(),
+                BackgroundFlag::None,
+            );
             self.root
                 .set_char_foreground(pos.x, pos.y, TColor::from(color.fg))
         }
@@ -348,12 +363,13 @@ impl Display {
         characters: &ReadStorage<'a, Character>,
         cursors: &ReadStorage<'a, Cursor>,
         colors: &ReadStorage<'a, Colors>,
-        icons: &ReadStorage<'a, Icon>,
+        icons: &ReadStorage<'a, IconRef>,
         players: &ReadStorage<'a, Player>,
         positions: &ReadStorage<'a, Position>,
         regions: &ReadStorage<'a, Region>,
         solids: &ReadStorage<'a, Solid>,
 
+        assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
         maps: &Read<'a, AreaMapCollection>,
         collisions: &Read<'a, CollisionMaps>,
@@ -387,8 +403,12 @@ impl Display {
         // draw all npcs, also snag the one under the cursor if applicable
         for (region, pos, icon, color, ..) in (regions, positions, icons, colors, !players).join() {
             if *region == player_region {
-                self.root
-                    .put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
+                self.root.put_char(
+                    pos.x,
+                    pos.y,
+                    assets.get_icon(&icon.name).base_ch(),
+                    BackgroundFlag::None,
+                );
                 self.root
                     .set_char_foreground(pos.x, pos.y, TColor::from(color.fg));
             }
@@ -407,8 +427,12 @@ impl Display {
 
         // draw player, make sure it ends up on top
         for (pos, icon, color, ..) in (positions, icons, colors, players).join() {
-            self.root
-                .put_char(pos.x, pos.y, icon.ch, BackgroundFlag::None);
+            self.root.put_char(
+                pos.x,
+                pos.y,
+                assets.get_icon(&icon.name).base_ch(),
+                BackgroundFlag::None,
+            );
             self.root
                 .set_char_foreground(pos.x, pos.y, TColor::from(color.fg))
         }
@@ -431,11 +455,12 @@ impl Display {
         cursors: &ReadStorage<'a, Cursor>,
         colors: &ReadStorage<'a, Colors>,
         descriptions: &ReadStorage<'a, Description>,
-        icons: &ReadStorage<'a, Icon>,
+        icons: &ReadStorage<'a, IconRef>,
         players: &ReadStorage<'a, Player>,
         positions: &ReadStorage<'a, Position>,
         regions: &ReadStorage<'a, Region>,
         maps: &Read<'a, AreaMapCollection>,
+        assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
         ui_queue: &Read<'a, UIQueue>,
     ) {
@@ -466,7 +491,12 @@ impl Display {
                 (regions, positions, icons, colors, descriptions).join()
             {
                 if *pos == cursor_pos && *region == player_region {
-                    ui::draw_entity_info(&self.root, *icon, *color, desc);
+                    ui::draw_entity_info(
+                        &self.root,
+                        assets.get_icon(&icon.name).base_ch(),
+                        *color,
+                        desc,
+                    );
                     found_entity = true;
                 }
             }

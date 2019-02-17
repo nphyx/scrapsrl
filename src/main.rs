@@ -21,6 +21,7 @@ use self::system::input::*;
 use self::system::*;
 use self::util::icons::*;
 
+/*
 fn make_bug(world: &mut World) {
     let mut rng = rand::thread_rng();
     let x = rng.gen_range(0, MAP_WIDTH);
@@ -29,7 +30,7 @@ fn make_bug(world: &mut World) {
         .brain()
         .solid()
         .character(Character::blank())
-        .icon(ICON_BUG)
+        .icon(IconRef::new("bug"))
         .colors(
             Color {
                 r: 32,
@@ -55,6 +56,7 @@ fn make_bug(world: &mut World) {
         .with(MovePlan { x: 0, y: 0 })
         .build();
 }
+*/
 
 use specs::Builder;
 fn make_computer(world: &mut World) {
@@ -65,9 +67,7 @@ fn make_computer(world: &mut World) {
             y: MAP_HEIGHT / 2 + 1,
         })
         .with(Region { x: 0, y: 0 })
-        .with(Icon {
-            ch: ICON_OLD_COMPUTER,
-        })
+        .with(IconRef::new("bug"))
         .with(Solid)
         .with(Colors {
             fg: Color::new(130, 130, 127),
@@ -78,7 +78,7 @@ fn make_computer(world: &mut World) {
             long: "An old-world electronic device. Looks like it's still working.".to_string(),
         })
         .with(NotificationInteraction {
-            header: ICON_OLD_COMPUTER.to_string(),
+            header: "F".to_string(),
             body: "Bleep, bloop!".to_string(),
         })
         .build();
@@ -103,7 +103,7 @@ fn main() {
     world.add_resource(maps);
     world.add_resource(collisions);
     world.add_resource(ui_queue);
-    /* FIXME unused world.add_resource(Templates::default()); */
+    world.add_resource(Assets::default());
 
     let mut window_closed = false;
 
@@ -118,7 +118,7 @@ fn main() {
         })
         .with(Region { x: 0, y: 0 })
         .with(MovePlan { x: 0, y: 0 })
-        .with(Icon { ch: ICON_MALE })
+        .with(IconRef::new("person_male"))
         .with(Colors {
             fg: Color::new(255, 255, 255),
             bg: Color::new(255, 255, 255),
@@ -126,7 +126,7 @@ fn main() {
         .with(Character::default())
         .build();
 
-    make_bug(&mut world);
+    // make_bug(&mut world);
     make_computer(&mut world);
 
     world
@@ -136,7 +136,7 @@ fn main() {
             y: rng.gen_range(0, MAP_HEIGHT),
         })
         .with(Region { x: 0, y: 0 })
-        .with(Icon { ch: ICON_TABLET })
+        .with(IconRef::new("device_tablet"))
         .with(Colors {
             fg: Color {
                 r: 128,
@@ -163,7 +163,7 @@ fn main() {
             y: rng.gen_range(0, MAP_HEIGHT),
         })
         .with(Region { x: 0, y: 0 })
-        .with(Icon { ch: ICON_HATCHBACK })
+        .with(IconRef::new("vehicle_hatchback"))
         .with(Colors {
             fg: Color {
                 r: 128,

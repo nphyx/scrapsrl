@@ -8,7 +8,7 @@ pub struct RegionSystem;
 impl<'a> System<'a> for RegionSystem {
     type SystemData = (
         ReadStorage<'a, Player>,
-        ReadStorage<'a, Icon>,
+        ReadStorage<'a, IconRef>,
         WriteStorage<'a, MovePlan>,
         WriteStorage<'a, Position>,
         WriteStorage<'a, Region>,
@@ -90,7 +90,6 @@ impl<'a> System<'a> for RegionSystem {
         if player_changed_region {
             for (region, icon, entity) in (&regions, &icons, &entities).join() {
                 if !maps.has(*region) {
-                    println!("pruning entity {} at {:?}", icon.ch, region);
                     entities.delete(entity).expect("failed to delete entity");
                 }
             }

@@ -1,8 +1,6 @@
 use crate::component::*;
 use serde::{Deserialize, Serialize};
 
-pub type IconTemplateRef = String;
-
 #[derive(Clone, Serialize, Deserialize)]
 pub enum GeographyTag {
     Forest,
@@ -14,7 +12,7 @@ pub struct GroundCover {
     /// base colors for the ground cover
     pub colors: Colors,
     /// a string referring to an icon by file stem (icons/grass.ron = "grass" here)
-    pub icon: IconTemplateRef,
+    pub icon: IconRef,
 }
 
 /// stub
@@ -31,7 +29,7 @@ pub struct GeographyTemplate {
     pub description: Option<Description>,
     #[serde(default)]
     /// a string referring to an icon by file stem, used on world map (icons/grass.ron = "grass" here)
-    pub icon: Option<IconTemplateRef>,
+    pub icon: Option<IconRef>,
     #[serde(default)]
     /// colors shown on world map for this geography type
     pub colors: Option<Colors>,

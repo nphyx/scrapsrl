@@ -1,0 +1,14 @@
+(
+    base: '\u{e014}',
+    horizontal_line: Some('\u{e00c}'),
+    corner_tl: Some('\u{e011}'),
+    corner_tr: Some('\u{e013}'),
+    corner_bl: Some('\u{e00e}'),
+    corner_br: Some('\u{e010}'),
+    vertical_line: Some('\u{e00c}'),
+    tee_l: Some('\u{e00d}'),
+    tee_r: Some('\u{e00b}'),
+    tee_u: Some('\u{e00f}'),
+    tee_d: Some('\u{e012}'),
+    center: Some('\u{e00c}'),
+)

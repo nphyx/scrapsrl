@@ -1,5 +1,5 @@
 use crate::component::Region;
-use crate::resource::{AreaMap, AreaMapCollection, GameStage, GameState, Templates};
+use crate::resource::{AreaMap, AreaMapCollection, Assets, GameStage, GameState};
 use tcod::noise::*;
 use tcod::random::{Algo, Rng};
 
@@ -25,18 +25,18 @@ impl MapGenerator {
 use specs::{Read, System, Write};
 impl<'a> System<'a> for MapGenerator {
     type SystemData = (
-        Read<'a, Templates>,
+        Read<'a, Assets>,
         Write<'a, AreaMapCollection>,
         Write<'a, GameState>,
     );
 
-    fn run(&mut self, (templates, mut maps, mut state): Self::SystemData) {
+    fn run(&mut self, (assets, mut maps, mut state): Self::SystemData) {
         if state.stage == GameStage::LoadingAssets {
             return;
         } // don't try to build map while assets loading
         for (region, map) in maps.iter_mut() {
             if !map.populated {
-                self.generate(*region, map, &templates, &mut state);
+                self.generate(*region, map, &assets, &mut state);
                 return; // only do one per pass, so we can show progress
             }
         }
@@ -48,7 +48,7 @@ impl MapGenerator {
         &mut self,
         region: Region,
         map: &mut AreaMap,
-        templates: &Templates,
+        assets: &Assets,
         state: &mut GameState,
     ) {
         // let map = AreaMap::default();
@@ -64,11 +64,11 @@ impl MapGenerator {
             .init();
 
         // choose a geography variant
-        let geography = templates.choose_geography(1.0); // TODO choose geography from noise
+        let geography = assets.choose_geography(1.0); // TODO choose geography from noise
 
         // lay down a basic ground cover layer
-        ground_cover::base(&noise, map, region.to_offset(), 0.2, &geography, templates);
-        ground_cover::scatter(&noise, map, region.to_offset(), 1.0, &geography, templates);
+        ground_cover::base(&noise, map, region.to_offset(), 0.2, &geography, assets);
+        ground_cover::scatter(&noise, map, region.to_offset(), 1.0, &geography, assets);
 
         /* place trees
         trees::place_trees(&noise, map, width, height, region.to_offset(), 0.2, 0.7);

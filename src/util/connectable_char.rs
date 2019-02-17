@@ -31,6 +31,7 @@ impl ConnectableChars {
     /// TODO move the maps out to a config file and load them here
     pub fn new() -> ConnectableChars {
         let mut map = ConnectMap::new();
+        /*
         map.insert(
             LINE,
             ConnectableChar {
@@ -94,6 +95,7 @@ impl ConnectableChars {
                 cap_d: LINE_DBL_VERT,
             },
         );
+        */
         ConnectableChars { map }
     }
 

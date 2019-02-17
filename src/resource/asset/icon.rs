@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct IconTemplate {
+pub struct Icon {
     base: char,
     #[serde(default)]
     corner_tl: Option<char>,
@@ -35,9 +35,9 @@ pub struct IconTemplate {
     cap_d: Option<char>,
 }
 
-impl Default for IconTemplate {
-    fn default() -> IconTemplate {
-        IconTemplate {
+impl Default for Icon {
+    fn default() -> Icon {
+        Icon {
             base: '?',
             corner_tl: None,
             corner_tr: None,
@@ -58,7 +58,7 @@ impl Default for IconTemplate {
     }
 }
 
-impl IconTemplate {
+impl Icon {
     pub fn ch(&self, above: bool, below: bool, left: bool, right: bool) -> char {
         match (above, below, left, right) {
             (true, true, false, false) => self.vertical.unwrap_or(self.base),

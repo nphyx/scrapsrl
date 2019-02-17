@@ -1,41 +1,31 @@
-/// Templates for game objects, to be serialized and deserialized from RON files
+/// Assets for game objects, to be serialized and deserialized from RON files
 pub mod builder;
 pub mod entity_template;
 pub mod geography_template;
-pub mod icon_template;
+pub mod icon;
 pub mod structure_template;
 
 pub use builder::*;
 pub use entity_template::*;
 pub use geography_template::*;
-pub use icon_template::*;
+pub use icon::*;
 pub use structure_template::*;
-
-pub trait Template {}
-
-#[derive(Copy, Clone)]
-pub enum TemplateType {
-    Icon,
-    Entity,
-    Geography,
-    Structure,
-}
 
 use specs::{Component, VecStorage};
 use std::collections::HashMap;
 #[derive(Component)]
 #[storage(VecStorage)]
-pub struct Templates {
+pub struct Assets {
     entities: HashMap<String, EntityTemplate>,
-    icons: HashMap<String, IconTemplate>,
+    icons: HashMap<String, Icon>,
     structures: HashMap<String, StructureTemplate>,
     geographies: HashMap<String, GeographyTemplate>,
     pub ready: bool,
 }
 
-impl Default for Templates {
-    fn default() -> Templates {
-        Templates {
+impl Default for Assets {
+    fn default() -> Assets {
+        Assets {
             entities: HashMap::new(),
             icons: HashMap::new(),
             structures: HashMap::new(),
@@ -45,9 +35,9 @@ impl Default for Templates {
     }
 }
 
-impl Templates {
-    pub fn add_icon(&mut self, name: String, template: IconTemplate) {
-        self.icons.insert(name, template);
+impl Assets {
+    pub fn add_icon(&mut self, name: String, icon: Icon) {
+        self.icons.insert(name, icon);
     }
     pub fn add_entity(&mut self, name: String, template: EntityTemplate) {
         self.entities.insert(name, template);
@@ -83,11 +73,12 @@ impl Templates {
             .clone()
     }
 
-    pub fn get_icon(&self, name: String) -> IconTemplate {
-        println!("Looking up icon {}", name);
-        self.icons
-            .get(&name)
-            .unwrap_or(&IconTemplate::default())
-            .clone()
+    pub fn get_icon(&self, name: &String) -> Icon {
+        if let Some(icon) = self.icons.get(name) {
+            icon.clone()
+        } else {
+            // println!("WARNING: icon not found: {}", name);
+            Icon::default()
+        }
     }
 }

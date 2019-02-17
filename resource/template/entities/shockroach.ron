@@ -28,7 +28,7 @@
         short: "a shockroach",
         long: "A housecat-sized cockroach. Electric sparks arc between its antenna.",
     )),
-    icon: Some((ch: '\u{e269}',)),
+    icon: Some((name: "roach")),
     notification: None,
     solid: Some(()),
 )

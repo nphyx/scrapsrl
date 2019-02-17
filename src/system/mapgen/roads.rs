@@ -5,17 +5,7 @@ use crate::resource::{tile_types::*, AreaMap, Tile};
 use crate::util::{colors::lerp, icons::*};
 use tcod::noise::Noise;
 
-const VEHICLES: [char; 9] = [
-    ICON_BUS,
-    ICON_DBL_BUS,
-    ICON_SCHOOL_BUS,
-    ICON_CONVERTIBLE,
-    ICON_SUV,
-    ICON_HATCHBACK,
-    ICON_SEDAN,
-    ICON_SPORTSCAR,
-    ICON_TRUCK_PICKUP,
-];
+const VEHICLES: [char; 1] = ['F'];
 
 /// places a car
 fn place_car(

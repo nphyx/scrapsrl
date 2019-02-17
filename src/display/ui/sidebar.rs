@@ -60,17 +60,17 @@ fn draw_info(
     console.print_rect(x + 4, y + 2, width - 6, 10, long);
 }
 
-use crate::component::{Colors, Description, Icon};
+use crate::component::{Colors, Description};
 /// draw entity in infobox area of sidebar
 pub fn draw_entity_info(
     console: &dyn Console,
-    icon: Icon,
+    icon: char,
     colors: Colors,
     description: &Description,
 ) {
     draw_info(
         console,
-        icon.ch,
+        icon,
         TColor::from(colors.fg),
         DEFAULT_BG,
         description.short.clone(),
