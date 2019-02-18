@@ -1,18 +1,17 @@
-use super::icons::*;
 use std::collections::HashMap;
 
 struct ConnectableChar {
     pub base: char,
-    pub horiz: char,
-    pub vert: char,
+    pub horizontal_line: char,
+    pub vertical_line: char,
     pub corner_tl: char,
     pub corner_tr: char,
     pub corner_bl: char,
     pub corner_br: char,
-    pub t_l: char,
-    pub t_r: char,
-    pub t_u: char,
-    pub t_d: char,
+    pub tee_l: char,
+    pub tee_r: char,
+    pub tee_u: char,
+    pub tee_d: char,
     pub cross: char,
     pub cap_l: char,
     pub cap_r: char,
@@ -140,16 +139,16 @@ impl ConnectableChars {
                 }
             }
             match matched {
-                (true, true, false, false) => chosen = connectable.vert,
-                (false, false, true, true) => chosen = connectable.horiz,
+                (true, true, false, false) => chosen = connectable.vertical_line,
+                (false, false, true, true) => chosen = connectable.horizontal_line,
                 (false, true, false, true) => chosen = connectable.corner_tl,
                 (false, true, true, false) => chosen = connectable.corner_tr,
                 (true, false, false, true) => chosen = connectable.corner_bl,
                 (true, false, true, false) => chosen = connectable.corner_br,
-                (true, true, true, false) => chosen = connectable.t_l,
-                (true, true, false, true) => chosen = connectable.t_r,
-                (true, false, true, true) => chosen = connectable.t_u,
-                (false, true, true, true) => chosen = connectable.t_d,
+                (true, true, true, false) => chosen = connectable.tee_l,
+                (true, true, false, true) => chosen = connectable.tee_r,
+                (true, false, true, true) => chosen = connectable.tee_u,
+                (false, true, true, true) => chosen = connectable.tee_d,
                 (true, true, true, true) => chosen = connectable.cross,
                 (false, false, false, true) => chosen = connectable.cap_l,
                 (false, false, true, false) => chosen = connectable.cap_r,

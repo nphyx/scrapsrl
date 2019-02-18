@@ -1,11 +1,12 @@
-// use super::ground_cover::ground_bg_color;
 use super::util::*;
 use crate::component::{Color, Position};
 use crate::resource::{tile_types::*, AreaMap, Tile};
-use crate::util::{colors::lerp, icons::*};
+use crate::util::colors::lerp;
 use tcod::noise::Noise;
 
 const VEHICLES: [char; 1] = ['F'];
+// FIXME use icon assets here
+// FIXME redo tile description system
 
 /// places a car
 fn place_car(
@@ -90,10 +91,10 @@ pub fn place_horizontal_roads(
                     map.set(pos, damaged_road(ground_bg, road_bg, i));
                 } else if cy == y_min || cy == y_max {
                     // outer line
-                    map.set(pos, road_segment(LINE_HORIZ, road_line_fg, road_bg));
+                    map.set(pos, road_segment('=', road_line_fg, road_bg));
                 } else if cy == y {
                     // center line
-                    let icon = if lanes > 2 { LINE_DBL_HORIZ } else { '-' };
+                    let icon = if lanes > 2 { '=' } else { '-' };
                     map.set(pos, road_segment(icon, road_line_center, road_bg));
                 } else if (cy - y) % 2 == 0 {
                     // lane seperator

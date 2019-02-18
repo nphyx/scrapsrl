@@ -1,11 +1,13 @@
 use super::util::*;
 use crate::constants::{DIALOG_WIDTH, MAP_HEIGHT, MAP_WIDTH};
 use crate::resource::*;
-use crate::util::icons::*;
 use std::sync::{Arc, Mutex};
 use tcod::console::Console;
+
 /// Draws UI widgets (dialogs, etc)
 use tcod::{BackgroundFlag, TextAlignment};
+
+// TODO rebuild frames using tile connector
 
 /// Draws a dialog box.
 pub fn draw_dialog(
@@ -30,58 +32,14 @@ pub fn draw_dialog(
         true,
         BackgroundFlag::Set,
     );
-    horiz_line(
-        console,
-        cx - half_width,
-        cy - half_height,
-        width,
-        LINE_DBL_HORIZ,
-    );
-    horiz_line(
-        console,
-        cx - half_width,
-        cy + half_height,
-        width,
-        LINE_DBL_HORIZ,
-    );
-    vert_line(
-        console,
-        cx - half_width,
-        cy - half_height,
-        height,
-        LINE_DBL_VERT,
-    );
-    vert_line(
-        console,
-        cx + half_width,
-        cy - half_height,
-        height,
-        LINE_DBL_VERT,
-    );
-    console.put_char(
-        cx - half_width,
-        cy - half_height,
-        LINE_DBL_TL,
-        BackgroundFlag::None,
-    );
-    console.put_char(
-        cx + half_width,
-        cy - half_height,
-        LINE_DBL_TR,
-        BackgroundFlag::None,
-    );
-    console.put_char(
-        cx - half_width,
-        cy + half_height,
-        LINE_DBL_BL,
-        BackgroundFlag::None,
-    );
-    console.put_char(
-        cx + half_width,
-        cy + half_height,
-        LINE_DBL_BR,
-        BackgroundFlag::None,
-    );
+    horiz_line(console, cx - half_width, cy - half_height, width, '=');
+    horiz_line(console, cx - half_width, cy + half_height, width, '=');
+    vert_line(console, cx - half_width, cy - half_height, height, '=');
+    vert_line(console, cx + half_width, cy - half_height, height, '=');
+    console.put_char(cx - half_width, cy - half_height, '=', BackgroundFlag::None);
+    console.put_char(cx + half_width, cy - half_height, '=', BackgroundFlag::None);
+    console.put_char(cx - half_width, cy + half_height, '=', BackgroundFlag::None);
+    console.put_char(cx + half_width, cy + half_height, '=', BackgroundFlag::None);
     console.set_alignment(TextAlignment::Center);
     console.print(cx, cy - half_height, title);
     console.print_rect(cx, cy - half_height + 2, width - 4, height - 4, body);

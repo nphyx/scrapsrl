@@ -19,7 +19,6 @@ use self::display::Display;
 use self::resource::*;
 use self::system::input::*;
 use self::system::*;
-use self::util::icons::*;
 
 /*
 fn make_bug(world: &mut World) {
@@ -181,7 +180,7 @@ fn main() {
             long: "A kind of vehicle with a door on the back.".to_string(),
         })
         .with(NotificationInteraction {
-            header: ICON_HATCHBACK.to_string(),
+            header: "vehicle".to_string(),
             body: "There's nothing inside.".to_string(),
         })
         .build();

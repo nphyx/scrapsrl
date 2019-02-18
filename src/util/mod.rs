@@ -1,7 +1,6 @@
 use crate::component::Position;
 pub mod colors;
 mod connectable_char;
-pub mod icons;
 pub use self::connectable_char::ConnectableChars;
 
 pub fn clamp<T>(a: T, b: T, x: T) -> T

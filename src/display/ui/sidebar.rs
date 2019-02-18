@@ -1,7 +1,6 @@
 use super::util::*;
 use crate::component::Character;
 use crate::constants::{DEFAULT_BG, SIDEBAR_WIDTH};
-use crate::util::icons::*;
 use tcod::{Console, TextAlignment};
 
 type TColor = tcod::colors::Color;
@@ -13,7 +12,7 @@ pub fn draw_stats(mut console: &dyn Console, pc: &Character) {
     let y = 0;
     let width = SIDEBAR_WIDTH;
     let height = console.height();
-    vert_line(console, x, y, height, LINE_DBL_VERT);
+    vert_line(console, x, y, height, '=');
     let text = format!(
         concat!(
             "   THIS IS SIDEBAR\n",
