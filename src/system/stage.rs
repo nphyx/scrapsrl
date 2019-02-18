@@ -1,4 +1,4 @@
-use crate::resource::{AreaMapCollection, Assets, GameStage, GameState};
+use crate::resource::{AreaMaps, Assets, GameStage, GameState};
 /// stub game stage management
 use specs::{Read, System, Write};
 
@@ -7,7 +7,7 @@ pub struct Stage;
 impl<'a> System<'a> for Stage {
     type SystemData = (
         Read<'a, Assets>,
-        Read<'a, AreaMapCollection>,
+        Read<'a, AreaMaps>,
         Write<'a, GameState>,
     );
 

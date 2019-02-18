@@ -2,18 +2,19 @@ use specs::{System, Write};
 use tcod::input::Key;
 use tcod::input::KeyCode::*;
 
-use crate::resource::{AreaMapCollection, GameState, RenderMode, UserInput};
+use crate::resource::{AreaMaps, GameState, RenderMode, UserInput, WorldState};
 
 /// handle input that should work regardless of game state
 pub struct SystemInput;
 impl<'a> System<'a> for SystemInput {
     type SystemData = (
         Write<'a, UserInput>,
-        Write<'a, AreaMapCollection>,
+        Write<'a, AreaMaps>,
         Write<'a, GameState>,
+        Write<'a, WorldState>,
     );
 
-    fn run(&mut self, (mut input, mut maps, mut state): Self::SystemData) {
+    fn run(&mut self, (mut input, mut maps, mut state, mut world): Self::SystemData) {
         match input.get() {
             // toggle fullscreen
             Some(Key { code: F11, .. }) => {
@@ -51,7 +52,7 @@ impl<'a> System<'a> for SystemInput {
             // change the world seed and regen the map (debug only)
             Some(Key { code: F8, .. }) => {
                 println!("DEBUG COMMAND: generating map with new world seed");
-                state.world_seed += 1;
+                world.seed += 1;
                 for (_, map) in maps.iter_mut() {
                     map.populated = false;
                 }

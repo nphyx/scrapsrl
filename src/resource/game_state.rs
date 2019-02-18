@@ -39,18 +39,12 @@ pub struct GameState {
     pub looking: bool,
     /// game controls enabled (does not affect system-level input: fullscreen, quit, etc)
     pub input_enabled: bool,
-    /// global RNG seed
-    pub world_seed: u32,
 
     /// tracks the X,Y offset of the current map from 0, 0
     pub region: Region,
 
     /// rendering modes
     pub render_mode: RenderMode,
-
-    pub world_day: u32,
-    pub world_time: f32,
-    pub world_year: u32,
 }
 
 impl Default for GameState {
@@ -69,32 +63,17 @@ impl Default for GameState {
 
             looking: false,
 
-            world_seed: 0,
-
             region: Region::default(),
 
             render_mode: RenderMode::Normal,
-
-            world_day: 0,
-            world_time: 6.0,
-            world_year: 0,
         }
     }
 }
 
 impl GameState {
-    /// 1.0 is noon, 0.0 is midnight
-    pub fn world_time_relative(&self) -> f32 {
-        ((self.world_time * 15.0 * (std::f32::consts::PI / 180.0)).sin() + 1.0) / 2.0
-    }
-
     pub fn change_region(&mut self, x_change: i32, y_change: i32) {
         self.region.x += x_change;
         self.region.y += y_change;
-        /*
-        self.region[0] += x_change * MAP_WIDTH;
-        self.region[0] += y_change * MAP_HEIGHT;
-        */
         println!("changed region to {:?}", self.region);
     }
 }

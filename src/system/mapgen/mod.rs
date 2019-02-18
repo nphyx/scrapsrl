@@ -1,5 +1,5 @@
 use crate::component::Region;
-use crate::resource::{AreaMap, AreaMapCollection, Assets, GameStage, GameState};
+use crate::resource::{AreaMap, AreaMaps, Assets, GameStage, GameState, WorldState};
 use tcod::noise::*;
 use tcod::random::{Algo, Rng};
 
@@ -26,17 +26,18 @@ use specs::{Read, System, Write};
 impl<'a> System<'a> for MapGenerator {
     type SystemData = (
         Read<'a, Assets>,
-        Write<'a, AreaMapCollection>,
+        Write<'a, AreaMaps>,
         Write<'a, GameState>,
+        Read<'a, WorldState>,
     );
 
-    fn run(&mut self, (assets, mut maps, mut state): Self::SystemData) {
+    fn run(&mut self, (assets, mut maps, state, world): Self::SystemData) {
         if state.stage == GameStage::LoadingAssets {
             return;
         } // don't try to build map while assets loading
         for (region, map) in maps.iter_mut() {
             if !map.populated {
-                self.generate(*region, map, &assets, &mut state);
+                self.generate(*region, map, &assets, &world);
                 return; // only do one per pass, so we can show progress
             }
         }
@@ -44,20 +45,14 @@ impl<'a> System<'a> for MapGenerator {
 }
 
 impl MapGenerator {
-    fn generate(
-        &mut self,
-        region: Region,
-        map: &mut AreaMap,
-        assets: &Assets,
-        state: &mut GameState,
-    ) {
+    fn generate(&mut self, region: Region, map: &mut AreaMap, assets: &Assets, world: &WorldState) {
         // let map = AreaMap::default();
         println!(
-            "Generating new map with world seed {} for {:?}",
-            state.world_seed, region
+            "Generating new map with dimensions {}x{}, seed {} for region {:?}",
+            map.width, map.height, world.seed, region
         );
         map.wipe();
-        let rng = Rng::new_with_seed(Algo::CMWC, state.world_seed);
+        let rng = Rng::new_with_seed(Algo::CMWC, world.seed);
         let noise = Noise::init_with_dimensions(2)
             .noise_type(NoiseType::Simplex)
             .random(rng)

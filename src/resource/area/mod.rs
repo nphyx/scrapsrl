@@ -83,11 +83,11 @@ use std::collections::hash_map::IterMut;
 use std::collections::HashMap;
 #[derive(Clone, Default, Component)]
 #[storage(VecStorage)]
-pub struct AreaMapCollection {
+pub struct AreaMaps {
     maps: HashMap<Region, AreaMap>,
 }
 
-impl AreaMapCollection {
+impl AreaMaps {
     /// initialize new maps for a given <center> and <radius> radius
     /// Note that radius extends from the edge of the center, so a "size 2" map is 5x5
     pub fn init(&mut self, center: Region, size: u8) {

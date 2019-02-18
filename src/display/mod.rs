@@ -63,7 +63,8 @@ impl<'a> System<'a> for Display {
         ReadStorage<'a, Region>,
         ReadStorage<'a, Solid>,
         Write<'a, GameState>,
-        Read<'a, AreaMapCollection>,
+        Read<'a, WorldState>,
+        Read<'a, AreaMaps>,
         Read<'a, Assets>,
         Read<'a, CollisionMaps>,
         Read<'a, UIQueue>,
@@ -83,6 +84,7 @@ impl<'a> System<'a> for Display {
             regions,
             solids,
             mut state,
+            world,
             maps,
             assets,
             collisions,
@@ -121,6 +123,7 @@ impl<'a> System<'a> for Display {
                         &regions,
                         &assets,
                         &mut state,
+                        &world,
                         &maps,
                     );
                     self.render_ui(
@@ -222,7 +225,8 @@ impl Display {
 
         assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
-        maps: &Read<'a, AreaMapCollection>,
+        world: &Read<'a, WorldState>,
+        maps: &Read<'a, AreaMaps>,
     ) {
         let mut player_pos: Position = Position::default();
         let mut player_region: Region = Region::default();
@@ -275,7 +279,7 @@ impl Display {
         }
 
         // TODO compute time of day adjustment, sunset gradient, and moon phase :D
-        let time_of_day_rel = state.world_time_relative();
+        let time_of_day_rel = world.time_relative();
 
         let light = Color::new(255, 240, 128);
         let ambient = Color::new(0, 6, 18);
@@ -371,7 +375,7 @@ impl Display {
 
         assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
-        maps: &Read<'a, AreaMapCollection>,
+        maps: &Read<'a, AreaMaps>,
         collisions: &Read<'a, CollisionMaps>,
     ) {
         let mut player_region: Region = Region::default();
@@ -459,7 +463,7 @@ impl Display {
         players: &ReadStorage<'a, Player>,
         positions: &ReadStorage<'a, Position>,
         regions: &ReadStorage<'a, Region>,
-        maps: &Read<'a, AreaMapCollection>,
+        maps: &Read<'a, AreaMaps>,
         assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
         ui_queue: &Read<'a, UIQueue>,

@@ -1,6 +1,6 @@
 use crate::component::*;
 use crate::constants::CHUNK_RADIUS;
-use crate::resource::{AreaMapCollection, CollisionMaps, GameState};
+use crate::resource::{AreaMaps, CollisionMaps, GameState};
 use specs::{Entities, Join, ReadStorage, System, Write, WriteStorage};
 
 pub struct RegionSystem;
@@ -13,7 +13,7 @@ impl<'a> System<'a> for RegionSystem {
         WriteStorage<'a, Position>,
         WriteStorage<'a, Region>,
         Write<'a, CollisionMaps>,
-        Write<'a, AreaMapCollection>,
+        Write<'a, AreaMaps>,
         Write<'a, GameState>,
         Entities<'a>,
     );

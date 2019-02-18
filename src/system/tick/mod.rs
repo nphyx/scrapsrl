@@ -1,6 +1,6 @@
 use crate::component::Cursor;
 use crate::resource::UserInput;
-use crate::resource::{AreaMapCollection, GameState, UIQueue};
+use crate::resource::{AreaMaps, GameState, UIQueue, WorldState};
 use specs::{Join, Read, ReadStorage, System, Write};
 
 /// handles game state maintenance before a tick runs
@@ -10,11 +10,12 @@ impl<'a> System<'a> for PreTick {
         ReadStorage<'a, Cursor>,
         Read<'a, UserInput>,
         Read<'a, UIQueue>,
-        Read<'a, AreaMapCollection>,
+        Read<'a, AreaMaps>,
         Write<'a, GameState>,
+        Write<'a, WorldState>,
     );
 
-    fn run(&mut self, (cursors, input, ui_queue, maps, mut state): Self::SystemData) {
+    fn run(&mut self, (cursors, input, ui_queue, maps, mut state, mut world): Self::SystemData) {
         if ui_queue.len() > 0 {
             state.ticking = false;
             state.paused = true;
@@ -56,21 +57,21 @@ impl<'a> System<'a> for PreTick {
         state.frame += 1;
         if state.ticking {
             state.tick += 1;
-            state.world_time += (100.0 / 60.0) / 100.0;
-            if state.world_time >= 24.0 {
-                state.world_time = 0.0;
-                state.world_day += 1;
+            world.time += (100.0 / 60.0) / 100.0;
+            if world.time >= 24.0 {
+                world.time = 0.0;
+                world.day += 1;
             }
-            if state.world_day >= 365 {
-                if (state.world_year + 1) % 4 == 0 {
+            if world.day >= 365 {
+                if (world.year + 1) % 4 == 0 {
                     // it was a leap year! but don't make the first year a leap year, that would be lame
-                    if state.world_day >= 366 {
-                        state.world_day = 0;
-                        state.world_year += 1;
+                    if world.day >= 366 {
+                        world.day = 0;
+                        world.year += 1;
                     }
                 } else {
-                    state.world_day = 0;
-                    state.world_year += 1;
+                    world.day = 0;
+                    world.year += 1;
                 }
             }
         }
