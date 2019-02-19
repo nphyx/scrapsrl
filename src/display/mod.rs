@@ -232,10 +232,11 @@ impl Display {
         let mut player_region: Region = Region::default();
 
         for (region, pos, character, _player) in (regions, positions, characters, players).join() {
-            ui::draw_stats(&self.root, character);
+            ui::draw_stats(&self.root, &assets, character);
             ui::draw_status_bar(&self.root, character, &state);
             player_pos = *pos;
             player_region = *region;
+            ui::draw_worldmap(&self.root, &assets, player_region, &world);
         }
         let map = maps.get(player_region);
 
@@ -381,7 +382,7 @@ impl Display {
         let mut player_region: Region = Region::default();
 
         for (region, character, _player) in (regions, characters, players).join() {
-            ui::draw_stats(&self.root, character);
+            ui::draw_stats(&self.root, assets, character);
             ui::draw_status_bar(&self.root, character, &state);
             player_region = *region;
         }
@@ -473,7 +474,7 @@ impl Display {
         let mut has_cursor: bool = false;
 
         for (region, character, _player) in (regions, characters, players).join() {
-            ui::draw_stats(&self.root, character);
+            ui::draw_stats(&self.root, assets, character);
             ui::draw_status_bar(&self.root, character, &state);
             player_region = *region;
         }

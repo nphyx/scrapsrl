@@ -1,18 +1,27 @@
 use super::util::*;
 use crate::component::Character;
 use crate::constants::{DEFAULT_BG, SIDEBAR_WIDTH};
+use crate::resource::Assets;
 use tcod::{Console, TextAlignment};
 
 type TColor = tcod::colors::Color;
 
-pub fn draw_stats(mut console: &dyn Console, pc: &Character) {
+pub fn draw_stats(mut console: &dyn Console, assets: &Assets, pc: &Character) {
     reset_colors(&console);
     console.set_alignment(TextAlignment::Left);
     let x = console.width() - SIDEBAR_WIDTH;
-    let y = 0;
+    let y = SIDEBAR_WIDTH + 1;
     let width = SIDEBAR_WIDTH;
     let height = console.height();
-    vert_line(console, x, y, height, '=');
+    vert_line(
+        console,
+        x,
+        y,
+        height,
+        assets
+            .get_icon(&"line_double".to_string())
+            .ch(true, true, false, false),
+    );
     let text = format!(
         concat!(
             "   THIS IS SIDEBAR\n",
@@ -53,7 +62,7 @@ fn draw_info(
 ) {
     let x = console.width() - SIDEBAR_WIDTH;
     let width = SIDEBAR_WIDTH;
-    let y = 13;
+    let y = SIDEBAR_WIDTH + 14;
     console.put_char_ex(x + 2, y, ch, fg, bg);
     console.print_rect(x + 4, y, width - 6, 1, short);
     console.print_rect(x + 4, y + 2, width - 6, 10, long);

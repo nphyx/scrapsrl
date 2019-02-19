@@ -7,7 +7,7 @@ mod connect_tiles;
 mod ground_cover;
 mod roads;
 mod trees;
-mod util;
+pub mod util;
 
 use connect_tiles::connect;
 

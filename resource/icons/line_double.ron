@@ -10,4 +10,5 @@
     tee_r: Some('\u{2560}'),
     tee_u: Some('\u{2569}'),
     tee_d: Some('\u{2566}'),
+    center: Some('\u{256c}'),
 )

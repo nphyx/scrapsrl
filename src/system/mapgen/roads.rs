@@ -6,14 +6,14 @@ use tcod::noise::Noise;
 
 /// FIXME don't hardcode this
 const VEHICLES: [&str; 8] = [
-    "vehicle_bus",
-    "vehicle_bus_school",
-    "vehicle_convertible",
-    "vehicle_double_bus",
-    "vehicle_hatchback",
     "vehicle_sedan",
-    "vehicle_suv",
+    "vehicle_convertible",
+    "vehicle_hatchback",
+    "vehicle_bus_school",
     "vehicle_truck_pickup",
+    "vehicle_suv",
+    "vehicle_bus",
+    "vehicle_double_bus",
 ];
 
 /// places a car
@@ -32,9 +32,8 @@ fn place_car(
     }
     let color_good = Color::new(68, 68, 68);
     let color_bad = Color::new(72, 40, 36);
-    let v = rand_up(fbm_offset(noise, pos, offset, 1.0, 1));
+    let v = rand_up(fbm_offset(noise, pos, offset, 10.0, 1));
     let ref icon = VEHICLES[(v * VEHICLES.len() as f32).floor() as usize].to_string();
-    println!("chose car {}", icon);
     let i = turb_offset(noise, pos, offset, scale, 32);
     let fg = lerp(color_good, color_bad, i * damage_factor);
     let pos = Position {
@@ -181,7 +180,7 @@ pub fn place_horizontal_roads(
 /// determines the vertical offset of a horizontal road at a given x position
 fn road_long(noise: &Noise, map: &AreaMap, y: i32, offset: [i32; 2]) -> f32 {
     let hw = map.width / 2;
-    rand_up(fbm_offset(noise, [y, hw], offset, 0.01, 1)) * map.width as f32
+    rand_up(fbm_offset(noise, [hw, y], offset, 0.01, 1)) * map.width as f32
 }
 
 /// generates a vertical road on the map. Damage factor is a range from 0 = pristine
