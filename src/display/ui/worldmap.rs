@@ -1,8 +1,8 @@
 use super::util::*;
 use crate::component::Region;
-use crate::constants::{DEFAULT_BG, SIDEBAR_WIDTH};
+use crate::constants::SIDEBAR_WIDTH;
 use crate::resource::{Assets, WorldState};
-use tcod::{BackgroundFlag, Console, TextAlignment};
+use tcod::{Console, TextAlignment};
 
 type TColor = tcod::colors::Color;
 
@@ -14,16 +14,28 @@ pub fn draw_worldmap(
 ) {
     reset_colors(&console);
     console.set_alignment(TextAlignment::Left);
-    let mut x = console.width() - SIDEBAR_WIDTH + 2;
-    let mut y = 0;
-    let width = SIDEBAR_WIDTH - 4;
-    let height = SIDEBAR_WIDTH - 4;
+    let base_x = console.width() - SIDEBAR_WIDTH + 3;
+    let mut x = base_x;
+    let mut y = 1;
+    let width = SIDEBAR_WIDTH - 6;
+    let height = SIDEBAR_WIDTH - 6;
     let hw = width / 2;
     let hh = height / 2;
     let fg = TColor::new(255, 255, 255);
     let bg_base = TColor::new(32, 32, 32);
     let mut bg: TColor;
     let mut ch: char;
+    let horiz_line = assets
+        .get_icon(&"line_single".to_string())
+        .ch(false, false, true, true);
+    draw_rect(
+        console,
+        base_x - 1,
+        y - 1,
+        width + 2,
+        height + 2,
+        assets.get_icon(&"line_single".to_string()),
+    );
     for ry in region.y - hh..=region.y + hh {
         for rx in region.x - hw..=region.x + hw {
             let up = world.get_road(Region { x: rx, y: ry - 1 });
@@ -64,14 +76,15 @@ pub fn draw_worldmap(
             console.put_char_ex(x, y, ch, fg, bg);
             x += 1;
         }
-        x = console.width() - SIDEBAR_WIDTH + 2;
+        x = base_x;
         y += 1;
     }
+    console.set_alignment(TextAlignment::Center);
     console.print_rect(
-        x,
+        x + width / 2,
         y,
         width,
         1,
-        format!("lat: {}, long: {}", region.y, region.x),
+        format!("lat:{}{}long:{}", region.y, horiz_line, region.x),
     );
 }

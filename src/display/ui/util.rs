@@ -1,3 +1,4 @@
+use crate::resource::Icon;
 use tcod::colors::Color;
 use tcod::{BackgroundFlag, Console};
 
@@ -34,6 +35,55 @@ pub fn count_lines(text: &str, max_length: i32) -> i32 {
     }
     lines += ((len - lines) as f32 / max_length as f32).ceil() as i32;
     lines
+}
+
+/// draws a rectangle, using connected tiles if the icon supports it
+pub fn draw_rect(mut console: &dyn Console, x: i32, y: i32, width: i32, height: i32, icon: Icon) {
+    // lay out lines
+    vert_line(console, x, y, height, icon.ch(true, true, false, false));
+    vert_line(
+        console,
+        x + width - 1,
+        y,
+        height,
+        icon.ch(true, true, false, false),
+    );
+    horiz_line(console, x, y, width, icon.ch(false, false, true, true));
+    horiz_line(
+        console,
+        x,
+        y + height - 1,
+        width,
+        icon.ch(false, false, true, true),
+    );
+    console.put_char(
+        // top left corner
+        x,
+        y,
+        icon.ch(false, true, false, true),
+        BackgroundFlag::None,
+    );
+    console.put_char(
+        // top right corner
+        x + width - 1,
+        y,
+        icon.ch(false, true, true, false),
+        BackgroundFlag::None,
+    );
+    console.put_char(
+        // bottom left corner
+        x,
+        y + height - 1,
+        icon.ch(true, false, false, true),
+        BackgroundFlag::None,
+    );
+    console.put_char(
+        // bottom right corner
+        x + width - 1,
+        y + height - 1,
+        icon.ch(true, false, true, false),
+        BackgroundFlag::None,
+    );
 }
 
 /// fills a rectangular area

@@ -6,13 +6,14 @@ use tcod::{Console, TextAlignment};
 
 type TColor = tcod::colors::Color;
 
-pub fn draw_stats(mut console: &dyn Console, assets: &Assets, pc: &Character) {
+pub fn draw_sidebar_frame(mut console: &dyn Console, assets: &Assets) {
     reset_colors(&console);
     console.set_alignment(TextAlignment::Left);
+
     let x = console.width() - SIDEBAR_WIDTH;
-    let y = SIDEBAR_WIDTH + 1;
-    let width = SIDEBAR_WIDTH;
+    let y = 0;
     let height = console.height();
+
     vert_line(
         console,
         x,
@@ -22,32 +23,59 @@ pub fn draw_stats(mut console: &dyn Console, assets: &Assets, pc: &Character) {
             .get_icon(&"line_double".to_string())
             .ch(true, true, false, false),
     );
-    let text = format!(
-        concat!(
-            "   THIS IS SIDEBAR\n",
-            "\n",
-            "ATTR   \u{250c}POW SUB RES\u{2510}\n",
-            "Body:{} |S:{} G:{} T:{}|\n",
-            "Mind:{} |I:{} W:{} R:{}|\n",
-            "Soul:{} |C:{} E:{} W:{}|\n",
-            "       \u{2514}-----------\u{2518}\n",
-            "\n"
+}
+
+pub fn draw_stats(mut console: &dyn Console, assets: &Assets, pc: &Character) {
+    reset_colors(&console);
+    console.set_alignment(TextAlignment::Left);
+    let x = console.width() - SIDEBAR_WIDTH;
+    let y = SIDEBAR_WIDTH - 3;
+
+    console.print_rect(
+        x + 2,
+        y + 1,
+        7,
+        4,
+        format!(
+            "ATTR\nBody:{}\nMind:{}\nSoul:{}\n",
+            pc.body(),
+            pc.mind(),
+            pc.soul()
         ),
-        pc.body(),
-        pc.strength(),
-        pc.grace(),
-        pc.toughness(),
-        pc.mind(),
-        pc.intellect(),
-        pc.wits(),
-        pc.resolve(),
-        pc.soul(),
-        pc.charisma(),
-        pc.empathy(),
-        pc.will()
     );
 
-    console.print_rect(x + 2, y, width - 2, height, text);
+    draw_rect(
+        console,
+        x + 9,
+        y + 1,
+        13,
+        5,
+        assets.get_icon(&"line_single".to_string()),
+    );
+
+    let horiz_line = assets
+        .get_icon(&"line_single".to_string())
+        .ch(false, false, true, true);
+    console.print_rect(
+        x + 10,
+        y + 1,
+        14,
+        4,
+        format!(
+            "POW{}SUB{}RES\nS:{} G:{} T:{}\nI:{} W:{} R:{}\nC:{} E:{} W:{}",
+            horiz_line,
+            horiz_line,
+            pc.strength(),
+            pc.grace(),
+            pc.toughness(),
+            pc.intellect(),
+            pc.wits(),
+            pc.resolve(),
+            pc.charisma(),
+            pc.empathy(),
+            pc.will()
+        ),
+    );
 }
 
 use tcod::colors::Color;
