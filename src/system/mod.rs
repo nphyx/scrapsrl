@@ -8,6 +8,7 @@ mod movement;
 mod region;
 mod stage;
 mod tick;
+mod world_gen;
 
 pub mod input;
 
@@ -21,3 +22,4 @@ pub use movement::Movement;
 pub use region::RegionSystem;
 pub use stage::*;
 pub use tick::{PostTick, PreTick};
+pub use world_gen::WorldGen;

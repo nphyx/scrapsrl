@@ -67,10 +67,11 @@ fn main() {
         .with(CursorInput, "cursor_input", &["system_input"])
         .with(PlayerInput, "player_input", &["cursor_input"])
         .with(FallthroughInput, "fallthrough_input", &["player_input"])
+        .with(WorldGen, "world_gen", &["fallthrough_input"])
         .with(
             MapGenerator::new(MAP_WIDTH, MAP_HEIGHT),
             "map_gen",
-            &["fallthrough_input"],
+            &["fallthrough_input", "world_gen"],
         )
         .with(CollisionSystem, "collision_system", &["map_gen"])
         // let AI decide what it wants to do

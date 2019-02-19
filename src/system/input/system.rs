@@ -52,7 +52,8 @@ impl<'a> System<'a> for SystemInput {
             // change the world seed and regen the map (debug only)
             Some(Key { code: F8, .. }) => {
                 println!("DEBUG COMMAND: generating map with new world seed");
-                world.seed += 1;
+                let old_seed = world.seed();
+                world.set_seed(old_seed + 1);
                 for (_, map) in maps.iter_mut() {
                     map.populated = false;
                 }

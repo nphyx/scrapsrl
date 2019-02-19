@@ -7,7 +7,8 @@ pub struct Tile {
     pub bg: Color,
     pub transparent: bool,
     pub walkable: bool,
-    pub type_id: u32, // this references the tile descriptions in mapgen/tile_types
+    /// arbitrary type flag used by map generator to mark tiles for checks
+    pub type_id: u32,
 }
 
 impl Default for Tile {

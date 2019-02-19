@@ -1,11 +1,11 @@
 (
     base: '+',
-    horizontal_line: Some('\u{2500}'),
+    horizontal: Some('\u{2500}'),
+    vertical: Some('\u{2502}'),
     corner_tl: Some('\u{250c}'),
     corner_tr: Some('\u{2510}'),
     corner_bl: Some('\u{2514}'),
     corner_br: Some('\u{2518}'),
-    vertical_line: Some('\u{2502}'),
     tee_l: Some('\u{2524}'),
     tee_r: Some('\u{251c}'),
     tee_u: Some('\u{2534}'),

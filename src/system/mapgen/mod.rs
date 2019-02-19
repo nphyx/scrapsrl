@@ -46,13 +46,14 @@ impl<'a> System<'a> for MapGenerator {
 
 impl MapGenerator {
     fn generate(&mut self, region: Region, map: &mut AreaMap, assets: &Assets, world: &WorldState) {
+        let seed = world.seed();
         // let map = AreaMap::default();
         println!(
             "Generating new map with dimensions {}x{}, seed {} for region {:?}",
-            map.width, map.height, world.seed, region
+            map.width, map.height, seed, region
         );
         map.wipe();
-        let rng = Rng::new_with_seed(Algo::CMWC, world.seed);
+        let rng = Rng::new_with_seed(Algo::CMWC, world.seed());
         let noise = Noise::init_with_dimensions(2)
             .noise_type(NoiseType::Simplex)
             .random(rng)
@@ -69,8 +70,33 @@ impl MapGenerator {
         trees::place_trees(&noise, map, width, height, region.to_offset(), 0.2, 0.7);
         */
 
-        // draw a road
-        roads::place_horizontal_roads(&noise, map, region.to_offset(), 0.1, 0.8, 8);
+        let road_data = world.get_road(region);
+
+        if road_data.lanes_x > 0 {
+            // draw a road
+            roads::place_horizontal_roads(
+                &assets,
+                &noise,
+                map,
+                region.to_offset(),
+                0.1,
+                0.8,
+                road_data.lanes_x as i32,
+            );
+        }
+
+        if road_data.lanes_y > 0 {
+            // draw a road
+            roads::place_vertical_roads(
+                &assets,
+                &noise,
+                map,
+                region.to_offset(),
+                0.1,
+                0.8,
+                road_data.lanes_y as i32,
+            );
+        }
 
         // connect connectable tiles
         connect(map);
