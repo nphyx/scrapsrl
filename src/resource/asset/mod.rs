@@ -36,17 +36,17 @@ impl Default for Assets {
 }
 
 impl Assets {
-    pub fn add_icon(&mut self, name: String, icon: Icon) {
-        self.icons.insert(name, icon);
+    pub fn add_icon(&mut self, name: &str, icon: Icon) {
+        self.icons.insert(name.to_string(), icon);
     }
-    pub fn add_entity(&mut self, name: String, template: EntityTemplate) {
-        self.entities.insert(name, template);
+    pub fn add_entity(&mut self, name: &str, template: EntityTemplate) {
+        self.entities.insert(name.to_string(), template);
     }
-    pub fn add_geography(&mut self, name: String, template: GeographyTemplate) {
-        self.geographies.insert(name, template);
+    pub fn add_geography(&mut self, name: &str, template: GeographyTemplate) {
+        self.geographies.insert(name.to_string(), template);
     }
-    pub fn add_structure(&mut self, name: String, template: StructureTemplate) {
-        self.structures.insert(name, template);
+    pub fn add_structure(&mut self, name: &str, template: StructureTemplate) {
+        self.structures.insert(name.to_string(), template);
     }
     pub fn len(&self) -> usize {
         self.entities.len() + self.icons.len() + self.structures.len() + self.geographies.len()
@@ -73,7 +73,7 @@ impl Assets {
             .clone()
     }
 
-    pub fn get_icon(&self, name: &String) -> Icon {
+    pub fn get_icon(&self, name: &str) -> Icon {
         if let Some(icon) = self.icons.get(name) {
             icon.clone()
         } else {

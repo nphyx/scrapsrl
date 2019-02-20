@@ -100,13 +100,9 @@ pub fn place_horizontal_roads(
     let bg = Color { r: 4, g: 4, b: 4 };
     let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
 
-    let dashed = assets.get_icon(&"line_emdash".to_string()).base_ch();
-    let line = assets
-        .get_icon(&"line_single".to_string())
-        .ch(false, false, true, true);
-    let dbl = assets
-        .get_icon(&"line_double".to_string())
-        .ch(false, false, true, true);
+    let dashed = assets.get_icon("line_emdash").base_ch();
+    let line = assets.get_icon("line_single").ch(false, false, true, true);
+    let dbl = assets.get_icon("line_double").ch(false, false, true, true);
     let road_rubble: char = '\u{e35d}';
     let mut segment_icon: char;
     let mut fg: Color;
@@ -208,12 +204,8 @@ pub fn place_vertical_roads(
     let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
 
     let dashed = '|';
-    let line = assets
-        .get_icon(&"line_single".to_string())
-        .ch(true, true, false, false);
-    let dbl = assets
-        .get_icon(&"line_double".to_string())
-        .ch(true, true, false, false);
+    let line = assets.get_icon("line_single").ch(true, true, false, false);
+    let dbl = assets.get_icon("line_double").ch(true, true, false, false);
 
     for cy in 0..map.height {
         let x = road_long(noise, map, cy, offset).floor() as i32;

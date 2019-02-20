@@ -19,9 +19,7 @@ pub fn draw_sidebar_frame(mut console: &dyn Console, assets: &Assets) {
         x,
         y,
         height,
-        assets
-            .get_icon(&"line_double".to_string())
-            .ch(true, true, false, false),
+        assets.get_icon("line_double").ch(true, true, false, false),
     );
 }
 
@@ -44,18 +42,9 @@ pub fn draw_stats(mut console: &dyn Console, assets: &Assets, pc: &Character) {
         ),
     );
 
-    draw_rect(
-        console,
-        x + 9,
-        y + 1,
-        13,
-        5,
-        assets.get_icon(&"line_single".to_string()),
-    );
+    draw_rect(console, x + 9, y + 1, 13, 5, assets.get_icon("line_single"));
 
-    let horiz_line = assets
-        .get_icon(&"line_single".to_string())
-        .ch(false, false, true, true);
+    let horiz_line = assets.get_icon("line_single").ch(false, false, true, true);
     console.print_rect(
         x + 10,
         y + 1,
@@ -80,14 +69,7 @@ pub fn draw_stats(mut console: &dyn Console, assets: &Assets, pc: &Character) {
 
 use tcod::colors::Color;
 
-fn draw_info(
-    mut console: &dyn Console,
-    ch: char,
-    fg: Color,
-    bg: Color,
-    short: String,
-    long: String,
-) {
+fn draw_info(mut console: &dyn Console, ch: char, fg: Color, bg: Color, short: &str, long: &str) {
     let x = console.width() - SIDEBAR_WIDTH;
     let width = SIDEBAR_WIDTH;
     let y = SIDEBAR_WIDTH + 14;
@@ -109,8 +91,8 @@ pub fn draw_entity_info(
         icon,
         TColor::from(colors.fg),
         DEFAULT_BG,
-        description.short.clone(),
-        description.long.clone(),
+        &*description.short,
+        &*description.long,
     );
 }
 
@@ -123,7 +105,7 @@ pub fn draw_tile_info(console: &dyn Console, tile: Tile) {
         tile.icon,
         TColor::from(tile.fg),
         TColor::from(tile.bg),
-        t.short_desc.to_string(),
-        t.long_desc.to_string(),
+        t.short_desc,
+        t.long_desc,
     );
 }

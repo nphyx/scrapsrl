@@ -25,16 +25,14 @@ pub fn draw_worldmap(
     let bg_base = TColor::new(32, 32, 32);
     let mut bg: TColor;
     let mut ch: char;
-    let horiz_line = assets
-        .get_icon(&"line_single".to_string())
-        .ch(false, false, true, true);
+    let horiz_line = assets.get_icon("line_single").ch(false, false, true, true);
     draw_rect(
         console,
         base_x - 1,
         y - 1,
         width + 2,
         height + 2,
-        assets.get_icon(&"line_single".to_string()),
+        assets.get_icon("line_single"),
     );
     for ry in region.y - hh..=region.y + hh {
         for rx in region.x - hw..=region.x + hw {
@@ -52,15 +50,11 @@ pub fn draw_worldmap(
                     "line_single"
                 };
                 if cur.lanes_x == 0 && cur.lanes_y > 0 {
-                    ch = assets
-                        .get_icon(&size.to_string())
-                        .ch(true, true, false, false);
+                    ch = assets.get_icon(size).ch(true, true, false, false);
                 } else if cur.lanes_x > 0 && cur.lanes_y == 0 {
-                    ch = assets
-                        .get_icon(&size.to_string())
-                        .ch(false, false, true, true);
+                    ch = assets.get_icon(size).ch(false, false, true, true);
                 } else {
-                    ch = assets.get_icon(&size.to_string()).ch(
+                    ch = assets.get_icon(size).ch(
                         up.lanes_y > 0,
                         down.lanes_y > 0,
                         left.lanes_x > 0,

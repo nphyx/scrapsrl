@@ -108,19 +108,19 @@ impl AssetLoader {
                 match template_type {
                     AssetType::Entity => {
                         let template: EntityTemplate = ron::de::from_str(&text).unwrap();
-                        assets.add_entity(name, template);
+                        assets.add_entity(&name, template);
                     }
                     AssetType::Icon => {
                         let template: Icon = ron::de::from_str(&text).unwrap();
-                        assets.add_icon(name, template);
+                        assets.add_icon(&name, template);
                     }
                     AssetType::Geography => {
                         let template: GeographyTemplate = ron::de::from_str(&text).unwrap();
-                        assets.add_geography(name, template);
+                        assets.add_geography(&name, template);
                     }
                     AssetType::Structure => {
                         let template: StructureTemplate = ron::de::from_str(&text).unwrap();
-                        assets.add_structure(name, template);
+                        assets.add_structure(&name, template);
                     }
                 }
             } else {
