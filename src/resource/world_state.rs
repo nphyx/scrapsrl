@@ -37,6 +37,19 @@ impl Default for RoadMap {
     }
 }
 
+#[derive(Copy, Clone)]
+pub struct PopMap {
+    samples: [[f32; WORLD_SIZE]; WORLD_SIZE],
+}
+
+impl Default for PopMap {
+    fn default() -> PopMap {
+        PopMap {
+            samples: [[0.0; WORLD_SIZE]; WORLD_SIZE],
+        }
+    }
+}
+
 #[derive(Copy, Clone, Component, Deserialize, Serialize)]
 #[storage(VecStorage)]
 pub struct WorldState {
@@ -51,6 +64,10 @@ pub struct WorldState {
     pub year: u32,
 
     size: u32,
+
+    #[serde(skip)]
+    /// map of population density, deterministic so skipped when reloading game
+    pub pop: PopMap,
 
     #[serde(skip)]
     /// map of roads, deterministic so skipped when reloading game
@@ -69,6 +86,7 @@ impl Default for WorldState {
             day: 0,
             time: 6.0,
             year: 70,
+            pop: PopMap::default(),
             roads: RoadMap::default(),
             size: WORLD_SIZE as u32,
             ready: false,
@@ -101,6 +119,16 @@ impl WorldState {
         assert!((x as usize) < WORLD_SIZE, "got an oversized x in set_road");
         assert!((y as usize) < WORLD_SIZE, "got an oversized y in set_road");
         (x as usize, y as usize)
+    }
+
+    pub fn set_pop(&mut self, region: Region, density: f32) {
+        let (x, y) = self.to_abs_pos(region);
+        self.pop.samples[x as usize][y as usize] = density;
+    }
+
+    pub fn get_pop(&mut self, region: Region, density: f32) {
+        let (x, y) = self.to_abs_pos(region);
+        self.pop.samples[x as usize][y as usize] = density;
     }
 
     pub fn get_road(&self, region: Region) -> RoadTile {

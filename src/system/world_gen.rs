@@ -23,6 +23,13 @@ impl<'a> System<'a> for WorldGen {
 
             for x in world.min_x()..world.max_x() {
                 for y in world.min_y()..world.max_y() {
+                    // generate pre-apocalypse population density
+                    world.set_pop(
+                        Region::new(x, y),
+                        rand_up(noise.get_fbm([x as f32, y as f32], 32)),
+                    );
+
+                    // generate roads
                     let o_x: [f32; 2] = [x as f32 * MAP_WIDTH as f32 / 800.0, y as f32];
                     let o_y: [f32; 2] = [x as f32, y as f32 * MAP_WIDTH as f32 / 800.0];
                     let lanes_x = ((rand_up(noise.get_fbm(o_x, 32)) * 12.0) - 5.0)
