@@ -126,9 +126,9 @@ impl WorldState {
         self.pop.samples[x as usize][y as usize] = density;
     }
 
-    pub fn get_pop(&mut self, region: Region, density: f32) {
+    pub fn get_pop(&self, region: Region) -> f32 {
         let (x, y) = self.to_abs_pos(region);
-        self.pop.samples[x as usize][y as usize] = density;
+        self.pop.samples[x as usize][y as usize]
     }
 
     pub fn get_road(&self, region: Region) -> RoadTile {

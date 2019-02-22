@@ -25,4 +25,4 @@ pub const TEMPLATE_DIR: &str = "./resource/template";
 pub const ICON_DIR: &str = "./resource";
 
 /// world is always square, this is the length of a side
-pub const WORLD_SIZE: usize = 1000;
+pub const WORLD_SIZE: usize = 250;

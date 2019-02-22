@@ -22,7 +22,6 @@ pub fn draw_worldmap(
     let hw = width / 2;
     let hh = height / 2;
     let fg = TColor::new(255, 255, 255);
-    let bg_base = TColor::new(32, 32, 32);
     let mut bg: TColor;
     let mut ch: char;
     let horiz_line = assets.get_icon("line_single").ch(false, false, true, true);
@@ -62,10 +61,12 @@ pub fn draw_worldmap(
                     );
                 }
             }
+            let cur_region = Region::new(ry, rx);
+            let pop_col = ((world.get_pop(cur_region) * 224.0).floor()) as u8;
             if region.y == ry && region.x == rx {
-                bg = TColor::new(128, 128, 128);
+                bg = TColor::new(pop_col, pop_col + 16, pop_col);
             } else {
-                bg = bg_base;
+                bg = TColor::new(pop_col, pop_col, pop_col);
             }
             console.put_char_ex(x, y, ch, fg, bg);
             x += 1;
