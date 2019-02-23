@@ -1,0 +1,29 @@
+(
+    tags: Some([Urban]),
+    structures: None, // Some(("small_home", "small_storefront", "gas_station")),
+    population_range: (0.7, 1.0),
+    description: Some((
+            short: "urban",
+            long: "The concrete jungle."
+    )),
+    icon: Some((name: "grid_1.3x1.3")),
+    colors: Some((
+            fg: (r: 16, g: 180, b: 30),
+            bg: (r: 48, g: 48, b: 12),
+    )),
+    ground_cover: Some([
+            (
+                frequency: 0.0,
+                colors: (
+                        fg: (r: 32, g: 32, b: 29),
+                        bg: (r: 42, g: 42, b: 38),
+                ),
+                icon: (name:"grid_1.3x1.3"),
+            ),
+    ]),
+    scatter: Some([
+            (frequency: 0.00005, colors: ( fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0),), icon:(name: "fixture_tire_stack")),
+            (frequency: 0.023, colors: ( fg: (r: 32, g: 36, b: 32), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile")),
+            (frequency: 0.023, colors: ( fg: (r: 38, g: 10, b: 8), bg: (r: 0, g: 0, b: 0),), icon:(name: "fixture_pipe_s")),
+    ])
+)

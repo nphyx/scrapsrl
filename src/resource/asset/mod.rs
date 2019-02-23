@@ -13,6 +13,10 @@ pub use structure_template::*;
 
 use specs::{Component, VecStorage};
 use std::collections::HashMap;
+
+use crate::component::Region;
+use crate::resource::WorldState;
+
 #[derive(Component)]
 #[storage(VecStorage)]
 pub struct Assets {
@@ -64,20 +68,31 @@ impl Assets {
         self.structures.len()
     }
     /// chooses a random geography based on a random number <selector>
-    pub fn choose_geography(&self, selector: f32) -> GeographyTemplate {
-        let keys: Vec<String> = self.geographies.keys().map(|k| k.clone()).collect();
-        let len = keys.len() as f32;
-        self.geographies
-            .get(keys.get((len * (selector % len)).floor() as usize).unwrap())
-            .unwrap()
-            .clone()
+    pub fn choose_geography(
+        &self,
+        sample: f32,
+        region: Region,
+        world: &WorldState,
+    ) -> &GeographyTemplate {
+        let pop = world.get_pop(region);
+        // let keys: Vec<String> = self.geographies.keys().map(|k| k.clone()).collect();
+        let choices: Vec<&GeographyTemplate> = self
+            .geographies
+            .values()
+            .filter(|item| item.population_range[0] < pop && item.population_range[1] > pop)
+            .collect();
+        let len = choices.len() as f32;
+        let choice = *choices
+            .get((len * (sample % len)).floor() as usize)
+            .expect("no available geographies matching the given tag");
+        println!("chose {:?}", choice.tags);
+        choice
     }
 
     pub fn get_icon(&self, name: &str) -> Icon {
         if let Some(icon) = self.icons.get(name) {
             icon.clone()
         } else {
-            // println!("WARNING: icon not found: {}", name);
             Icon::default()
         }
     }

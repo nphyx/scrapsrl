@@ -64,8 +64,8 @@ fn select_fg(geography: &GeographyTemplate, noise_sample: f32) -> Color {
     let mut sum_freq = 0.0;
     if let Some(ref cover_set) = geography.ground_cover {
         let mut cover_list = cover_set.iter();
-        if cover_list.nth(0).is_some() {
-            color = cover_list.nth(0).unwrap().colors.fg;
+        if let Some(cover) = cover_list.nth(0) {
+            color = cover.colors.fg;
         }
         for cover in cover_list {
             sum_freq += cover.frequency;

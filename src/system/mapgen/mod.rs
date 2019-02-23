@@ -60,7 +60,8 @@ impl MapGenerator {
             .init();
 
         // choose a geography variant
-        let geography = assets.choose_geography(1.0); // TODO choose geography from noise
+        let geography = assets.choose_geography(1.0, region, world); // TODO choose geography from noise
+        println!("received {:?}", geography.tags);
 
         // lay down a basic ground cover layer
         ground_cover::base(&noise, map, region.to_offset(), 0.2, &geography, assets);

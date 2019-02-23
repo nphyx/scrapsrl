@@ -1,12 +1,14 @@
 use crate::component::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum GeographyTag {
     Forest,
+    Rural,
+    Urban,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct GroundCover {
     pub frequency: f32,
     /// base colors for the ground cover
@@ -21,6 +23,10 @@ pub struct GeographyTemplate {
     #[serde(default)]
     /// tags that apply to this region, which will be used during object generation
     pub tags: Option<Vec<GeographyTag>>,
+    #[serde(default)]
+    /// lower and upper threshold of population levels in which the geography can occur
+    /// from 0.0 - 1.0
+    pub population_range: [f32; 2],
     #[serde(default)]
     /// list of structures that may appear in this map (density controlled elsewhere?)
     pub structures: Option<Vec<String>>,
@@ -45,6 +51,7 @@ impl Default for GeographyTemplate {
     fn default() -> GeographyTemplate {
         GeographyTemplate {
             tags: None,
+            population_range: [0.0, 1.0],
             structures: None,
             description: None,
             icon: None,

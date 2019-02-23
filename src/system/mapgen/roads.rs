@@ -31,7 +31,7 @@ fn place_car(
         return;
     }
     let color_good = Color::new(68, 68, 68);
-    let color_bad = Color::new(72, 40, 36);
+    let color_bad = Color::new(38, 10, 8);
     let v = rand_up(fbm_offset(noise, pos, offset, 10.0, 1));
     let ref icon = VEHICLES[(v * VEHICLES.len() as f32).floor() as usize].to_string();
     let i = turb_offset(noise, pos, offset, scale, 32);
