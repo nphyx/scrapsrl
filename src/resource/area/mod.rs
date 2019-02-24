@@ -1,5 +1,6 @@
 use crate::component::{Position, Region};
 use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
+use crate::resource::GeographyTemplate;
 
 mod iterators;
 mod tile;
@@ -18,6 +19,7 @@ pub struct AreaMap {
     pub height: i32,
     /// mark true when mapgen is complete
     pub populated: bool,
+    pub geography: GeographyTemplate,
 }
 
 impl Default for AreaMap {
@@ -28,6 +30,7 @@ impl Default for AreaMap {
             width: WIDTH as i32,
             height: HEIGHT as i32,
             populated: false,
+            geography: GeographyTemplate::default(),
         }
     }
 }
@@ -47,6 +50,13 @@ impl AreaMap {
             return None;
         }
         Some(self.tiles[pos.x as usize][pos.y as usize])
+    }
+
+    pub fn get_mut(&mut self, pos: Position) -> Option<&mut Tile> {
+        if 0 > pos.x || pos.x >= self.width || 0 > pos.y || pos.y >= self.height {
+            return None;
+        }
+        Some(&mut self.tiles[pos.x as usize][pos.y as usize])
     }
 
     pub fn get_icon(&self, pos: Position) -> Option<char> {
@@ -114,8 +124,8 @@ impl AreaMaps {
         }
     }
 
-    /// get the map at the given location. Will probably die if the map doesn't exist, but
-    /// we want that because it shouldn't have happened.
+    /// get the map at the given location. Will probably die if the map doesn't exist,
+    /// but we want that because it shouldn't have happened.
     pub fn get(&self, region: Region) -> &AreaMap {
         match self.maps.get(&region) {
             Some(map) => map,

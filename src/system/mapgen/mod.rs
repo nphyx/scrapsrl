@@ -6,8 +6,11 @@ use tcod::random::{Algo, Rng};
 mod connect_tiles;
 mod ground_cover;
 mod roads;
+mod structure;
 mod trees;
 pub mod util;
+
+use util::*;
 
 use connect_tiles::connect;
 
@@ -60,21 +63,17 @@ impl MapGenerator {
             .init();
 
         // choose a geography variant
-        let geography = assets.choose_geography(1.0, region, world); // TODO choose geography from noise
+        let geography = world.get_geography_from_assets(assets, region);
         println!("received {:?}", geography.tags);
+        map.geography = geography.clone();
 
         // lay down a basic ground cover layer
-        ground_cover::base(&noise, map, region.to_offset(), 0.2, &geography, assets);
-        ground_cover::scatter(&noise, map, region.to_offset(), 1.0, &geography, assets);
-
-        /* place trees
-        trees::place_trees(&noise, map, width, height, region.to_offset(), 0.2, 0.7);
-        */
+        ground_cover::base(&noise, map, region.to_offset(), 0.2, assets);
+        ground_cover::scatter(&noise, map, region.to_offset(), 1.0, assets);
 
         let road_data = world.get_road(region);
 
         if road_data.lanes_x > 0 {
-            // draw a road
             roads::place_horizontal_roads(
                 &assets,
                 &noise,
@@ -87,7 +86,6 @@ impl MapGenerator {
         }
 
         if road_data.lanes_y > 0 {
-            // draw a road
             roads::place_vertical_roads(
                 &assets,
                 &noise,
@@ -98,6 +96,8 @@ impl MapGenerator {
                 road_data.lanes_y as i32,
             );
         }
+
+        structure::build(&assets, &noise, map, &region, world);
 
         // connect connectable tiles
         connect(map);

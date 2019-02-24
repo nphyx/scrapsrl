@@ -41,7 +41,7 @@ pub fn draw_worldmap(
             let right = world.get_road(Region { x: rx + 1, y: ry });
             let cur = world.get_road(Region { x: rx, y: ry });
             if cur.lanes_x == 0 && cur.lanes_y == 0 {
-                ch = ' ';
+                ch = world.get_icon(Region { x: rx, y: ry });
             } else {
                 let size = if cur.lanes_x > 3 || cur.lanes_y > 3 {
                     "line_double"
@@ -61,7 +61,7 @@ pub fn draw_worldmap(
                     );
                 }
             }
-            let cur_region = Region::new(ry, rx);
+            let cur_region = Region::new(rx, ry);
             let pop_col = ((world.get_pop(cur_region) * 224.0).floor()) as u8;
             if region.y == ry && region.x == rx {
                 bg = TColor::new(pop_col, pop_col + 16, pop_col);
@@ -80,6 +80,14 @@ pub fn draw_worldmap(
         y,
         width,
         1,
-        format!("lat:{}{}long:{}", region.y, horiz_line, region.x),
+        format!(
+            "x:{}{}y:{}{}pop:{:.*}",
+            region.x,
+            horiz_line,
+            region.y,
+            horiz_line,
+            1,
+            world.get_pop(region) * 10.0
+        ),
     );
 }

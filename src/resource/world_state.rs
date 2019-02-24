@@ -1,9 +1,12 @@
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 use specs::{Component, VecStorage};
+use tcod::noise::*;
 
 use crate::component::Region;
 use crate::constants::*;
+use crate::resource::{Assets, GeographyTemplate};
+use crate::util::*;
 
 #[derive(Copy, Clone, Debug)]
 pub struct RoadTile {
@@ -15,6 +18,7 @@ pub struct RoadTile {
     pub lanes_y: u8,
 }
 
+/// a road tile specifying the x and y lanes of a road
 impl Default for RoadTile {
     fn default() -> RoadTile {
         RoadTile {
@@ -29,10 +33,39 @@ pub struct RoadMap {
     tiles: [[RoadTile; WORLD_SIZE]; WORLD_SIZE],
 }
 
+/// a map of road tiles
 impl Default for RoadMap {
     fn default() -> RoadMap {
         RoadMap {
             tiles: [[RoadTile::default(); WORLD_SIZE]; WORLD_SIZE],
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+/// a map of geography template indexes
+pub struct GeographyMap {
+    indexes: [[usize; WORLD_SIZE]; WORLD_SIZE],
+}
+
+impl Default for GeographyMap {
+    fn default() -> GeographyMap {
+        GeographyMap {
+            indexes: [[0; WORLD_SIZE]; WORLD_SIZE],
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+/// a map of geography icons for drawing a world map
+pub struct IconMap {
+    chars: [[char; WORLD_SIZE]; WORLD_SIZE],
+}
+
+impl Default for IconMap {
+    fn default() -> IconMap {
+        IconMap {
+            chars: [[' '; WORLD_SIZE]; WORLD_SIZE],
         }
     }
 }
@@ -63,6 +96,7 @@ pub struct WorldState {
     /// years since apocalypse
     pub year: u32,
 
+    /// world size (world is always square)
     size: u32,
 
     #[serde(skip)]
@@ -72,6 +106,14 @@ pub struct WorldState {
     #[serde(skip)]
     /// map of roads, deterministic so skipped when reloading game
     pub roads: RoadMap,
+
+    #[serde(skip)]
+    /// map of geographies
+    pub geographies: GeographyMap,
+
+    #[serde(skip)]
+    /// map of icons
+    pub icons: IconMap,
 
     /// true when the world is ready to be used (after init)
     pub ready: bool,
@@ -88,6 +130,8 @@ impl Default for WorldState {
             year: 70,
             pop: PopMap::default(),
             roads: RoadMap::default(),
+            geographies: GeographyMap::default(),
+            icons: IconMap::default(),
             size: WORLD_SIZE as u32,
             ready: false,
         }
@@ -121,19 +165,24 @@ impl WorldState {
         (x as usize, y as usize)
     }
 
+    pub fn get_icon(&self, region: Region) -> char {
+        let (x, y) = self.to_abs_pos(region);
+        self.icons.chars[x][y]
+    }
+
     pub fn set_pop(&mut self, region: Region, density: f32) {
         let (x, y) = self.to_abs_pos(region);
-        self.pop.samples[x as usize][y as usize] = density;
+        self.pop.samples[x][y] = density;
     }
 
     pub fn get_pop(&self, region: Region) -> f32 {
         let (x, y) = self.to_abs_pos(region);
-        self.pop.samples[x as usize][y as usize]
+        self.pop.samples[x][y]
     }
 
     pub fn get_road(&self, region: Region) -> RoadTile {
         let (x, y) = self.to_abs_pos(region);
-        self.roads.tiles[x as usize][y as usize]
+        self.roads.tiles[x][y]
     }
 
     pub fn set_road(&mut self, region: Region, lanes_x: u8, lanes_y: u8) {
@@ -156,5 +205,38 @@ impl WorldState {
 
     pub fn max_y(&self) -> i32 {
         (self.size as i32 / 2) as i32
+    }
+
+    /// chooses a random geography based on a random number <selector>
+    pub fn choose_geography<'a>(&mut self, noise: &Noise, assets: &'a Assets, region: Region) {
+        let sample: f32 =
+            rand_up(noise.get_fbm([region.x as f32 * 0.1, region.y as f32 * 0.1], 16));
+        let pop = self.get_pop(region);
+        let choices: Vec<(usize, &GeographyTemplate)> = assets
+            .get_geographies()
+            .values()
+            .enumerate()
+            .filter(|item| item.1.population_range[0] < pop && item.1.population_range[1] > pop)
+            .collect();
+        let len = choices.len() as f32;
+        let choice = *choices
+            .get((len * (sample % len)).floor() as usize)
+            .expect("no available geographies matching the given tag");
+        let (x, y) = self.to_abs_pos(region);
+        self.geographies.indexes[x][y] = choice.0;
+        if let Some(icon) = &choice.1.icon {
+            self.icons.chars[x][y] = assets.get_icon(&icon.name).base_ch();
+        }
+    }
+
+    pub fn get_geography_from_assets(&self, assets: &Assets, region: Region) -> GeographyTemplate {
+        let (x, y) = self.to_abs_pos(region);
+        let index = self.geographies.indexes[x][y];
+        let geographies: Vec<&GeographyTemplate> = assets.get_geographies().values().collect();
+        if let Some(geography) = geographies.get(index) {
+            return (*geography).clone();
+        } else {
+            GeographyTemplate::default()
+        }
     }
 }

@@ -67,33 +67,64 @@ impl Assets {
     pub fn structure_len(&self) -> usize {
         self.structures.len()
     }
-    /// chooses a random geography based on a random number <selector>
-    pub fn choose_geography(
-        &self,
-        sample: f32,
-        region: Region,
-        world: &WorldState,
-    ) -> &GeographyTemplate {
-        let pop = world.get_pop(region);
-        // let keys: Vec<String> = self.geographies.keys().map(|k| k.clone()).collect();
-        let choices: Vec<&GeographyTemplate> = self
-            .geographies
-            .values()
-            .filter(|item| item.population_range[0] < pop && item.population_range[1] > pop)
-            .collect();
-        let len = choices.len() as f32;
-        let choice = *choices
-            .get((len * (sample % len)).floor() as usize)
-            .expect("no available geographies matching the given tag");
-        println!("chose {:?}", choice.tags);
-        choice
+    pub fn get_geographies(&self) -> &HashMap<String, GeographyTemplate> {
+        return &self.geographies;
     }
-
     pub fn get_icon(&self, name: &str) -> Icon {
         if let Some(icon) = self.icons.get(name) {
             icon.clone()
         } else {
             Icon::default()
         }
+    }
+
+    pub fn get_geography(&self, name: &str) -> GeographyTemplate {
+        if let Some(template) = self.geographies.get(name) {
+            template.clone()
+        } else {
+            GeographyTemplate::default()
+        }
+    }
+
+    pub fn get_structure(&self, name: &str) -> StructureTemplate {
+        if let Some(structure) = self.structures.get(name) {
+            structure.clone()
+        } else {
+            StructureTemplate::default()
+        }
+    }
+
+    pub fn process_geographies(&mut self) {
+        let mut queue: Vec<(String, GeographyTemplate)> = Vec::new();
+        let mut queue_processed: HashMap<String, GeographyTemplate> = HashMap::new();
+        let mut marks: Vec<usize> = Vec::new();
+        for (name, template) in self.geographies.drain() {
+            queue.push((name, template));
+        }
+        let mut iterations = 0;
+        while queue.len() > 0 {
+            for (i, item) in queue.iter_mut().enumerate() {
+                let (name, template) = item;
+                if let Some(ref parent_name) = template.parent {
+                    if let Some(parent) = queue_processed.get_mut(parent_name) {
+                        println!("applying inheritance {} -> {}", parent_name, name);
+                        template.inherit(parent);
+                        marks.push(i);
+                    }
+                } else {
+                    marks.push(i);
+                }
+            }
+            while let Some(i) = marks.pop() {
+                let (name, template) = queue.remove(i);
+                queue_processed.insert(name, template);
+            }
+            iterations += 1;
+            if iterations > 5 {
+                panic!("too much nesting in geography templates (limit 5), or a possibly cyclic inheritance dependency");
+            }
+        }
+        println!("finished inheritance for geographies");
+        self.geographies = queue_processed;
     }
 }

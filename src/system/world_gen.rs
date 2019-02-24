@@ -1,18 +1,18 @@
-use crate::system::mapgen::util::*;
 use specs::{Read, System, Write};
 use tcod::noise::*;
 use tcod::random::{Algo, Rng};
 
 use crate::component::Region;
 use crate::constants::*;
-use crate::resource::{GameStage, GameState, WorldState};
+use crate::resource::{Assets, GameStage, GameState, WorldState};
+use crate::util::rand_up;
 
 pub struct WorldGen;
 
 impl<'a> System<'a> for WorldGen {
-    type SystemData = (Read<'a, GameState>, Write<'a, WorldState>);
+    type SystemData = (Read<'a, GameState>, Write<'a, WorldState>, Read<'a, Assets>);
 
-    fn run(&mut self, (state, mut world): Self::SystemData) {
+    fn run(&mut self, (state, mut world, assets): Self::SystemData) {
         if !world.ready && state.stage == GameStage::Initializing {
             println!("generating new world with seed {}", world.seed());
             let rng = Rng::new_with_seed(Algo::CMWC, world.seed());
@@ -35,6 +35,7 @@ impl<'a> System<'a> for WorldGen {
                     let lanes_x = road_lanes(&noise, o_x, pop);
                     let lanes_y = road_lanes(&noise, o_y, pop);
                     world.set_road(region, lanes_x, lanes_y);
+                    world.choose_geography(&noise, &assets, region);
                 }
             }
             clean_roads(&mut world);

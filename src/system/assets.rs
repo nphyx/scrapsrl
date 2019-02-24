@@ -124,6 +124,8 @@ impl AssetLoader {
                     }
                 }
             } else {
+                // run inheritance passes
+                assets.process_geographies();
                 assets.ready = true;
                 println!("finished loading {} assets: {} entities, {} icons, {} geographies, {} structures.", assets.len(), assets.entity_len(), assets.icon_len(), assets.geography_len(), assets.structure_len());
             }

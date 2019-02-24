@@ -49,6 +49,9 @@ impl std::cmp::PartialEq<MovePlan> for Position {
 }
 
 impl Position {
+    pub fn new(x: i32, y: i32) -> Position {
+        Position { x, y }
+    }
     pub fn to_array(self) -> [i32; 2] {
         [self.x, self.y]
     }

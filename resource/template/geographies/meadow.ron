@@ -1,0 +1,40 @@
+(
+    tags: Some([Rural]),
+    structures: Some(["small_home", "small_storefront", "gas_station"]),
+    population_range: (0.0, 0.7),
+    description: Some((
+            short: "a forest",
+            long: "Mostly trees."
+    )),
+    icon: Some((name: "flora_herb")),
+    colors: Some((
+            fg: (r: 16, g: 180, b: 30),
+            bg: (r: 48, g: 48, b: 12),
+    )),
+    ground_cover: Some([
+            (
+                frequency: 0.3,
+                colors: (
+                        fg: (r: 112, g: 141, b: 64),
+                        bg: (r: 12, g: 24, b: 6),
+                ),
+                icon: (name: "tall_grass"),
+            ),
+            (
+                frequency: 0.8,
+                colors: (
+                        fg: (r: 118, g: 121, b: 72),
+                        bg: (r: 12, g: 16, b: 4),
+                ),
+                icon: (name:"short_grass"),
+            ),
+    ]),
+    scatter: Some([
+            (frequency: 0.00005, colors: ( fg: (r: 102, g: 104, b: 100), bg: (r: 0, g: 0, b: 0),), icon:(name: "boulder")),
+            (frequency: 0.1, colors: ( fg: (r: 118, g: 121, b: 72), bg: (r: 38, g: 36, b: 21),), icon:(name: "flora_herb")),
+            (frequency: 0.01, colors: ( fg: (r: 112, g: 108, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock")),
+            (frequency: 0.015, colors: ( fg: (r: 112, g: 118, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_2")),
+            (frequency: 0.004, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_3")),
+            (frequency: 0.023, colors: ( fg: (r: 62, g: 40, b: 31), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile")),
+    ])
+)

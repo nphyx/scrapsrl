@@ -1,0 +1,8 @@
+(
+    min_width:12,
+    max_width:17,
+    min_height:12,
+    max_height:17,
+    perimeter:1,
+    connect_to: Some([(connection_type: Road, connection_method: Driveway)]),
+)

@@ -45,6 +45,10 @@ pub struct GeographyTemplate {
     #[serde(default)]
     /// scatter objects, placed independently according to frequency
     pub scatter: Option<Vec<GroundCover>>,
+    /// will adopt all settings from this template if it is provided, overriding
+    /// where this template has its own settings and incorporating all items from both
+    /// in the case of vecs
+    pub parent: Option<String>,
 }
 
 impl Default for GeographyTemplate {
@@ -58,6 +62,66 @@ impl Default for GeographyTemplate {
             colors: None,
             ground_cover: None,
             scatter: None,
+            parent: None,
         }
+    }
+}
+
+impl GeographyTemplate {
+    pub fn inherit(&mut self, parent: &mut GeographyTemplate) {
+        if let Some(ref parent_tags) = parent.tags {
+            if let Some(ref mut tags) = self.tags {
+                for tag in parent_tags.iter() {
+                    tags.push(tag.clone());
+                }
+            } else {
+                self.tags = Some(parent_tags.clone());
+            }
+        }
+        if let Some(ref parent_structures) = parent.structures {
+            if let Some(ref mut structures) = self.structures {
+                for structure in parent_structures.iter() {
+                    structures.push(structure.clone());
+                }
+            } else {
+                self.structures = Some(parent_structures.clone());
+            }
+        }
+        if let Some(ref parent_description) = parent.description {
+            if let None = self.description {
+                self.description = Some(parent_description.clone());
+            }
+        }
+        if let Some(ref parent_icon) = parent.icon {
+            if let None = self.icon {
+                self.icon = Some(parent_icon.clone());
+            }
+        }
+        if let Some(ref parent_colors) = parent.colors {
+            if let None = self.colors {
+                self.colors = Some(parent_colors.clone());
+            }
+        }
+        if let Some(ref parent_ground_cover) = parent.ground_cover {
+            if let Some(ref mut ground_cover) = self.ground_cover {
+                for structure in parent_ground_cover.iter() {
+                    ground_cover.push(structure.clone());
+                }
+            } else {
+                self.ground_cover = Some(parent_ground_cover.clone());
+            }
+        }
+        if let Some(ref parent_scatter) = parent.scatter {
+            if let Some(ref mut scatter) = self.scatter {
+                for structure in parent_scatter.iter() {
+                    scatter.push(structure.clone());
+                }
+            } else {
+                self.scatter = Some(parent_scatter.clone());
+            }
+        }
+        // all done, remove the parent so this doesn't get repeated
+        // and improperly duplicated
+        self.parent = None;
     }
 }

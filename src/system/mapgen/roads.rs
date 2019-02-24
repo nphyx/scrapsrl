@@ -2,6 +2,7 @@ use super::util::*;
 use crate::component::{Color, Position};
 use crate::resource::{tile_types::*, AreaMap, Assets, Tile};
 use crate::util::colors::lerp;
+use crate::util::*;
 use tcod::noise::Noise;
 
 /// FIXME don't hardcode this

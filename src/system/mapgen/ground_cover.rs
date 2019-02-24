@@ -2,6 +2,7 @@ use super::util::*;
 use crate::component::{Color, Position};
 use crate::resource::{tile_types::*, AreaMap, Assets, GeographyTemplate, Tile};
 use crate::util::colors::lerp;
+use crate::util::*;
 use tcod::noise::Noise;
 
 /* we'll want to get grass color in other functions maybe
@@ -111,15 +112,16 @@ pub fn base(
     map: &mut AreaMap,
     offset: [i32; 2],
     noise_scale: f32,
-    geography: &GeographyTemplate,
     templates: &Assets,
 ) {
     for x in 0..map.width {
         for y in 0..map.height {
             let i = rand_up(fbm_offset(noise, [x, y], offset, noise_scale, 32));
-            let bg = select_bg(&geography, i);
-            let fg = select_fg(&geography, i);
-            let icon = templates.get_icon(&select_icon(&geography, i)).base_ch();
+            let bg = select_bg(&map.geography, i);
+            let fg = select_fg(&map.geography, i);
+            let icon = templates
+                .get_icon(&select_icon(&map.geography, i))
+                .base_ch();
             map.set(
                 Position { x, y },
                 Tile::new(icon, fg, bg, true, true, TYPE_GRASS),
@@ -134,10 +136,11 @@ pub fn scatter(
     map: &mut AreaMap,
     offset: [i32; 2],
     noise_scale: f32,
-    geography: &GeographyTemplate,
     templates: &Assets,
 ) {
-    if let Some(ref scatter_list) = geography.scatter {
+    if let Some(ref scatter_list) = map.geography.scatter {
+        use std::collections::HashMap;
+        let mut queue: HashMap<Position, Tile> = HashMap::new();
         for x in 0..map.width {
             for y in 0..map.height {
                 let mut scale = 0.0; // this gets twiddled every pass
@@ -151,13 +154,16 @@ pub fn scatter(
                         if let Some(tile) = map.get(pos) {
                             bg = tile.bg;
                         }
-                        map.set(
+                        queue.insert(
                             Position { x, y },
                             Tile::new(icon, scatter_obj.colors.fg, bg, true, true, TYPE_GRASS),
                         );
                     }
                 }
             }
+        }
+        for (pos, tile) in queue.drain() {
+            map.set(pos, tile);
         }
     }
 }
