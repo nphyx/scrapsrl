@@ -11,8 +11,11 @@ shred = "0.7.1"
 specs-derive = "0.4.0"
 serde = { version = "*", features = ["derive"] }
 serde_derive = "*"
+wfc = "0.8.0"
 rand = "*"
 ron = "*"
+rand_pcg = "*"
+direction = "0.17.7"
 
 [features]
 nightly = ["shred/nightly"]

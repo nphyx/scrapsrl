@@ -10,8 +10,6 @@ mod structure;
 mod trees;
 pub mod util;
 
-use util::*;
-
 use connect_tiles::connect;
 
 pub struct MapGenerator {

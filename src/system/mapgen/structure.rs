@@ -40,7 +40,9 @@ pub fn build(
                 continue;
             }
 
-            if let Some(structure) = choose_structure(assets, noise, pos, offset, &map.geography) {
+            if let Some(mut structure) =
+                choose_structure(assets, noise, pos, offset, &map.geography)
+            {
                 let mut width: i32 = structure.max_width;
                 let mut height: i32 = structure.max_height;
                 // first check we can fit the structure in here
@@ -63,29 +65,50 @@ pub fn build(
 
                 // now place a structure of the size we've found
                 if width >= structure.min_width && height >= structure.min_height {
+                    use rand::prelude::*;
+                    use rand_pcg::*;
+                    use wfc::{retry::NumTimes, wrap::WrapNone, RunOwn, Size};
+
                     println!("creating structure of size {}, {}", width, height);
                     let perimeter = structure.perimeter;
-                    for sy in 0..=height {
-                        for sx in 0..=width {
-                            let pos = Position::new(sx + x, sy + y);
-                            let fg = Color::new(255, 255, 255);
-                            let bg = Color::new(32, 32, 32);
-                            // FIXME update to use correct tile type params after
-                            // redoing that system
-                            if sx >= perimeter
-                                && sx <= width - perimeter
-                                && sy >= perimeter
-                                && sy <= height - perimeter
-                            {
-                                map.set(pos, Tile::new(' ', fg, bg, false, false, TYPE_VEHICLE))
-                            } else {
-                                // other tiles should have been placed by now
-                                if let Some(tile) = map.get_mut(pos) {
-                                    tile.type_id = TYPE_VEHICLE;
-                                }
-                            }
-                        }
-                    }
+                    let wx = x as u32;
+                    let wy = y as u32;
+                    let wp = perimeter as u32;
+                    let structure_seed: u64 =
+                        // TODO is this too sloppy? probably works fine
+                        (world.seed() as u64) << 8 + (wx as u64) << 4 + wy as u64;
+                    let mut rng = Pcg32::seed_from_u64(structure_seed);
+                    let table = structure.get_pattern_table();
+                    let stats = wfc::GlobalStats::new(table);
+                    let wfc_runner = RunOwn::new_wrap(
+                        Size::new(width as u32 - wp, height as u32 - wp),
+                        &stats,
+                        WrapNone,
+                        &mut rng,
+                    );
+                    let wave = wfc_runner
+                        .collapse_retrying(NumTimes(100), &mut rng)
+                        .expect("failed to generate structure");
+                    let grid = wave.grid();
+                    let mapchar = structure.get_mapchar();
+                    grid.enumerate().for_each(|(coord, wc)| {
+                        let tile = structure
+                            .get_tile(*mapchar.get(&wc.chosen_pattern_id().expect("")).unwrap());
+                        let pos = Position::new(coord.x + x, coord.y + y);
+                        let icon = assets.get_icon(&tile.icon.name).base_ch();
+                        let colors = tile.colors;
+                        map.set(
+                            pos,
+                            Tile::new(
+                                icon,
+                                colors.fg,
+                                colors.bg,
+                                tile.transparent,
+                                tile.walkable,
+                                TYPE_VEHICLE,
+                            ),
+                        );
+                    });
                 }
             }
         } // end x loop

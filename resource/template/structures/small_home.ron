@@ -5,4 +5,59 @@
     max_height:17,
     perimeter:1,
     connect_to: Some([(connection_type: Road, connection_method: Driveway)]),
+    tiles: {
+        'e': ( // floor
+            label: 'e',
+            icon: (name: "flora_tree_evergreen"),
+            transparent: true,
+            walkable: true,
+            colors: (fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0)),
+            pattern: (
+                weight: 2,
+                allowed_neighbors: (['d','='], ['d','='], ['d','='], ['d','='])
+            )
+        ),
+        'd': ( // floor
+            label: 'd',
+            icon: (name: "flora_tree_deciduous"),
+            transparent: true,
+            walkable: true,
+            colors: (fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0)),
+            pattern: (
+                weight: 2,
+                allowed_neighbors: (['e','='], ['e','='], ['e','='], ['e','='])
+            )
+        ),
+        '=': ( // wall
+            label: '=',
+            icon: (name: "line_double"),
+            transparent: true,
+            walkable: true,
+            colors: (fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0)),
+            pattern: (
+                weight: 1,
+                allowed_neighbors: (['=','e','d'], ['=','e','d'], ['=','e','d'], ['=','e','d'])
+            )
+        ),
+        /*
+        '|': ( // vertical wall
+            label: '|',
+            icon: (name: "grid1.3x1.3"),
+            colors: (fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0)),
+            pattern: (
+                weight: 1,
+                allowed_neighbors: (['|','+'], ['|','+'], ['_'], ['_'])
+            )
+        ),
+        '-': ( // horizontal wall
+            label: '-',
+            icon: (name: "grid1.3x1.3"),
+            colors: (fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0)),
+            pattern: (
+                weight: 1,
+                allowed_neighbors: (['_'], ['_'], ['+','-'], ['+','-'])
+            )
+        ),
+        */
+    }
 )
