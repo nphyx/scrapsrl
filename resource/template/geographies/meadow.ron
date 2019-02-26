@@ -6,7 +6,7 @@
             short: "a forest",
             long: "Mostly trees."
     )),
-    icon: Some((name: "flora_herb")),
+    icon: Some((name: "map_terrain_meadow")),
     colors: Some((
             fg: (r: 16, g: 180, b: 30),
             bg: (r: 48, g: 48, b: 12),

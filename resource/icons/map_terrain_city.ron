@@ -1,0 +1,9 @@
+(
+    base: '\u{0154}',
+    horizontal: Some('\u{0155}'),
+    vertical: Some('\u{0156}'),
+    cap_l: Some('\u{0154}'),
+    cap_r: Some('\u{0156}'),
+    cap_u: Some('\u{0155}'),
+    cap_d: Some('\u{0154}'),
+)

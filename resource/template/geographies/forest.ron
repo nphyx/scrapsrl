@@ -1,7 +1,7 @@
 (
     tags: Some([Forest]),
     population_range: (0.0, 0.3),
-    icon: Some((name: "flora_tree_deciduous")),
+    icon: Some((name: "map_terrain_tree")),
     scatter: Some([
             (frequency: 0.023, colors: ( fg: (r: 65, g: 65, b: 55), bg: (r: 0, g: 0, b: 0),), icon:(name: "flora_mushroom_1")),
             (frequency: 0.023, colors: ( fg: (r: 65, g: 55, b: 65), bg: (r: 0, g: 0, b: 0),), icon:(name: "flora_mushroom_2")),

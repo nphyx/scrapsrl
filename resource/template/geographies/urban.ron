@@ -6,7 +6,7 @@
             short: "urban",
             long: "The concrete jungle."
     )),
-    icon: Some((name: "grid_1.3x1.3")),
+    icon: Some((name: "map_terrain_city")),
     colors: Some((
             fg: (r: 16, g: 180, b: 30),
             bg: (r: 48, g: 48, b: 12),

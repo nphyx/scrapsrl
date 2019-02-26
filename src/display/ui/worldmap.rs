@@ -44,9 +44,9 @@ pub fn draw_worldmap(
                 ch = world.get_icon(Region { x: rx, y: ry });
             } else {
                 let size = if cur.lanes_x > 3 || cur.lanes_y > 3 {
-                    "line_double"
+                    "map_road_large"
                 } else {
-                    "line_single"
+                    "map_road_small"
                 };
                 if cur.lanes_x == 0 && cur.lanes_y > 0 {
                     ch = assets.get_icon(size).ch(true, true, false, false);

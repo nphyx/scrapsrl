@@ -1,3 +1,7 @@
 (
-    base: '\u{f182}'
+    base: '\u{d4}',
+    cap_d: Some('\u{d4}'),
+    cap_r: Some('\u{d5}'),
+    cap_l: Some('\u{d6}'),
+    cap_u: Some('\u{d7}'),
 )
