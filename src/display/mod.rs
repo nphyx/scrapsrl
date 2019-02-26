@@ -1,4 +1,5 @@
 use super::component::*;
+use super::constants::*;
 use super::resource::*;
 use super::util::colors::*;
 use super::util::{clamp, distance};
@@ -27,9 +28,9 @@ impl Display {
     /// initialize the display
     pub fn new() -> Display {
         let mut root = RootConsole::initializer()
-            .font("monofur-nf-24-square.png", FontLayout::AsciiInRow)
+            .font(SPRITE_MAP, FontLayout::Tcod)
             .font_type(FontType::Greyscale)
-            .font_dimensions(256, 256)
+            .font_dimensions(SPRITE_WIDTH, SPRITE_HEIGHT)
             .size(SCREEN_WIDTH, SCREEN_HEIGHT)
             .title("SCRAPS: Bug Hunter")
             .init();

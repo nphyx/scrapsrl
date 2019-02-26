@@ -76,7 +76,7 @@ pub fn build(
                     let wp = perimeter as u32;
                     let structure_seed: u64 =
                         // TODO is this too sloppy? probably works fine
-                        (world.seed() as u64) << 8 + (wx as u64) << 4 + wy as u64;
+                        (world.seed() as u64) * 1024 + (wx as u64) * 512 + wy as u64;
                     let mut rng = Pcg32::seed_from_u64(structure_seed);
                     let table = structure.get_pattern_table();
                     let stats = wfc::GlobalStats::new(table);
