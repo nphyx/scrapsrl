@@ -10,6 +10,7 @@ impl<'a> System<'a> for Movement {
         ReadStorage<'a, Region>,
         WriteStorage<'a, MovePlan>,
         ReadStorage<'a, Solid>,
+        WriteStorage<'a, Orientation>,
         WriteStorage<'a, Position>,
         Read<'a, AreaMaps>,
         Write<'a, CollisionMaps>,
@@ -19,15 +20,24 @@ impl<'a> System<'a> for Movement {
     fn run(
         &mut self,
         (
-      regions,
-      mut plans,
-      solids,
-      mut positions,
-      area_maps,
-      mut collision_maps,
-      entities): Self::SystemData,
+            regions,
+            mut plans,
+            solids,
+            mut orientations,
+            mut positions,
+            area_maps,
+            mut collision_maps,
+            entities,
+        ): Self::SystemData,
     ) {
-        for (region, plan, pos, entity) in (&regions, &mut plans, &mut positions, &entities).join()
+        for (region, orientation, plan, pos, entity) in (
+            &regions,
+            &mut orientations,
+            &mut plans,
+            &mut positions,
+            &entities,
+        )
+            .join()
         {
             // guard against entities outside currently loaded map
             if !area_maps.has(*region) {
@@ -63,6 +73,18 @@ impl<'a> System<'a> for Movement {
                 } // always ok to move if not solid
             }
             if ok {
+                if plan.x > 0 {
+                    orientation.dir = Direction::East;
+                }
+                if plan.x < 0 {
+                    orientation.dir = Direction::West;
+                }
+                if plan.y > 0 {
+                    orientation.dir = Direction::South;
+                }
+                if plan.y < 0 {
+                    orientation.dir = Direction::North;
+                }
                 // do the move if all checks passed
                 collision_maps.set(*region, *pos, false);
                 collision_maps.set(*region, new_pos, true);

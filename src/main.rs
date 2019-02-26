@@ -53,6 +53,7 @@ fn main() {
             bg: Color::new(255, 255, 255),
         })
         .with(Character::default())
+        .with(Orientation::new(Direction::South))
         .build();
 
     let mut display = Display::new();

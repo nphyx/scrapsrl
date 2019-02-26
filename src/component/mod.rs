@@ -10,6 +10,7 @@ mod icon_ref;
 mod move_plan;
 mod notification;
 mod opaque;
+mod orientation;
 mod player;
 mod position;
 mod region;
@@ -24,6 +25,7 @@ pub use self::icon_ref::IconRef;
 pub use self::move_plan::MovePlan;
 pub use self::notification::NotificationInteraction;
 pub use self::opaque::Opaque;
+pub use self::orientation::*;
 pub use self::player::Player;
 pub use self::position::Position;
 pub use self::region::Region;
@@ -42,6 +44,7 @@ pub fn init(world: &mut World) {
     world.register::<Player>();
     world.register::<Position>();
     world.register::<Opaque>();
+    world.register::<Orientation>();
     world.register::<Region>();
     world.register::<Solid>();
 }

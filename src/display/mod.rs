@@ -34,7 +34,6 @@ impl Display {
             .size(SCREEN_WIDTH, SCREEN_HEIGHT)
             .title("SCRAPS: Bug Hunter")
             .init();
-
         root.set_default_background(DEFAULT_BG);
         root.set_default_foreground(DEFAULT_FG);
         root.clear();
@@ -59,6 +58,7 @@ impl<'a> System<'a> for Display {
         ReadStorage<'a, Cursor>,
         ReadStorage<'a, Description>,
         ReadStorage<'a, IconRef>,
+        ReadStorage<'a, Orientation>,
         ReadStorage<'a, Player>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, Region>,
@@ -80,6 +80,7 @@ impl<'a> System<'a> for Display {
             cursors,
             descriptions,
             icons,
+            orientations,
             players,
             positions,
             regions,
@@ -119,6 +120,7 @@ impl<'a> System<'a> for Display {
                         &cursors,
                         &colors,
                         &icons,
+                        &orientations,
                         &players,
                         &positions,
                         &regions,
@@ -148,6 +150,7 @@ impl<'a> System<'a> for Display {
                         &cursors,
                         &colors,
                         &icons,
+                        &orientations,
                         &players,
                         &positions,
                         &regions,
@@ -220,6 +223,7 @@ impl Display {
         cursors: &ReadStorage<'a, Cursor>,
         colors: &ReadStorage<'a, Colors>,
         icons: &ReadStorage<'a, IconRef>,
+        orientations: &ReadStorage<'a, Orientation>,
         players: &ReadStorage<'a, Player>,
         positions: &ReadStorage<'a, Position>,
         regions: &ReadStorage<'a, Region>,
@@ -340,17 +344,7 @@ impl Display {
                 .set_char_background(pos.x, pos.y, TColor::from(bg), BackgroundFlag::Set);
         }
 
-        // draw player, make sure it ends up on top
-        for (pos, icon, color, ..) in (positions, icons, colors, players).join() {
-            self.root.put_char(
-                pos.x,
-                pos.y,
-                assets.get_icon(&icon.name).base_ch(),
-                BackgroundFlag::None,
-            );
-            self.root
-                .set_char_foreground(pos.x, pos.y, TColor::from(color.fg))
-        }
+        self.draw_player(orientations, positions, icons, colors, players, assets);
 
         // draw in the cursor highlight
         for (pos, ..) in (positions, cursors).join() {
@@ -371,6 +365,7 @@ impl Display {
         cursors: &ReadStorage<'a, Cursor>,
         colors: &ReadStorage<'a, Colors>,
         icons: &ReadStorage<'a, IconRef>,
+        orientations: &ReadStorage<'a, Orientation>,
         players: &ReadStorage<'a, Player>,
         positions: &ReadStorage<'a, Position>,
         regions: &ReadStorage<'a, Region>,
@@ -433,17 +428,7 @@ impl Display {
             }
         }
 
-        // draw player, make sure it ends up on top
-        for (pos, icon, color, ..) in (positions, icons, colors, players).join() {
-            self.root.put_char(
-                pos.x,
-                pos.y,
-                assets.get_icon(&icon.name).base_ch(),
-                BackgroundFlag::None,
-            );
-            self.root
-                .set_char_foreground(pos.x, pos.y, TColor::from(color.fg))
-        }
+        self.draw_player(orientations, positions, icons, colors, players, assets);
 
         // draw in the cursor highlight
         for (pos, ..) in (positions, cursors).join() {
@@ -453,6 +438,48 @@ impl Display {
                 TColor::new(110, 180, 144),
                 BackgroundFlag::Overlay,
             );
+        }
+    }
+
+    fn draw_player<'a>(
+        &mut self,
+        orientations: &ReadStorage<'a, Orientation>,
+        positions: &ReadStorage<'a, Position>,
+        icons: &ReadStorage<'a, IconRef>,
+        colors: &ReadStorage<'a, Colors>,
+        players: &ReadStorage<'a, Player>,
+        assets: &Read<'a, Assets>,
+    ) {
+        // draw player, make sure it ends up on top
+        for (orientation, pos, icon, color, ..) in
+            (orientations, positions, icons, colors, players).join()
+        {
+            let mut north = false;
+            let mut south = false;
+            let mut east = false;
+            let mut west = false;
+            match orientation.dir {
+                Direction::North => {
+                    north = true;
+                }
+                Direction::South => {
+                    south = true;
+                }
+                Direction::East => {
+                    east = true;
+                }
+                Direction::West => {
+                    west = true;
+                }
+            }
+            self.root.put_char(
+                pos.x,
+                pos.y,
+                assets.get_icon(&icon.name).ch(north, south, east, west),
+                BackgroundFlag::None,
+            );
+            self.root
+                .set_char_foreground(pos.x, pos.y, TColor::from(color.fg))
         }
     }
 

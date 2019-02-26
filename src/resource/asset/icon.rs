@@ -74,8 +74,8 @@ impl Icon {
             (true, true, true, true) => self.center.unwrap_or(self.base),
             (false, false, false, true) => self.cap_l.unwrap_or(self.base),
             (false, false, true, false) => self.cap_r.unwrap_or(self.base),
-            (false, true, false, false) => self.cap_u.unwrap_or(self.base),
-            (true, false, false, false) => self.cap_d.unwrap_or(self.base),
+            (false, true, false, false) => self.cap_d.unwrap_or(self.base),
+            (true, false, false, false) => self.cap_u.unwrap_or(self.base),
             (false, false, false, false) => self.base,
         }
     }
