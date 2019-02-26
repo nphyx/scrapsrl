@@ -28,7 +28,7 @@ impl Display {
     /// initialize the display
     pub fn new() -> Display {
         let mut root = RootConsole::initializer()
-            .font(SPRITE_MAP, FontLayout::Tcod)
+            .font(SPRITE_MAP, FontLayout::AsciiInRow)
             .font_type(FontType::Greyscale)
             .font_dimensions(SPRITE_WIDTH, SPRITE_HEIGHT)
             .size(SCREEN_WIDTH, SCREEN_HEIGHT)
