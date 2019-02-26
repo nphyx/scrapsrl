@@ -21,7 +21,7 @@ pub fn draw_worldmap(
     let height = SIDEBAR_WIDTH - 6;
     let hw = width / 2;
     let hh = height / 2;
-    let fg = TColor::new(255, 255, 255);
+    let fg = TColor::new(0, 0, 0);
     let mut bg: TColor;
     let mut ch: char;
     let horiz_line = assets.get_icon("line_single").ch(false, false, true, true);
@@ -43,8 +43,10 @@ pub fn draw_worldmap(
             if cur.lanes_x == 0 && cur.lanes_y == 0 {
                 ch = world.get_icon(Region { x: rx, y: ry });
             } else {
-                let size = if cur.lanes_x > 3 || cur.lanes_y > 3 {
+                let size = if cur.lanes_x > 4 || cur.lanes_y > 4 {
                     "map_road_large"
+                } else if cur.lanes_x > 2 || cur.lanes_y > 2 {
+                    "map_road_medium"
                 } else {
                     "map_road_small"
                 };
@@ -62,7 +64,7 @@ pub fn draw_worldmap(
                 }
             }
             let cur_region = Region::new(rx, ry);
-            let pop_col = ((world.get_pop(cur_region) * 224.0).floor()) as u8;
+            let pop_col = ((world.get_pop(cur_region) * 128.0).floor()) as u8 + 64;
             if region.y == ry && region.x == rx {
                 bg = TColor::new(pop_col, pop_col + 16, pop_col);
             } else {
