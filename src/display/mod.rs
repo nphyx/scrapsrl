@@ -285,15 +285,29 @@ impl Display {
             }
         }
 
+        self.draw_player(orientations, positions, icons, colors, players, assets);
+
         // TODO compute time of day adjustment, sunset gradient, and moon phase :D
         let time_of_day_rel = world.time_relative();
 
-        let light = Color::new(255, 240, 128);
-        let ambient = Color::new(0, 6, 18);
-
-        // TODO calculate relative contrast and maintain for out-of-vis objects
-        let bg_gray = Color::new(8, 8, 8);
-        let fg_gray = Color::new(24, 24, 24);
+        let light = Color::new(178, 162, 72);
+        let day_ambient = Color::new(225, 255, 225);
+        let evening_ambient = Color::new(255, 92, 92);
+        let night_ambient = Color::new(138, 128, 255);
+        let ambient = if time_of_day_rel > 0.5 {
+            lerp(
+                day_ambient,
+                evening_ambient,
+                1.0 - ((time_of_day_rel - 0.5) * 2.0).powf(2.0),
+            )
+        } else {
+            lerp(
+                night_ambient,
+                evening_ambient,
+                (time_of_day_rel * 2.0).powf(2.0),
+            )
+        };
+        let night = Color::new(12, 12, 12);
 
         // lighting pass
         for (pos, _) in map.iter() {
@@ -302,49 +316,33 @@ impl Display {
             let mut fg = orig_fg;
             let mut bg = orig_bg;
             let dist = distance(player_pos, pos);
+            let light_radius = 20.0;
+            // this figures out the intensity and radius of the player-emitted light area
+            let rel_dist =
+                (clamp(0.000001, light_radius, light_radius - dist) / light_radius).powf(2.0);
 
-            // this figures out the radius of the player-emitted light area
-            let rel_dist = clamp(0.0, 1.0, dist.powf(1.25) / (MAP_WIDTH as f32)).sqrt();
-            // ignore the trigonometric man behind the curtain
-            let frame = (state.frame % 360) as f32 / 8.0;
-            let flicker_mod = frame.cos() * 0.005;
-
-            let blend = lerp(light, ambient, clamp(0.0, 1.0, rel_dist - flicker_mod));
-
+            // apply night time shading
+            fg = lerp(multiply(Color::from(fg), night), fg, 0.1 + time_of_day_rel);
+            bg = lerp(multiply(Color::from(bg), night), bg, 0.1 + time_of_day_rel);
+            // ambient light enhancement
+            fg = soft_light(fg, ambient, 1.0);
+            bg = soft_light(bg, ambient, 0.5);
             if self.map.is_in_fov(pos.x, pos.y) {
-                bg = soft_light(soft_light(bg, blend), blend);
-                fg = soft_light(soft_light(fg, blend), blend);
-                fg = lerp(
-                    fg,
-                    lerp(orig_fg, screen(orig_fg, light), 0.15),
-                    time_of_day_rel,
-                );
-                bg = lerp(
-                    bg,
-                    lerp(orig_bg, screen(orig_bg, light), 0.1),
-                    time_of_day_rel,
-                );
+                // apply light
+                if time_of_day_rel < 0.5 {
+                    fg = lerp(fg, color_dodge(orig_fg, light), rel_dist);
+                    bg = lerp(bg, color_dodge(orig_bg, light), rel_dist);
+                }
             } else {
-                fg = screen(lerp(fg, fg_gray, rel_dist), ambient);
-                bg = screen(lerp(bg, bg_gray, rel_dist), ambient);
-                fg = lerp(
-                    fg,
-                    lerp(orig_fg, desaturate(orig_fg), 0.25),
-                    time_of_day_rel,
-                );
-                bg = lerp(
-                    bg,
-                    lerp(orig_bg, desaturate(orig_bg), 0.25),
-                    time_of_day_rel,
-                );
+                // desaturate areas that are out of fov
+                bg = desaturate(bg, 0.65);
+                fg = desaturate(fg, 0.65);
             }
             self.root
                 .set_char_foreground(pos.x, pos.y, TColor::from(fg));
             self.root
                 .set_char_background(pos.x, pos.y, TColor::from(bg), BackgroundFlag::Set);
         }
-
-        self.draw_player(orientations, positions, icons, colors, players, assets);
 
         // draw in the cursor highlight
         for (pos, ..) in (positions, cursors).join() {

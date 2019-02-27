@@ -1,0 +1,14 @@
+(
+    base: '\u{173}',
+    horizontal: Some('\u{181}'),
+    vertical: Some('\u{170}'),
+    corner_tl: Some('\u{160}'),
+    corner_tr: Some('\u{162}'),
+    corner_bl: Some('\u{180}'),
+    corner_br: Some('\u{182}'),
+    tee_r: Some('\u{183}'),
+    tee_l: Some('\u{163}'),
+    tee_d: Some('\u{161}'),
+    tee_u: Some('\u{171}'),
+    center: Some('\u{173}'),
+)

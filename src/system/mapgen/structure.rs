@@ -36,13 +36,11 @@ pub fn build(
 
             // 10% chance of trying a structure, if the sample is lower than the
             // map's population
-            if sample > (world.get_pop(*region)) {
+            if sample < world.get_pop(*region) {
                 continue;
             }
 
-            if let Some(mut structure) =
-                choose_structure(assets, noise, pos, offset, &map.geography)
-            {
+            if let Some(structure) = choose_structure(assets, noise, pos, offset, &map.geography) {
                 let mut width: i32 = structure.max_width;
                 let mut height: i32 = structure.max_height;
                 // first check we can fit the structure in here
@@ -87,7 +85,7 @@ pub fn build(
                         &mut rng,
                     );
                     let wave = wfc_runner
-                        .collapse_retrying(NumTimes(100), &mut rng)
+                        .collapse_retrying(NumTimes(1000), &mut rng)
                         .expect("failed to generate structure");
                     let grid = wave.grid();
                     let mapchar = structure.get_mapchar();
@@ -109,8 +107,121 @@ pub fn build(
                             ),
                         );
                     });
+                    draw_outer_wall(map, assets, Position::new(x, y), width, height);
                 }
             }
         } // end x loop
     } // end y loop
+}
+
+fn draw_horizontal_line(
+    map: &mut AreaMap,
+    pos: Position,
+    width: i32,
+    ch: char,
+    fg: Color,
+    bg: Color,
+    transparent: bool,
+    walkable: bool,
+) {
+    for x in pos.x..=pos.x + width {
+        let cpos = Position::new(x, pos.y);
+        map.set(
+            cpos,
+            Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
+        );
+    }
+}
+
+fn draw_vertical_line(
+    map: &mut AreaMap,
+    pos: Position,
+    height: i32,
+    ch: char,
+    fg: Color,
+    bg: Color,
+    transparent: bool,
+    walkable: bool,
+) {
+    for y in pos.y..pos.y + height {
+        let cpos = Position::new(pos.x, y);
+        map.set(
+            cpos,
+            Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
+        );
+    }
+}
+
+fn draw_outer_wall(map: &mut AreaMap, assets: &Assets, pos: Position, width: i32, height: i32) {
+    let wall = assets.get_icon("structure_wall_slat");
+    let fg = Color::new(64, 64, 64);
+    let bg = Color::new(0, 0, 0);
+    let mut ch = wall.ch(false, false, true, true);
+    let transparent = false;
+    let walkable = true;
+    draw_horizontal_line(
+        map,
+        Position::new(pos.x + 1, pos.y),
+        width - 4,
+        ch,
+        fg,
+        bg,
+        transparent,
+        walkable,
+    );
+    draw_horizontal_line(
+        map,
+        Position::new(pos.x + 1, pos.y + height - 2),
+        width - 4,
+        ch,
+        fg,
+        bg,
+        transparent,
+        walkable,
+    );
+    ch = wall.ch(true, true, false, false);
+    draw_vertical_line(
+        map,
+        Position::new(pos.x, pos.y + 1),
+        height - 3,
+        ch,
+        fg,
+        bg,
+        transparent,
+        walkable,
+    );
+    draw_vertical_line(
+        map,
+        Position::new(pos.x + width - 2, pos.y + 1),
+        height - 3,
+        ch,
+        fg,
+        bg,
+        transparent,
+        walkable,
+    );
+    // top left
+    ch = wall.ch(false, true, false, true);
+    map.set(
+        pos,
+        Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
+    );
+    // top right
+    ch = wall.ch(false, true, true, false);
+    map.set(
+        Position::new(pos.x + width - 2, pos.y),
+        Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
+    );
+    // bottom left
+    ch = wall.ch(true, false, false, true);
+    map.set(
+        Position::new(pos.x, pos.y + height - 2),
+        Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
+    );
+    // bottom right
+    ch = wall.ch(true, false, true, false);
+    map.set(
+        Position::new(pos.x + width - 2, pos.y + height - 2),
+        Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
+    );
 }

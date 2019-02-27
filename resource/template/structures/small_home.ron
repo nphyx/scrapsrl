@@ -6,37 +6,37 @@
     perimeter:1,
     connect_to: Some([(connection_type: Road, connection_method: Driveway)]),
     tiles: {
-        'e': ( // floor
+        'r': ( // floor
             label: 'e',
-            icon: (name: "flora_tree_evergreen"),
+            icon: (name: "structure_floor_random"),
             transparent: true,
             walkable: true,
-            colors: (fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0)),
-            pattern: (
-                weight: 2,
-                allowed_neighbors: (['d','='], ['d','='], ['d','='], ['d','='])
-            )
-        ),
-        'd': ( // floor
-            label: 'd',
-            icon: (name: "flora_tree_deciduous"),
-            transparent: true,
-            walkable: true,
-            colors: (fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0)),
-            pattern: (
-                weight: 2,
-                allowed_neighbors: (['e','='], ['e','='], ['e','='], ['e','='])
-            )
-        ),
-        '=': ( // wall
-            label: '=',
-            icon: (name: "line_double"),
-            transparent: true,
-            walkable: true,
-            colors: (fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0)),
+            colors: (fg: (r: 0, g: 0, b: 42), bg: (r: 0, g: 0, b: 0)),
             pattern: (
                 weight: 1,
-                allowed_neighbors: (['=','e','d'], ['=','e','d'], ['=','e','d'], ['=','e','d'])
+                allowed_neighbors: (['s','b'], ['s','b'], ['s','b'], ['s','b'])
+            )
+        ),
+        's': ( // floor
+            label: 'd',
+            icon: (name: "structure_floor_small_squares"),
+            transparent: true,
+            walkable: true,
+            colors: (fg: (r: 0, g: 0, b: 22), bg: (r: 0, g: 0, b: 0)),
+            pattern: (
+                weight: 1,
+                allowed_neighbors: (['r','b'], ['r','b'], ['r','b'], ['r','b'])
+            )
+        ),
+        'b': ( // wall
+            label: '=',
+            icon: (name: "structure_floor_small_tiles"),
+            transparent: true,
+            walkable: true,
+            colors: (fg: (r: 0, g: 0, b: 32), bg: (r: 0, g: 0, b: 0)),
+            pattern: (
+                weight: 1,
+                allowed_neighbors: (['r','s'], ['r','s'], ['r','s'], ['r','s'])
             )
         ),
         /*

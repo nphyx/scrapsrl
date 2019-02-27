@@ -15,15 +15,15 @@
             (
                 frequency: 0.0,
                 colors: (
-                        fg: (r: 32, g: 32, b: 29),
-                        bg: (r: 42, g: 42, b: 38),
+                        fg: (r: 24, g: 24, b: 24),
+                        bg: (r: 48, g: 48, b: 48),
                 ),
-                icon: (name:"grid_1.3x1.3"),
+                icon: (name:"ground_concrete_1"),
             ),
     ]),
     scatter: Some([
-            (frequency: 0.00005, colors: ( fg: (r: 0, g: 0, b: 0), bg: (r: 0, g: 0, b: 0),), icon:(name: "fixture_tire_stack")),
-            (frequency: 0.023, colors: ( fg: (r: 32, g: 36, b: 32), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile")),
-            (frequency: 0.023, colors: ( fg: (r: 38, g: 10, b: 8), bg: (r: 0, g: 0, b: 0),), icon:(name: "fixture_pipe_s")),
+            (frequency: 0.021, colors: ( fg: (r: 24, g: 24, b: 24), bg: (r: 0, g: 0, b: 0),), icon:(name: "ground_concrete_2")),
+            (frequency: 0.023, colors: ( fg: (r: 58, g: 58, b: 58), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile")),
+            (frequency: 0.023, colors: ( fg: (r: 24, g: 24, b: 24), bg: (r: 0, g: 0, b: 0),), icon:(name: "ground_concrete_3")),
     ])
 )
