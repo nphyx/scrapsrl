@@ -72,27 +72,11 @@ impl MapGenerator {
         let road_data = world.get_road(region);
 
         if road_data.lanes_x > 0 {
-            roads::place_horizontal_roads(
-                &assets,
-                &noise,
-                map,
-                region.to_offset(),
-                0.1,
-                0.8,
-                road_data.lanes_x as i32,
-            );
+            roads::place_horizontal_roads(&assets, &noise, world, map, &region, 0.1, 0.8);
         }
 
         if road_data.lanes_y > 0 {
-            roads::place_vertical_roads(
-                &assets,
-                &noise,
-                map,
-                region.to_offset(),
-                0.1,
-                0.8,
-                road_data.lanes_y as i32,
-            );
+            roads::place_vertical_roads(&assets, &noise, world, map, &region, 0.1, 0.8);
         }
 
         structure::build(&assets, &noise, map, &region, world);

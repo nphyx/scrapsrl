@@ -1,6 +1,6 @@
 use super::util::*;
-use crate::component::{Color, Position};
-use crate::resource::{tile_types::*, AreaMap, Assets, Tile};
+use crate::component::{Color, Position, Region};
+use crate::resource::{tile_types::*, AreaMap, Assets, Tile, WorldState};
 use crate::util::colors::lerp;
 use crate::util::*;
 use tcod::noise::Noise;
@@ -71,22 +71,16 @@ fn road_segment(icon: char, fg: Color, bg: Color) -> Tile {
     Tile::new(icon, fg, bg, true, true, TYPE_ROAD)
 }
 
-/// determines the vertical offset of a horizontal road at a given x position
-fn road_lat(noise: &Noise, map: &AreaMap, x: i32, offset: [i32; 2]) -> f32 {
-    let hh = map.height / 2;
-    rand_up(fbm_offset(noise, [x, hh], offset, 0.01, 1)) * map.height as f32
-}
-
 /// generates a horizontal road on the map. Damage factor is a range from 0 = pristine
 /// to +1 = completely wrecked.
 pub fn place_horizontal_roads(
     assets: &Assets,
     noise: &Noise,
+    world: &WorldState,
     map: &mut AreaMap,
-    offset: [i32; 2],
+    region: &Region,
     noise_scale: f32,
     damage_factor: f32,
-    lanes: i32,
 ) {
     let road_line_fg = Color {
         r: 102,
@@ -104,15 +98,18 @@ pub fn place_horizontal_roads(
     let dashed = assets.get_icon("line_emdash").base_ch();
     let line = assets.get_icon("line_single").ch(false, false, true, true);
     let dbl = assets.get_icon("line_double").ch(false, false, true, true);
+    let lanes = world.get_road(*region).lanes_x as i32;
+    let offset = region.to_offset();
+
     let road_rubble: char = '\u{e35d}';
     let mut segment_icon: char;
     let mut fg: Color;
     let mut ground_bg = Color::new(0, 0, 0);
 
     for cx in 0..map.width {
-        let y = road_lat(noise, map, cx, offset).floor() as i32;
-        let y_min = (y - (lanes * 2)).max(0);
-        let y_max = y + (lanes * 2).min(map.height);
+        let y = road_center_longitudinal(noise, world, map, region, cx);
+        let y_min = y - (lanes * 2); // *2 because two tiles per lane
+        let y_max = y + (lanes * 2);
 
         for cy in y_min..=y_max {
             let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
@@ -174,22 +171,16 @@ pub fn place_horizontal_roads(
     }
 }
 
-/// determines the vertical offset of a horizontal road at a given x position
-fn road_long(noise: &Noise, map: &AreaMap, y: i32, offset: [i32; 2]) -> f32 {
-    let hw = map.width / 2;
-    rand_up(fbm_offset(noise, [hw, y], offset, 0.01, 1)) * map.width as f32
-}
-
 /// generates a vertical road on the map. Damage factor is a range from 0 = pristine
 /// to +1 = completely wrecked.
 pub fn place_vertical_roads(
     assets: &Assets,
     noise: &Noise,
+    world: &WorldState,
     map: &mut AreaMap,
-    offset: [i32; 2],
+    region: &Region,
     noise_scale: f32,
     damage_factor: f32,
-    lanes: i32,
 ) {
     let road_line_fg = Color {
         r: 102,
@@ -207,18 +198,21 @@ pub fn place_vertical_roads(
     let dashed = '|';
     let line = assets.get_icon("line_single").ch(true, true, false, false);
     let dbl = assets.get_icon("line_double").ch(true, true, false, false);
+    let lanes = world.get_road(*region).lanes_y as i32;
+    let offset = region.to_offset();
+
+    let road_rubble: char = '\u{e35d}';
+    let mut ground_bg = Color::new(0, 0, 0);
+    let mut segment_icon: char;
+    let mut fg: Color;
 
     for cy in 0..map.height {
-        let x = road_long(noise, map, cy, offset).floor() as i32;
-        let x_min = (x - (lanes * 2)).max(0);
-        let x_max = (x + (lanes * 2)).min(map.width);
+        let x = road_center_latitudinal(noise, world, map, region, cy);
+        let x_min = x - (lanes * 2);
+        let x_max = x + (lanes * 2);
         for cx in x_min..=x_max {
             let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
             let pos = Position { x: cx, y: cy };
-            let mut ground_bg = Color::new(0, 0, 0);
-            let road_rubble: char = '\u{e35d}';
-            let mut segment_icon: char;
-            let mut fg: Color;
 
             if i < damage_factor {
                 if let Some(tile) = map.get(pos) {

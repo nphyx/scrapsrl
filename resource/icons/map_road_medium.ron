@@ -11,8 +11,8 @@
     tee_u: Some('\u{0138}'),
     tee_d: Some('\u{0139}'),
     center: Some('\u{013a}'),
-    cap_d: Some('\u{013b}'),
-    cap_u: Some('\u{013c}'),
+    cap_u: Some('\u{013b}'),
+    cap_d: Some('\u{013c}'),
     cap_r: Some('\u{013d}'),
     cap_l: Some('\u{013e}'),
 )

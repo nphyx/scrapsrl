@@ -1,6 +1,6 @@
-use crate::component::Position;
-use crate::resource::{AreaMap, Tile};
-use crate::util::clamp;
+use crate::component::{Position, Region};
+use crate::resource::{AreaMap, Tile, WorldState};
+use crate::util::{clamp, rand_up};
 use tcod::noise::Noise;
 
 pub fn choose<T>(options: Vec<T>, sample: f32) -> T
@@ -54,4 +54,38 @@ pub fn fill_rect(
             map.set(Position { x, y }, tile);
         }
     }
+}
+
+/// determines the vertical offset of a horizontal road at a given x position
+pub fn road_center_longitudinal(
+    noise: &Noise,
+    world: &WorldState,
+    map: &AreaMap,
+    region: &Region,
+    x: i32,
+) -> i32 {
+    let lanes = world.get_road(*region).lanes_x as i32;
+    let pop = world.get_pop(*region);
+    let hh = map.height / 2;
+    let base = (rand_up(fbm_offset(noise, [x, hh], region.to_offset(), 0.01, 1))
+        * (1.0 - pop)
+        * map.height as f32) as i32;
+    clamp(0 + (lanes * 2), map.height - (lanes * 2), base)
+}
+
+/// determines the vertical offset of a horizontal road at a given x position
+pub fn road_center_latitudinal(
+    noise: &Noise,
+    world: &WorldState,
+    map: &AreaMap,
+    region: &Region,
+    y: i32,
+) -> i32 {
+    let lanes = world.get_road(*region).lanes_y as i32;
+    let pop = world.get_pop(*region);
+    let hw = map.width / 2;
+    let base = (rand_up(fbm_offset(noise, [hw, y], region.to_offset(), 0.01, 1))
+        * (1.0 - pop)
+        * map.width as f32) as i32;
+    clamp(0 + lanes * 2, map.width - lanes * 2, base)
 }

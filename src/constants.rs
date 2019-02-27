@@ -25,7 +25,7 @@ pub const TEMPLATE_DIR: &str = "./resource/template";
 pub const ICON_DIR: &str = "./resource";
 pub const SPRITE_MAP: &str = "./tiles.png";
 pub const SPRITE_WIDTH: i32 = 16;
-pub const SPRITE_HEIGHT: i32 = 32;
+pub const SPRITE_HEIGHT: i32 = 64;
 
 /// world is always square, this is the length of a side
 pub const WORLD_SIZE: usize = 250;

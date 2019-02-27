@@ -1,7 +1,7 @@
 (
-    base: '\u{d0}',
-    cap_d: Some('\u{d0}'),
-    cap_r: Some('\u{d1}'),
+    base: '\u{d1}',
+    cap_u: Some('\u{d0}'),
+    cap_d: Some('\u{d1}'),
     cap_l: Some('\u{d2}'),
-    cap_u: Some('\u{d3}'),
+    cap_r: Some('\u{d3}'),
 )
