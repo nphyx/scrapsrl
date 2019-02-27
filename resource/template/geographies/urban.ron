@@ -15,15 +15,14 @@
             (
                 frequency: 0.0,
                 colors: (
-                        fg: (r: 24, g: 24, b: 24),
-                        bg: (r: 48, g: 48, b: 48),
+                        fg: (r: 48, g: 48, b: 48),
+                        bg: (r: 32, g: 32, b: 32),
                 ),
                 icon: (name:"ground_concrete_1"),
             ),
     ]),
     scatter: Some([
-            (frequency: 0.021, colors: ( fg: (r: 24, g: 24, b: 24), bg: (r: 0, g: 0, b: 0),), icon:(name: "ground_concrete_2")),
-            (frequency: 0.023, colors: ( fg: (r: 58, g: 58, b: 58), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile")),
-            (frequency: 0.023, colors: ( fg: (r: 24, g: 24, b: 24), bg: (r: 0, g: 0, b: 0),), icon:(name: "ground_concrete_3")),
+            (frequency: 0.021, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_2")),
+            (frequency: 0.023, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_3")),
     ])
 )
