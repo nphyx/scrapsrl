@@ -18,6 +18,10 @@ impl Color {
     pub fn new(r: u8, g: u8, b: u8) -> Color {
         Color { r, g, b }
     }
+
+    pub fn to_tuple(&self) -> (u8, u8, u8) {
+        (self.r, self.g, self.b)
+    }
 }
 
 impl From<tcod::colors::Color> for Color {
@@ -40,24 +44,19 @@ impl From<Color> for tcod::colors::Color {
     }
 }
 
+impl From<(u8, u8, u8)> for Color {
+    fn from(color: (u8, u8, u8)) -> Color {
+        Color {
+            r: color.0,
+            g: color.1,
+            b: color.2,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Component, Default, Debug, Serialize, Deserialize)]
 #[storage(VecStorage)]
 pub struct Colors {
     pub fg: Color,
     pub bg: Color,
 }
-
-/*
-impl Serialize for Colors {
-  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-    let mut s = serializer.serialize_struct("Colors", 6)?;
-    s.serialize_field("fg_r", &self.fg.r)?;
-    s.serialize_field("fg_g", &self.fg.g)?;
-    s.serialize_field("fg_b", &self.fg.b)?;
-    s.serialize_field("bg_r", &self.bg.r)?;
-    s.serialize_field("bg_g", &self.bg.g)?;
-    s.serialize_field("bg_b", &self.bg.b)?;
-    s.end()
-  }
-}
-*/

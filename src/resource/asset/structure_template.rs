@@ -17,31 +17,63 @@ pub struct StructureConnection {
     connection_method: StructureConnectionMethod,
 }
 
-use std::num::NonZeroU32;
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct StructurePattern {
-    weight: u32,
-    allowed_neighbors: (Vec<char>, Vec<char>, Vec<char>, Vec<char>),
-}
-
-impl Default for StructurePattern {
-    fn default() -> StructurePattern {
-        StructurePattern {
-            weight: 1,
-            allowed_neighbors: (Vec::new(), Vec::new(), Vec::new(), Vec::new()),
-        }
-    }
-}
-
 /// A map of chars to tile IDs. Chars are used to label tiles in templates.
 type CharMap = HashMap<char, u32>;
 
 /// a map of ids and their corresponding chars (reverse of CharMap)
 type MapChar = HashMap<u32, char>;
 
-impl StructurePattern {
-    // convert a structure pattern into a PatternDescription given a character map
-    fn to_pattern_description(&self, charmap: &CharMap) -> PatternDescription {
+fn default_true() -> bool {
+    true
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct StructureTile {
+    /// identify a tile by a single char, this is arbitrary
+    /// and defined in the template
+    // label: char,
+    /// the character that will be displayed
+    #[serde(default)]
+    pub icon: String,
+    #[serde(default)]
+    fg: (u8, u8, u8),
+    #[serde(default)]
+    bg: (u8, u8, u8),
+    #[serde(default = "default_true")]
+    pub transparent: bool,
+    #[serde(default = "default_true")]
+    pub walkable: bool,
+    #[serde(default)]
+    weight: u32,
+    #[serde(default)]
+    allowed_neighbors: (Vec<char>, Vec<char>, Vec<char>, Vec<char>),
+}
+
+impl Default for StructureTile {
+    fn default() -> StructureTile {
+        StructureTile {
+            icon: "?".to_string(),
+            fg: (255, 255, 255),
+            bg: (0, 0, 0),
+            transparent: true,
+            walkable: true,
+            weight: 1,
+            allowed_neighbors: (Vec::new(), Vec::new(), Vec::new(), Vec::new()),
+        }
+    }
+}
+
+use crate::component::Color;
+impl StructureTile {
+    pub fn fg(&self) -> Color {
+        Color::from(self.fg)
+    }
+
+    pub fn bg(&self) -> Color {
+        Color::from(self.bg)
+    }
+    pub fn pattern_description(&self, charmap: &CharMap) -> PatternDescription {
+        use core::num::NonZeroU32;
         PatternDescription {
             weight: NonZeroU32::new(self.weight),
             allowed_neighbours: CardinalDirectionTable::new_array([
@@ -66,41 +98,6 @@ impl StructurePattern {
                     .map(|ch| *charmap.get(ch).unwrap_or(&0))
                     .collect(),
             ]),
-        }
-    }
-}
-
-use crate::component::{Color, Colors, IconRef};
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct StructureTile {
-    /// identify a tile by a single char, this is arbitrary
-    /// and defined in the template
-    label: char,
-    /// the character that will be displayed
-    #[serde(default)]
-    pub icon: IconRef,
-    #[serde(default)]
-    pub colors: Colors,
-    pub transparent: bool,
-    pub walkable: bool,
-    #[serde(default)]
-    pattern: StructurePattern,
-}
-
-impl Default for StructureTile {
-    fn default() -> StructureTile {
-        StructureTile {
-            label: '?',
-            icon: IconRef {
-                name: "?".to_string(),
-            },
-            colors: Colors {
-                fg: Color::new(255, 255, 255),
-                bg: Color::new(0, 0, 0),
-            },
-            transparent: true,
-            walkable: true,
-            pattern: StructurePattern::default(),
         }
     }
 }
@@ -159,7 +156,7 @@ impl StructureTemplate {
         let descs = self
             .tiles
             .values()
-            .map(|tile| tile.pattern.to_pattern_description(&charmap))
+            .map(|tile| tile.pattern_description(&charmap))
             .collect();
         return PatternTable::from_vec(descs);
     }

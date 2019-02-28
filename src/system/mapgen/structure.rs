@@ -93,14 +93,13 @@ pub fn build(
                         let tile = structure
                             .get_tile(*mapchar.get(&wc.chosen_pattern_id().expect("")).unwrap());
                         let pos = Position::new(coord.x + x, coord.y + y);
-                        let icon = assets.get_icon(&tile.icon.name).base_ch();
-                        let colors = tile.colors;
+                        let icon = assets.get_icon(&tile.icon).base_ch();
                         map.set(
                             pos,
                             Tile::new(
                                 icon,
-                                colors.fg,
-                                colors.bg,
+                                tile.fg(),
+                                tile.bg(),
                                 tile.transparent,
                                 tile.walkable,
                                 TYPE_VEHICLE,
