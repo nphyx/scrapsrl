@@ -4,6 +4,8 @@ use crate::resource::{
     tile_types::*, AreaMap, Assets, GeographyTemplate, StructureTemplate, Tile, WorldState,
 };
 use crate::util::*;
+use rand::prelude::*;
+use rand_pcg::*;
 use tcod::noise::Noise;
 
 fn choose_structure<'a>(
@@ -15,7 +17,7 @@ fn choose_structure<'a>(
 ) -> Option<StructureTemplate> {
     if let Some(ref structures) = geography.structures {
         let sample = rand_up(fbm_offset(noise, pos, offset, 1.0, 1));
-        let structure_name = choose(structures.clone(), sample);
+        let structure_name = choose(&structures, sample);
         return Some(assets.get_structure(&structure_name));
     }
     None
@@ -29,88 +31,114 @@ pub fn build(
     world: &WorldState,
 ) {
     let offset = region.to_offset();
-    for x in 0..map.width {
-        for y in 0..map.height {
-            let pos = [x, y];
-            let sample = rand_up(fbm_offset(noise, pos, offset, 0.1, 1));
+    let mut count = 0;
+    let max_structures = 2;
+    let mut tries = 0;
+    let max_tries = 100;
+    let horiz: Vec<i32> = (0..map.width).collect();
+    let vert: Vec<i32> = (0..map.height).collect();
+    let off = region.to_unsigned();
+    let map_seed: u64 =
+        // TODO is this too sloppy? probably works fine
+        (u64::from(world.seed()) / 32) + (off[0] << 3) + off[1];
 
-            // 10% chance of trying a structure, if the sample is lower than the
-            // map's population
-            if sample < world.get_pop(*region) {
-                continue;
+    let mut rng = Pcg32::seed_from_u64(map_seed);
+    while count < max_structures && tries < max_tries {
+        let mut x: i32 = 0;
+        let mut y: i32 = 0;
+        while tries < max_tries {
+            x = choose(&horiz, rng.gen_range(0.0, 1.0));
+            y = choose(&vert, rng.gen_range(0.0, 1.0));
+            if let Some(tile) = map.get(Position::new(x, y)) {
+                if tile.type_id != TYPE_GRASS {
+                    tries += 1;
+                } else {
+                    break;
+                }
             }
+        }
+        if tries >= max_tries {
+            println!(
+                "failed to create a new structure (made {}/{}), skipping",
+                count, max_structures
+            );
+            break;
+        }
 
-            if let Some(structure) = choose_structure(assets, noise, pos, offset, &map.geography) {
-                let mut width: i32 = structure.max_width;
-                let mut height: i32 = structure.max_height;
-                // first check we can fit the structure in here
-                for sx in 0..width {
-                    for sy in 0..height {
-                        let maybe_tile = map.get(Position::new(x + sx, y + sy));
-                        if maybe_tile.is_none() || maybe_tile.unwrap().type_id != TYPE_GRASS {
-                            // if on the first row, shrink the width
-                            if height == 0 {
-                                width = sx + 1
-                            }
-                            // else shrink the height
-                            else {
-                                height = sy + 1
-                            }
-                            break;
+        let pos = [x, y];
+        let sample = rand_up(fbm_offset(noise, pos, offset, 0.1, 1));
+
+        if let Some(structure) = choose_structure(assets, noise, pos, offset, &map.geography) {
+            let width_range: Vec<i32> = (structure.min_width..=structure.max_width).collect();
+
+            let height_range: Vec<i32> = (structure.min_height..=structure.max_height).collect();
+            let mut width: i32 = choose(&width_range, sample);
+            let mut height: i32 = choose(&height_range, sample);
+            // first check we can fit the structure in here
+            for sx in 0..width {
+                for sy in 0..height {
+                    let maybe_tile = map.get(Position::new(x + sx, y + sy));
+                    if maybe_tile.is_none() || maybe_tile.unwrap().type_id != TYPE_GRASS {
+                        // if on the first row, shrink the width
+                        if height == 0 {
+                            width = sx + 1
                         }
+                        // else shrink the height
+                        else {
+                            height = sy + 1
+                        }
+                        break;
                     }
                 }
-
-                // now place a structure of the size we've found
-                if width >= structure.min_width && height >= structure.min_height {
-                    use rand::prelude::*;
-                    use rand_pcg::*;
-                    use wfc::{retry::NumTimes, wrap::WrapNone, RunOwn, Size};
-
-                    println!("creating structure of size {}, {}", width, height);
-                    let perimeter = structure.perimeter;
-                    let wx = x as u32;
-                    let wy = y as u32;
-                    let wp = perimeter as u32;
-                    let structure_seed: u64 =
-                        // TODO is this too sloppy? probably works fine
-                        (world.seed() as u64) * 1024 + (wx as u64) * 512 + wy as u64;
-                    let mut rng = Pcg32::seed_from_u64(structure_seed);
-                    let table = structure.get_pattern_table();
-                    let stats = wfc::GlobalStats::new(table);
-                    let wfc_runner = RunOwn::new_wrap(
-                        Size::new(width as u32 - wp, height as u32 - wp),
-                        &stats,
-                        WrapNone,
-                        &mut rng,
-                    );
-                    let wave = wfc_runner
-                        .collapse_retrying(NumTimes(1000), &mut rng)
-                        .expect("failed to generate structure");
-                    let grid = wave.grid();
-                    let mapchar = structure.get_mapchar();
-                    grid.enumerate().for_each(|(coord, wc)| {
-                        let tile = structure
-                            .get_tile(*mapchar.get(&wc.chosen_pattern_id().expect("")).unwrap());
-                        let pos = Position::new(coord.x + x, coord.y + y);
-                        let icon = assets.get_icon(&tile.icon).base_ch();
-                        map.set(
-                            pos,
-                            Tile::new(
-                                icon,
-                                tile.fg(),
-                                tile.bg(),
-                                tile.transparent,
-                                tile.walkable,
-                                TYPE_VEHICLE,
-                            ),
-                        );
-                    });
-                    draw_outer_wall(map, assets, Position::new(x, y), width, height);
-                }
             }
-        } // end x loop
-    } // end y loop
+
+            // now place a structure of the size we've found
+            if width >= structure.min_width && height >= structure.min_height {
+                use wfc::{retry::NumTimes, wrap::WrapNone, RunOwn, Size};
+
+                println!("creating structure of size {}, {}", width, height);
+                let perimeter = structure.perimeter;
+                /*
+                let wx = x as u32;
+                let wy = y as u32;
+                */
+                let wp = perimeter as u32;
+                let table = structure.get_pattern_table();
+                let stats = wfc::GlobalStats::new(table);
+                let wfc_runner = RunOwn::new_wrap(
+                    Size::new(width as u32 - wp, height as u32 - wp),
+                    &stats,
+                    WrapNone,
+                    &mut rng,
+                );
+                let wave = wfc_runner
+                    // not as many times as you'd think
+                    .collapse_retrying(NumTimes(1000), &mut rng)
+                    .expect("failed to generate structure");
+                let grid = wave.grid();
+                let mapchar = structure.get_mapchar();
+                grid.enumerate().for_each(|(coord, wc)| {
+                    let tile = structure
+                        .get_tile(*mapchar.get(&wc.chosen_pattern_id().expect("")).unwrap());
+                    let pos = Position::new(coord.x + x, coord.y + y);
+                    let icon = assets.get_icon(&tile.icon).base_ch();
+                    map.set(
+                        pos,
+                        Tile::new(
+                            icon,
+                            tile.fg(),
+                            tile.bg(),
+                            tile.transparent,
+                            tile.walkable,
+                            TYPE_VEHICLE,
+                        ),
+                    );
+                });
+                draw_outer_wall(map, assets, Position::new(x, y), width, height);
+                count += 1;
+            }
+        }
+    }
 }
 
 fn draw_horizontal_line(

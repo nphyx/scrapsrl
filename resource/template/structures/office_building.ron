@@ -1,0 +1,23 @@
+(
+    min_width:22,
+    max_width:55,
+    min_height:22,
+    max_height:55,
+    perimeter:3,
+    tiles: {
+        'r': ( // floor
+            icon: "structure_floor_random",
+            fg: (64,64,64), 
+            bg: (32,32,32),
+            weight: 1,
+            allowed_neighbors: ([], [], [], []),
+        ),
+        's': ( // floor
+            icon: "structure_floor_small_squares",
+            fg: (64,64,64), 
+            bg: (32,32,32),
+            weight: 1,
+            allowed_neighbors: (['r'], ['r'], ['r'], ['r']),
+        ),
+    }
+)

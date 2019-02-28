@@ -119,7 +119,8 @@ impl AssetLoader {
                         assets.add_geography(&name, template);
                     }
                     AssetType::Structure => {
-                        let template: StructureTemplate = ron::de::from_str(&text).unwrap();
+                        let mut template: StructureTemplate = ron::de::from_str(&text).unwrap();
+                        template.init();
                         assets.add_structure(&name, template);
                     }
                 }

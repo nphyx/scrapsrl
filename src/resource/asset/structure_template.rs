@@ -27,6 +27,28 @@ fn default_true() -> bool {
     true
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub enum StructureTilePosition {
+    /// can be placed in any position
+    Any,
+    /// acts as a floor
+    Floor,
+    /// may only be adjacent to the room perimeter
+    Perimeter,
+    /// treat as free-standing furniture
+    Fixture,
+    /// does not have any automatic placement (only specified rules)
+    NoAuto,
+}
+
+fn default_tile_position() -> StructureTilePosition {
+    StructureTilePosition::Any
+}
+
+fn default_weight() -> u32 {
+    1
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StructureTile {
     /// identify a tile by a single char, this is arbitrary
@@ -43,12 +65,15 @@ pub struct StructureTile {
     pub transparent: bool,
     #[serde(default = "default_true")]
     pub walkable: bool,
-    #[serde(default)]
+    #[serde(default = "default_tile_position")]
+    pub position: StructureTilePosition,
+    #[serde(default = "default_weight")]
     weight: u32,
     #[serde(default)]
-    allowed_neighbors: (Vec<char>, Vec<char>, Vec<char>, Vec<char>),
+    allowed_neighbors: (HashSet<char>, HashSet<char>, HashSet<char>, HashSet<char>),
 }
 
+use std::collections::HashSet;
 impl Default for StructureTile {
     fn default() -> StructureTile {
         StructureTile {
@@ -57,8 +82,14 @@ impl Default for StructureTile {
             bg: (0, 0, 0),
             transparent: true,
             walkable: true,
+            position: StructureTilePosition::Any,
             weight: 1,
-            allowed_neighbors: (Vec::new(), Vec::new(), Vec::new(), Vec::new()),
+            allowed_neighbors: (
+                HashSet::new(),
+                HashSet::new(),
+                HashSet::new(),
+                HashSet::new(),
+            ),
         }
     }
 }
@@ -135,6 +166,103 @@ impl Default for StructureTemplate {
 
 use direction::*;
 impl StructureTemplate {
+    /// does cleanup and reconciliation of allowed neighbors rules
+    pub fn init(&mut self) {
+        let mut floors: HashSet<char> = HashSet::new();
+
+        // gather up all the floors, which can go next to most other tiles
+        // and we don't want to have to write them over and over again
+        // in templates
+        for (ch, tile) in &mut self.tiles {
+            if tile.position == StructureTilePosition::Floor {
+                floors.insert(*ch);
+            };
+        }
+        // add floors as neighbors to Any and Fixture types
+        for (_, tile) in &mut self.tiles {
+            if tile.position == StructureTilePosition::Fixture
+                || tile.position == StructureTilePosition::Any
+            {
+                for ch in &floors {
+                    tile.allowed_neighbors.0.insert(*ch);
+                    tile.allowed_neighbors.1.insert(*ch);
+                    tile.allowed_neighbors.2.insert(*ch);
+                    tile.allowed_neighbors.3.insert(*ch);
+                }
+            }
+        }
+
+        // now let's make sure all the values are properly mirrored
+        // order of directions is north_of, east_of, south_of, west_of
+        let mut north_of: HashMap<char, HashSet<char>> = HashMap::new();
+        let mut west_of: HashMap<char, HashSet<char>> = HashMap::new();
+        let mut east_of: HashMap<char, HashSet<char>> = HashMap::new();
+        let mut south_of: HashMap<char, HashSet<char>> = HashMap::new();
+        for (ch, tile) in self.tiles.clone() {
+            for i in tile.allowed_neighbors.0 {
+                let entry = south_of.entry(ch).or_insert(HashSet::new());
+                entry.insert(i);
+                let entry = north_of.entry(i).or_insert(HashSet::new());
+                entry.insert(ch);
+            }
+            for i in tile.allowed_neighbors.2 {
+                let entry = north_of.entry(ch).or_insert(HashSet::new());
+                entry.insert(i);
+                let entry = south_of.entry(i).or_insert(HashSet::new());
+                entry.insert(ch);
+            }
+            for i in tile.allowed_neighbors.1 {
+                let entry = west_of.entry(ch).or_insert(HashSet::new());
+                entry.insert(i);
+                let entry = east_of.entry(i).or_insert(HashSet::new());
+                entry.insert(ch);
+            }
+            for i in tile.allowed_neighbors.3 {
+                let entry = east_of.entry(ch).or_insert(HashSet::new());
+                entry.insert(i);
+                let entry = west_of.entry(i).or_insert(HashSet::new());
+                entry.insert(ch);
+            }
+        }
+
+        for (ch, set) in north_of {
+            let tile = self.tiles.get_mut(&ch).unwrap();
+            for i in set {
+                tile.allowed_neighbors.2.insert(i);
+            }
+        }
+        for (ch, set) in south_of {
+            let tile = self.tiles.get_mut(&ch).unwrap();
+            for i in set {
+                tile.allowed_neighbors.0.insert(i);
+            }
+        }
+        for (ch, set) in west_of {
+            let tile = self.tiles.get_mut(&ch).unwrap();
+            for i in set {
+                tile.allowed_neighbors.1.insert(i);
+            }
+        }
+        for (ch, set) in east_of {
+            let tile = self.tiles.get_mut(&ch).unwrap();
+            for i in set {
+                tile.allowed_neighbors.3.insert(i);
+            }
+        }
+        let complete: Vec<(
+            char,
+            (HashSet<char>, HashSet<char>, HashSet<char>, HashSet<char>),
+        )> = self
+            .tiles
+            .iter()
+            .map(|(c, t)| (*c, t.allowed_neighbors.clone()))
+            .collect();
+        for item in complete {
+            println!("CH --- NORTH -- EAST -- SOUTH -- WEST");
+            println!("{:?}", item);
+        }
+    }
+
     /// builds a charmap of the structure's tiles
     pub fn get_charmap(&self) -> CharMap {
         let mut charmap: CharMap = HashMap::new();

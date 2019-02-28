@@ -1,0 +1,7 @@
+(
+    base: '\u{16b}',
+    corner_tl: Some('\u{16c}'),
+    corner_tr: Some('\u{16d}'),
+    corner_bl: Some('\u{16c}'),
+    corner_br: Some('\u{16d}'),
+)

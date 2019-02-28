@@ -1,6 +1,6 @@
 (
     tags: Some([Urban]),
-    structures: None, // Some(("small_home", "small_storefront", "gas_station")),
+    structures: Some(["office_building"]),
     population_range: (0.7, 1.0),
     description: Some((
             short: "urban",
