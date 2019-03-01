@@ -1,40 +1,90 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Icon {
-    base: char,
-    #[serde(default)]
-    corner_tl: Option<char>,
-    #[serde(default)]
-    corner_tr: Option<char>,
-    #[serde(default)]
-    corner_bl: Option<char>,
-    #[serde(default)]
-    corner_br: Option<char>,
-    #[serde(default)]
-    vertical: Option<char>,
-    #[serde(default)]
-    horizontal: Option<char>,
-    #[serde(default)]
-    tee_l: Option<char>,
-    #[serde(default)]
-    tee_r: Option<char>,
-    #[serde(default)]
-    tee_u: Option<char>,
-    #[serde(default)]
-    tee_d: Option<char>,
-    #[serde(default)]
-    cap_l: Option<char>,
-    #[serde(default)]
-    center: Option<char>,
-    #[serde(default)]
-    cap_r: Option<char>,
-    #[serde(default)]
-    cap_u: Option<char>,
-    #[serde(default)]
-    cap_d: Option<char>,
+pub enum DoorState {
+    Closed,
+    Open,
+    Frame,
 }
 
+pub enum DoorOrientation {
+    Horizontal,
+    Vertical,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Icon {
+    /// base tile (no connections in any direction)
+    base: char,
+    #[serde(default)]
+    /// top left corner, connecting down and right
+    corner_tl: Option<char>,
+    #[serde(default)]
+    /// top right corner, connecting down and left
+    corner_tr: Option<char>,
+    #[serde(default)]
+    /// bottom left corner, connecting up and right
+    corner_bl: Option<char>,
+    #[serde(default)]
+    /// bottom right corner, connecting up and left
+    corner_br: Option<char>,
+    #[serde(default)]
+    /// connected on top and bottom sides
+    vertical: Option<char>,
+    #[serde(default)]
+    /// connected on left and right sides
+    horizontal: Option<char>,
+    #[serde(default)]
+    /// tee shape with leg pointing left
+    tee_l: Option<char>,
+    #[serde(default)]
+    /// tee shape with leg pointing right
+    tee_r: Option<char>,
+    #[serde(default)]
+    /// tee shape with leg pointing up
+    tee_u: Option<char>,
+    #[serde(default)]
+    /// tee shape with leg pointing down
+    tee_d: Option<char>,
+    #[serde(default)]
+    /// center tile, connected on all four sides
+    center: Option<char>,
+    #[serde(default)]
+    /// left endcap, connected only to right
+    cap_l: Option<char>,
+    #[serde(default)]
+    /// right endcap, connected only to left
+    cap_r: Option<char>,
+    #[serde(default)]
+    /// up endcap, connected only below
+    cap_u: Option<char>,
+    #[serde(default)]
+    /// down endcap, connected only above
+    cap_d: Option<char>,
+    #[serde(default)]
+    /// for wall tiles, a door (for a horizontal wall)
+    door_closed: Option<char>,
+    #[serde(default)]
+    /// for wall tiles, an open door (horizontal walls)
+    door_open: Option<char>,
+    #[serde(default)]
+    /// for wall tiles, a door frame with no door
+    door_frame: Option<char>,
+    #[serde(default)]
+    /// for wall tiles, a door (on vertical walls)
+    door_vertical: Option<char>,
+    #[serde(default)]
+    /// for wall tiles, an open door (on vertical walls)
+    door_vertical_open: Option<char>,
+    #[serde(default)]
+    /// for wall tiles, a list of window variants
+    windows: Vec<char>,
+    #[serde(default)]
+    /// variants on the base character which should be chosen at random and have no specific
+    /// connections
+    variants: Vec<char>,
+}
+
+/// An icon spec, loaded from a resource file. Contains the base icon and all its variants.
 impl Default for Icon {
     fn default() -> Icon {
         Icon {
@@ -54,11 +104,19 @@ impl Default for Icon {
             cap_r: None,
             cap_u: None,
             cap_d: None,
+            door_closed: None,
+            door_open: None,
+            door_frame: None,
+            door_vertical: None,
+            door_vertical_open: None,
+            windows: Vec::new(),
+            variants: Vec::new(),
         }
     }
 }
 
 impl Icon {
+    /// get a char for a connected tile, given its connections in cardinal directions
     pub fn ch(&self, above: bool, below: bool, left: bool, right: bool) -> char {
         match (above, below, left, right) {
             (true, true, false, false) => self.vertical.unwrap_or(self.base),
@@ -79,7 +137,44 @@ impl Icon {
             (false, false, false, false) => self.base,
         }
     }
+
+    /// get the base char
     pub fn base_ch(&self) -> char {
         self.base
+    }
+
+    /// for wall tiles, get a door by state and orientation
+    pub fn door_ch(&self, state: DoorState, orientation: DoorOrientation) -> char {
+        match orientation {
+            DoorOrientation::Vertical => {
+                match state {
+                    DoorState::Open => self.door_vertical_open.unwrap_or(self.base),
+                    // there is no difference between door closed/frame state
+                    _ => self.door_vertical.unwrap_or(self.base),
+                }
+            }
+            DoorOrientation::Horizontal => match state {
+                DoorState::Open => self.door_open.unwrap_or(self.base),
+                DoorState::Closed => self.door_open.unwrap_or(self.base),
+                DoorState::Frame => self.door_open.unwrap_or(self.base),
+            },
+        }
+    }
+
+    /// for wall tiles, get one of the windows
+    pub fn window_ch(&self, sample: f32) -> char {
+        use crate::util::choose;
+        choose(&self.windows, sample).unwrap_or(self.base)
+    }
+
+    /// get a count of the number of windows
+    pub fn window_len(&self) -> usize {
+        self.windows.len()
+    }
+
+    /// choose one of the variant tiles (if available)
+    pub fn variant_ch(&self, sample: f32) -> char {
+        use crate::util::choose;
+        choose(&self.variants, sample).unwrap_or(self.base)
     }
 }

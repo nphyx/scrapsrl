@@ -3,15 +3,6 @@ use crate::resource::{AreaMap, Tile, WorldState};
 use crate::util::{clamp, rand_up};
 use tcod::noise::Noise;
 
-pub fn choose<T>(options: &Vec<T>, sample: f32) -> T
-where
-    T: Clone,
-{
-    let len = options.len();
-    let i = (sample * len as f32).floor() as usize;
-    options[i].clone()
-}
-
 pub fn scale_axis(i: i32, offset: i32, scale: f32) -> f32 {
     ((i + offset) as f32 * scale) as f32
 }

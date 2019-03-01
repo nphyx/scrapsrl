@@ -1,7 +1,7 @@
 use super::util::*;
 use crate::component::Region;
 use crate::constants::SIDEBAR_WIDTH;
-use crate::resource::{Assets, WorldState};
+use crate::resource::{Assets, GameState, MapMode, WorldState};
 use tcod::{Console, TextAlignment};
 
 type TColor = tcod::colors::Color;
@@ -11,12 +11,14 @@ pub fn draw_worldmap(
     assets: &Assets,
     region: Region,
     world: &WorldState,
+    state: &GameState,
 ) {
     reset_colors(&console);
     console.set_alignment(TextAlignment::Left);
     let base_x = console.width() - SIDEBAR_WIDTH + 3;
     let mut x = base_x;
-    let mut y = 1;
+    let base_y = 1;
+    let mut y = base_y;
     let width = SIDEBAR_WIDTH - 6;
     let height = SIDEBAR_WIDTH - 6;
     let hw = width / 2;
@@ -40,22 +42,48 @@ pub fn draw_worldmap(
             let left = world.get_road(Region { x: rx - 1, y: ry });
             let right = world.get_road(Region { x: rx + 1, y: ry });
             let cur = world.get_road(Region { x: rx, y: ry });
-            if cur.lanes_x == 0 && cur.lanes_y == 0 {
-                ch = world.get_icon(Region { x: rx, y: ry });
-            } else {
-                let size = if cur.lanes_x > 4 || cur.lanes_y > 4 {
-                    "map_road_large"
-                } else if cur.lanes_x > 1 || cur.lanes_y > 1 {
-                    "map_road_medium"
-                } else {
-                    "map_road_small"
-                };
-                ch = assets.get_icon(size).ch(
-                    cur.lanes_y > 0 && up.lanes_y > 0,
-                    cur.lanes_y > 0 && down.lanes_y > 0,
-                    cur.lanes_x > 0 && left.lanes_x > 0,
-                    cur.lanes_x > 0 && right.lanes_x > 0,
-                );
+            match state.map_mode {
+                MapMode::Hybrid => {
+                    if cur.lanes_x == 0 && cur.lanes_y == 0 {
+                        ch = world.get_icon(Region { x: rx, y: ry });
+                    } else {
+                        let size = if cur.lanes_x > 4 || cur.lanes_y > 4 {
+                            "map_hybrid_large"
+                        } else if cur.lanes_x > 1 || cur.lanes_y > 1 {
+                            "map_hybrid_medium"
+                        } else {
+                            "map_hybrid_small"
+                        };
+                        ch = assets.get_icon(size).ch(
+                            cur.lanes_y > 0 && up.lanes_y > 0,
+                            cur.lanes_y > 0 && down.lanes_y > 0,
+                            cur.lanes_x > 0 && left.lanes_x > 0,
+                            cur.lanes_x > 0 && right.lanes_x > 0,
+                        );
+                    }
+                }
+                MapMode::Street => {
+                    if cur.lanes_x == 0 && cur.lanes_y == 0 {
+                        ch = ' ';
+                    } else {
+                        let size = if cur.lanes_x > 4 || cur.lanes_y > 4 {
+                            "map_street_large"
+                        } else if cur.lanes_x > 1 || cur.lanes_y > 1 {
+                            "map_street_medium"
+                        } else {
+                            "map_street_small"
+                        };
+                        ch = assets.get_icon(size).ch(
+                            cur.lanes_y > 0 && up.lanes_y > 0,
+                            cur.lanes_y > 0 && down.lanes_y > 0,
+                            cur.lanes_x > 0 && left.lanes_x > 0,
+                            cur.lanes_x > 0 && right.lanes_x > 0,
+                        );
+                    }
+                }
+                MapMode::Terrain => {
+                    ch = world.get_icon(Region { x: rx, y: ry });
+                }
             }
             // let cur_region = Region::new(rx, ry);
             // let pop_col = 128; // ((world.get_pop(cur_region) * 128.0).floor()) as u8 + 64;
@@ -71,6 +99,13 @@ pub fn draw_worldmap(
         y += 1;
     }
     console.set_alignment(TextAlignment::Center);
+    let mut mode_string: &str = match state.map_mode {
+        MapMode::Hybrid => "[M]ode:hybrid",
+        MapMode::Terrain => "[M]ode:terrain",
+        MapMode::Street => "[M]ode:street",
+    };
+    console.print_rect(x + width / 2, base_y - 1, width, 1, mode_string);
+
     console.print_rect(
         x + width / 2,
         y,

@@ -1,0 +1,14 @@
+(
+    base: '\u{213}',
+    horizontal: Some('\u{221}'),
+    vertical: Some('\u{210}'),
+    corner_tl: Some('\u{200}'),
+    corner_tr: Some('\u{202}'),
+    corner_bl: Some('\u{220}'),
+    corner_br: Some('\u{222}'),
+    tee_r: Some('\u{223}'),
+    tee_l: Some('\u{203}'),
+    tee_d: Some('\u{201}'),
+    tee_u: Some('\u{211}'),
+    center: Some('\u{213}'),
+)

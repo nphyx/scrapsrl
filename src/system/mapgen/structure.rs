@@ -1,11 +1,11 @@
 use super::util::*;
 use crate::component::{Color, Position, Region};
 use crate::resource::{
-    tile_types::*, AreaMap, Assets, GeographyTemplate, StructureTemplate, Tile, WorldState,
+    tile_types::*, AreaMap, Assets, GeographyTemplate, StructureTemplate, StructureTile, Tile,
+    WorldState,
 };
 use crate::util::*;
 use rand::prelude::*;
-use rand_pcg::*;
 use tcod::noise::Noise;
 
 fn choose_structure<'a>(
@@ -17,7 +17,9 @@ fn choose_structure<'a>(
 ) -> Option<StructureTemplate> {
     if let Some(ref structures) = geography.structures {
         let sample = rand_up(fbm_offset(noise, pos, offset, 1.0, 1));
-        let structure_name = choose(&structures, sample);
+        // should never fail, but if it does the placeholder string is not going to cause a
+        // problem
+        let structure_name = choose(&structures, sample).unwrap_or("Ooops".to_string());
         return Some(assets.get_structure(&structure_name));
     }
     None
@@ -37,18 +39,14 @@ pub fn build(
     let max_tries = 100;
     let horiz: Vec<i32> = (0..map.width).collect();
     let vert: Vec<i32> = (0..map.height).collect();
-    let off = region.to_unsigned();
-    let map_seed: u64 =
-        // TODO is this too sloppy? probably works fine
-        (u64::from(world.seed()) / 32) + (off[0] << 3) + off[1];
+    let mut rng = world.region_rng(*region);
 
-    let mut rng = Pcg32::seed_from_u64(map_seed);
     while count < max_structures && tries < max_tries {
         let mut x: i32 = 0;
         let mut y: i32 = 0;
         while tries < max_tries {
-            x = choose(&horiz, rng.gen_range(0.0, 1.0));
-            y = choose(&vert, rng.gen_range(0.0, 1.0));
+            x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
+            y = choose(&vert, rng.gen_range(0.0, 1.0)).unwrap_or(0);
             if let Some(tile) = map.get(Position::new(x, y)) {
                 if tile.type_id != TYPE_GRASS {
                     tries += 1;
@@ -72,8 +70,8 @@ pub fn build(
             let width_range: Vec<i32> = (structure.min_width..=structure.max_width).collect();
 
             let height_range: Vec<i32> = (structure.min_height..=structure.max_height).collect();
-            let mut width: i32 = choose(&width_range, sample);
-            let mut height: i32 = choose(&height_range, sample);
+            let mut width: i32 = choose(&width_range, sample).unwrap_or(0);
+            let mut height: i32 = choose(&height_range, sample).unwrap_or(0);
             // first check we can fit the structure in here
             for sx in 0..width {
                 for sy in 0..height {
@@ -112,7 +110,6 @@ pub fn build(
                     &mut rng,
                 );
                 let wave = wfc_runner
-                    // not as many times as you'd think
                     .collapse_retrying(NumTimes(1000), &mut rng)
                     .expect("failed to generate structure");
                 let grid = wave.grid();
@@ -134,14 +131,21 @@ pub fn build(
                         ),
                     );
                 });
-                draw_outer_wall(map, assets, Position::new(x, y), width, height);
+                build_rect(
+                    map,
+                    assets,
+                    &structure.perimeter_tile,
+                    Position::new(x, y),
+                    width,
+                    height,
+                );
                 count += 1;
             }
         }
     }
 }
 
-fn draw_horizontal_line(
+fn build_horizontal_line(
     map: &mut AreaMap,
     pos: Position,
     width: i32,
@@ -160,7 +164,7 @@ fn draw_horizontal_line(
     }
 }
 
-fn draw_vertical_line(
+fn build_vertical_line(
     map: &mut AreaMap,
     pos: Position,
     height: i32,
@@ -179,14 +183,21 @@ fn draw_vertical_line(
     }
 }
 
-fn draw_outer_wall(map: &mut AreaMap, assets: &Assets, pos: Position, width: i32, height: i32) {
-    let wall = assets.get_icon("structure_wall_slat");
+fn build_rect(
+    map: &mut AreaMap,
+    assets: &Assets,
+    tile: &StructureTile,
+    pos: Position,
+    width: i32,
+    height: i32,
+) {
+    let wall = assets.get_icon(&tile.icon);
     let fg = Color::new(64, 64, 64);
     let bg = Color::new(0, 0, 0);
     let mut ch = wall.ch(false, false, true, true);
     let transparent = false;
     let walkable = true;
-    draw_horizontal_line(
+    build_horizontal_line(
         map,
         Position::new(pos.x + 1, pos.y),
         width - 4,
@@ -196,7 +207,7 @@ fn draw_outer_wall(map: &mut AreaMap, assets: &Assets, pos: Position, width: i32
         transparent,
         walkable,
     );
-    draw_horizontal_line(
+    build_horizontal_line(
         map,
         Position::new(pos.x + 1, pos.y + height - 2),
         width - 4,
@@ -207,7 +218,7 @@ fn draw_outer_wall(map: &mut AreaMap, assets: &Assets, pos: Position, width: i32
         walkable,
     );
     ch = wall.ch(true, true, false, false);
-    draw_vertical_line(
+    build_vertical_line(
         map,
         Position::new(pos.x, pos.y + 1),
         height - 3,
@@ -217,7 +228,7 @@ fn draw_outer_wall(map: &mut AreaMap, assets: &Assets, pos: Position, width: i32
         transparent,
         walkable,
     );
-    draw_vertical_line(
+    build_vertical_line(
         map,
         Position::new(pos.x + width - 2, pos.y + 1),
         height - 3,

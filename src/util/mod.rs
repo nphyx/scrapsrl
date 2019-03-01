@@ -26,3 +26,16 @@ pub fn distance(p: Position, d: Position) -> f32 {
 pub fn rand_up(v: f32) -> f32 {
     (v + 1.0) / 2.0
 }
+
+/// chooses an item from a vec of options given an f32 sample between 0.0 and 1.0
+pub fn choose<T>(options: &Vec<T>, sample: f32) -> Option<T>
+where
+    T: Clone,
+{
+    let len = options.len();
+    let i = (sample * len as f32).floor() as usize;
+    match options.get(i) {
+        Some(item) => Some(item.clone()),
+        None => None,
+    }
+}

@@ -1,0 +1,28 @@
+(
+    tags: Some([Urban]),
+    structures: Some(["brick_building"]),
+    population_range: (0.5, 0.8),
+    description: Some((
+            short: "Old Town",
+            long: "An older part of the city, with historic buildings."
+    )),
+    icon: Some((name: "map_terrain_old_town")),
+    colors: Some((
+            fg: (r: 16, g: 180, b: 30),
+            bg: (r: 48, g: 48, b: 12),
+    )),
+    ground_cover: Some([
+            (
+                frequency: 0.0,
+                colors: (
+                        fg: (r: 48, g: 48, b: 48),
+                        bg: (r: 32, g: 32, b: 32),
+                ),
+                icon: (name:"ground_concrete_1"),
+            ),
+    ]),
+    scatter: Some([
+            (frequency: 0.021, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_2")),
+            (frequency: 0.023, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_3")),
+    ])
+)

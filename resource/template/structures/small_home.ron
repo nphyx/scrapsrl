@@ -4,6 +4,11 @@
     min_height:8,
     max_height:18,
     perimeter:1,
+    perimeter_tile: (
+        icon: "structure_wall_slat",
+        fg: (64,64,64), 
+        bg: (32,32,32),
+    ),
     connect_to: Some([(connection_type: Road, connection_method: Driveway)]),
     tiles: {
         '1': ( // floor tiles

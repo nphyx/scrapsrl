@@ -1,12 +1,12 @@
 (
-    min_width:22,
-    max_width:55,
-    min_height:22,
-    max_height:55,
-    perimeter:3,
+    min_width:16,
+    max_width:22,
+    min_height:16,
+    max_height:22,
+    perimeter:2,
     perimeter_tile: (
-        icon: "structure_wall_office",
-        fg: (64,64,64), 
+        icon: "structure_wall_brick",
+        fg: (64,46,22), 
         bg: (32,32,32),
     ),
     tiles: {

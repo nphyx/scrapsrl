@@ -242,7 +242,7 @@ impl Display {
             ui::draw_status_bar(&self.root, character, &state);
             player_pos = *pos;
             player_region = *region;
-            ui::draw_worldmap(&self.root, &assets, player_region, &world);
+            ui::draw_worldmap(&self.root, &assets, player_region, &world, &state);
         }
         let map = maps.get(player_region);
 

@@ -13,6 +13,12 @@ pub enum RenderMode {
     Collision,
 }
 
+pub enum MapMode {
+    Terrain,
+    Street,
+    Hybrid,
+}
+
 /// game state collects a bunch of globally needed data and coordination info in one
 /// place. Doesn't make a lot of sense to make these individual resources, causes too
 /// much boilerplate in Systems
@@ -45,6 +51,9 @@ pub struct GameState {
 
     /// rendering modes
     pub render_mode: RenderMode,
+
+    /// map mode
+    pub map_mode: MapMode,
 }
 
 impl Default for GameState {
@@ -66,6 +75,8 @@ impl Default for GameState {
             region: Region::default(),
 
             render_mode: RenderMode::Normal,
+
+            map_mode: MapMode::Hybrid,
         }
     }
 }

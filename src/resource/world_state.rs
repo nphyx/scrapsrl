@@ -1,4 +1,5 @@
 use rand::prelude::*;
+use rand_pcg::*;
 use serde::{Deserialize, Serialize};
 use specs::{Component, VecStorage};
 use tcod::noise::*;
@@ -216,7 +217,7 @@ impl WorldState {
             .get_geographies()
             .values()
             .enumerate()
-            .filter(|item| item.1.population_range[0] < pop && item.1.population_range[1] > pop)
+            .filter(|item| item.1.population_range[0] <= pop && item.1.population_range[1] >= pop)
             .collect();
         let len = choices.len() as f32;
         let choice = *choices
@@ -225,7 +226,9 @@ impl WorldState {
         let (x, y) = self.to_abs_pos(region);
         self.geographies.indexes[x][y] = choice.0;
         if let Some(icon) = &choice.1.icon {
-            self.icons.chars[x][y] = assets.get_icon(&icon.name).base_ch();
+            self.icons.chars[x][y] = assets
+                .get_icon(&icon.name)
+                .variant_ch(noise.get_fbm([region.x as f32, region.y as f32], 8));
         }
     }
 
@@ -238,5 +241,17 @@ impl WorldState {
         } else {
             GeographyTemplate::default()
         }
+    }
+
+    /// gets a seed based on the world seed and the given region
+    pub fn region_seed(&self, region: Region) -> u64 {
+        // TODO is this too sloppy? probably works fine
+        let off = region.to_unsigned();
+        (u64::from(self.seed) / 32) + (off[0] << 3) + off[1]
+    }
+
+    /// makes a region-specific RNG
+    pub fn region_rng(&self, region: Region) -> Pcg32 {
+        Pcg32::seed_from_u64(self.region_seed(region))
     }
 }

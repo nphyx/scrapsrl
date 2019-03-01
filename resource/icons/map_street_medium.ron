@@ -1,0 +1,18 @@
+(
+    base: '\u{0100}',
+    horizontal: Some('\u{0100}'),
+    vertical: Some('\u{0101}'),
+    corner_tl: Some('\u{0102}'),
+    corner_tr: Some('\u{0103}'),
+    corner_bl: Some('\u{0104}'),
+    corner_br: Some('\u{0105}'),
+    tee_l: Some('\u{0106}'),
+    tee_r: Some('\u{0107}'),
+    tee_u: Some('\u{0108}'),
+    tee_d: Some('\u{0109}'),
+    center: Some('\u{010a}'),
+    cap_u: Some('\u{010b}'),
+    cap_d: Some('\u{010c}'),
+    cap_r: Some('\u{010d}'),
+    cap_l: Some('\u{010e}'),
+)

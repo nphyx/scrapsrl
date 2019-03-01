@@ -2,7 +2,7 @@ use specs::{System, Write};
 use tcod::input::Key;
 use tcod::input::KeyCode::*;
 
-use crate::resource::{AreaMaps, GameState, RenderMode, UserInput, WorldState};
+use crate::resource::{AreaMaps, GameState, MapMode, RenderMode, UserInput, WorldState};
 
 /// handle input that should work regardless of game state
 pub struct SystemInput;
@@ -34,11 +34,35 @@ impl<'a> System<'a> for SystemInput {
                 input.consume();
                 return;
             }
+            // toggles minimap display mode
+            Some(Key {
+                code: Char,
+                printable: 'm',
+                shift: true,
+                ..
+            }) => {
+                println!("changing map mode");
+                match state.map_mode {
+                    MapMode::Hybrid => {
+                        state.map_mode = MapMode::Street;
+                    }
+                    MapMode::Street => {
+                        state.map_mode = MapMode::Terrain;
+                    }
+                    MapMode::Terrain => {
+                        state.map_mode = MapMode::Hybrid;
+                    }
+                }
+            }
             // TODO command line switch to enable/disable debug keys
             // debug render mode toggle
             Some(Key { code: F9, .. }) => match state.render_mode {
-                RenderMode::Normal => state.render_mode = RenderMode::Collision,
-                RenderMode::Collision => state.render_mode = RenderMode::Normal,
+                RenderMode::Normal => {
+                    state.render_mode = RenderMode::Collision;
+                }
+                RenderMode::Collision => {
+                    state.render_mode = RenderMode::Normal;
+                }
             },
             // regenerate the game map (debug only)
             Some(Key { code: F4, .. }) => {

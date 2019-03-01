@@ -1,7 +1,6 @@
 (
     tags: Some([Rural]),
-    structures: Some(["small_home"]),
-    population_range: (0.0, 0.7),
+    population_range: (0.0, 0.6),
     description: Some((
             short: "a forest",
             long: "Mostly trees."
@@ -32,9 +31,9 @@
     scatter: Some([
             (frequency: 0.00005, colors: ( fg: (r: 102, g: 104, b: 100), bg: (r: 0, g: 0, b: 0),), icon:(name: "boulder")),
             (frequency: 0.1, colors: ( fg: (r: 118, g: 121, b: 72), bg: (r: 38, g: 36, b: 21),), icon:(name: "flora_herb")),
-            (frequency: 0.01, colors: ( fg: (r: 112, g: 108, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock")),
-            (frequency: 0.015, colors: ( fg: (r: 112, g: 118, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_2")),
-            (frequency: 0.004, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_3")),
-            (frequency: 0.023, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile")),
+            (frequency: 0.001, colors: ( fg: (r: 112, g: 108, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock")),
+            (frequency: 0.0015, colors: ( fg: (r: 112, g: 118, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_2")),
+            (frequency: 0.0004, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_3")),
+            (frequency: 0.0023, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile")),
     ])
 )

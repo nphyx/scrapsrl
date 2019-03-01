@@ -143,6 +143,8 @@ pub struct StructureTemplate {
     pub max_height: i32,
     /// perimeter is *inside* the bounds, so account for it in min/max properties
     pub perimeter: i32,
+    /// tile used for outer walls
+    pub perimeter_tile: StructureTile,
     /// a special instruction for connecting to roads, other structures, etc
     pub connect_to: Option<Vec<StructureConnection>>,
     /// this contains all the tiles and rules for the structure to pass to the wfc system
@@ -158,6 +160,7 @@ impl Default for StructureTemplate {
             min_height: 3,
             max_height: 3,
             perimeter: 1,
+            perimeter_tile: StructureTile::default(),
             connect_to: None,
             tiles: HashMap::new(),
         }
