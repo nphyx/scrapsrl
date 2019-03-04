@@ -1,6 +1,6 @@
 use super::util::*;
-use crate::component::{Color, Position};
-use crate::resource::{tile_types::*, AreaMap, Tile};
+use crate::component::{Color, Description, Position};
+use crate::resource::{AreaMap, Tile};
 use crate::util::*;
 use tcod::noise::*;
 
@@ -33,7 +33,15 @@ fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
         cy - (size / 2),
         size,
         size,
-        Tile::new('o', fg, bg, false, false, TYPE_TREE),
+        Tile::new(
+            'o',
+            fg,
+            bg,
+            false,
+            false,
+            true,
+            Description::new("a tree", "It's a tree."),
+        ),
     );
     /*
 

@@ -1,6 +1,7 @@
 use crate::component::{Position, Region};
 use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
 use crate::resource::GeographyTemplate;
+use crate::util::Rect;
 
 mod iterators;
 mod tile;
@@ -14,7 +15,7 @@ pub const HEIGHT: usize = MAP_HEIGHT as usize;
 
 #[derive(Clone)]
 pub struct AreaMap {
-    tiles: [[Tile; HEIGHT]; WIDTH],
+    tiles: Vec<Vec<Tile>>,
     pub width: i32,
     pub height: i32,
     /// mark true when mapgen is complete
@@ -24,7 +25,7 @@ pub struct AreaMap {
 
 impl Default for AreaMap {
     fn default() -> AreaMap {
-        let tiles = [[Tile::default(); HEIGHT]; WIDTH];
+        let tiles = vec![vec![Tile::default(); HEIGHT]; WIDTH];
         AreaMap {
             tiles,
             width: WIDTH as i32,
@@ -40,7 +41,7 @@ impl AreaMap {
         let tile = Tile::default();
         for x in 0..WIDTH {
             for y in 0..HEIGHT {
-                self.tiles[x][y] = tile;
+                self.tiles[x][y] = tile.clone();
             }
         }
     }
@@ -49,7 +50,7 @@ impl AreaMap {
         if 0 > pos.x || pos.x >= self.width || 0 > pos.y || pos.y >= self.height {
             return None;
         }
-        Some(self.tiles[pos.x as usize][pos.y as usize])
+        Some(self.tiles[pos.x as usize][pos.y as usize].clone())
     }
 
     pub fn get_mut(&mut self, pos: Position) -> Option<&mut Tile> {
@@ -85,6 +86,29 @@ impl AreaMap {
             map: self,
             cur: [0, 0],
         }
+    }
+
+    /// finds the largest rectangle within the given area that is unoccupied
+    pub fn fit_rect(&mut self, room: Rect) -> bool {
+        let mut row_cells: Vec<Vec<i32>> = Vec::new();
+        let mut col_cells: Vec<Vec<i32>> = Vec::new();
+        let mut row_i: usize = 0;
+        let mut col_i: usize = 0;
+        for row in room.iter_rows() {
+            row_cells.push(Vec::new());
+            for pos in row.iter() {
+                let maybe_tile = self.get(*pos);
+                if maybe_tile.is_none() || maybe_tile.unwrap().constructed {
+                    row_cells[row_i].push(1);
+                } else {
+                    let prev = row_cells[row_i][row_cells.len()];
+                    row_cells[row_i].push(prev + 1);
+                }
+            }
+            row_i += 1;
+        }
+
+        return false;
     }
 }
 

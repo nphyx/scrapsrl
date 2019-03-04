@@ -43,7 +43,7 @@ pub fn fill_rect(
 
     for x in min_x..max_x {
         for y in min_y..max_y {
-            map.set(Position { x, y }, tile);
+            map.set(Position { x, y }, tile.clone());
         }
     }
 }

@@ -15,6 +15,9 @@ pub struct GroundCover {
     pub colors: Colors,
     /// a string referring to an icon by file stem (icons/grass.ron = "grass" here)
     pub icon: IconRef,
+    #[serde(default)]
+    /// a description to use for tiles of this type
+    pub description: Option<Description>,
 }
 
 /// stub

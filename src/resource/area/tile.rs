@@ -1,14 +1,16 @@
-use crate::component::Color;
+use crate::component::{Color, Description};
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Tile {
     pub icon: char,
     pub fg: Color,
     pub bg: Color,
     pub transparent: bool,
     pub walkable: bool,
-    /// arbitrary type flag used by map generator to mark tiles for checks
-    pub type_id: u32,
+    /// indicates the tile has had a non-ground tile placed in it
+    /// used to prevent overlapping structures during generation
+    pub constructed: bool,
+    pub description: Description,
 }
 
 impl Default for Tile {
@@ -19,7 +21,8 @@ impl Default for Tile {
             bg: Color::new(0, 0, 0),
             transparent: true,
             walkable: true,
-            type_id: 0,
+            constructed: false,
+            description: Description::default(),
         }
     }
 }
@@ -31,7 +34,8 @@ impl Tile {
         bg: Color,
         transparent: bool,
         walkable: bool,
-        type_id: u32,
+        constructed: bool,
+        description: Description,
     ) -> Tile {
         Tile {
             icon,
@@ -39,7 +43,8 @@ impl Tile {
             bg,
             transparent,
             walkable,
-            type_id,
+            constructed,
+            description,
         }
     }
 }

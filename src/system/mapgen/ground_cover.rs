@@ -1,32 +1,9 @@
 use super::util::*;
-use crate::component::{Color, Position};
-use crate::resource::{tile_types::*, AreaMap, Assets, GeographyTemplate, Tile};
+use crate::component::{Color, Description, Position};
+use crate::resource::{AreaMap, Assets, GeographyTemplate, Tile};
 use crate::util::colors::lerp;
 use crate::util::*;
 use tcod::noise::Noise;
-
-/* we'll want to get grass color in other functions maybe
-pub fn grass_bg_color(
-    noise: &Noise,
-    pos: [i32; 2],
-    offset: [i32; 2],
-    noise_scale: f32,
-    octaves: u32,
-) -> Color {
-    let color_sg_bg = Color {
-        r: 42,
-        g: 54,
-        b: 28,
-    };
-    let color_tg_bg = Color {
-        r: 38,
-        g: 36,
-        b: 21,
-    };
-    let i = rand_up(fbm_offset(noise, pos, offset, noise_scale, octaves));
-    lerp(color_sg_bg, color_tg_bg, i)
-}
-*/
 
 /// Selects a background color for the cover tile, blending based on noise_sample
 fn select_bg(geography: &GeographyTemplate, noise_sample: f32) -> Color {
@@ -124,7 +101,15 @@ pub fn base(
                 .base_ch();
             map.set(
                 Position { x, y },
-                Tile::new(icon, fg, bg, true, true, TYPE_GRASS),
+                Tile::new(
+                    icon,
+                    fg,
+                    bg,
+                    true,
+                    true,
+                    false,
+                    Description::new("grass", "Just some ordinary grass."),
+                ),
             );
         }
     }
@@ -154,9 +139,23 @@ pub fn scatter(
                         if let Some(tile) = map.get(pos) {
                             bg = tile.bg;
                         }
+                        let desc: Description;
+                        if let Some(tile_desc) = &scatter_obj.description {
+                            desc = tile_desc.clone();
+                        } else {
+                            desc = Description::new("grass", "Grass growing around some junk.");
+                        }
                         queue.insert(
                             Position { x, y },
-                            Tile::new(icon, scatter_obj.colors.fg, bg, true, true, TYPE_GRASS),
+                            Tile::new(
+                                icon,
+                                scatter_obj.colors.fg,
+                                bg,
+                                true,
+                                true,
+                                false,
+                                Description::new(&desc.short, &desc.long),
+                            ),
                         );
                     }
                 }

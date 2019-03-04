@@ -1,5 +1,5 @@
 use super::util::*;
-use crate::component::{Color, Position, Region};
+use crate::component::{Color, Description, Position, Region};
 use crate::resource::{tile_types::*, AreaMap, Assets, Tile, WorldState};
 use crate::util::colors::lerp;
 use crate::util::*;
@@ -50,7 +50,8 @@ fn place_car(
                 tile.bg,
                 true,
                 false,
-                TYPE_VEHICLE,
+                true,
+                Description::new("vehicle", "the rusted hulk of an old automobile"),
             ),
         )
     }
@@ -63,12 +64,28 @@ fn damaged_road(ground_bg: Color, road_bg: Color, blend_factor: f32) -> Tile {
         b: 94,
     };
     let bg = lerp(ground_bg, road_bg, blend_factor * 0.5);
-    Tile::new(',', grass_fg, bg, true, true, TYPE_ROAD_CRACKED)
+    Tile::new(
+        ',',
+        grass_fg,
+        bg,
+        true,
+        true,
+        true,
+        Description::new("road", "Little remains of this crumbled asphalt."),
+    )
 }
 
 /// creates a single segment of road
 fn road_segment(icon: char, fg: Color, bg: Color) -> Tile {
-    Tile::new(icon, fg, bg, true, true, TYPE_ROAD)
+    Tile::new(
+        icon,
+        fg,
+        bg,
+        true,
+        true,
+        true,
+        Description::new("road", "A crumbling old road."),
+    )
 }
 
 /// generates a horizontal road on the map. Damage factor is a range from 0 = pristine
@@ -150,7 +167,7 @@ pub fn place_horizontal_roads(
             // check if overlapping a horizontal road and draw correct tile
             // if so
             if let Some(tile) = map.get(pos) {
-                if tile.type_id == TYPE_ROAD {
+                if tile.constructed {
                     segment_icon = road_rubble;
                     fg = road_rubble_fg;
                 }
@@ -249,7 +266,7 @@ pub fn place_vertical_roads(
             // check if overlapping a horizontal road and draw correct tile
             // if so
             if let Some(tile) = map.get(pos) {
-                if tile.type_id == TYPE_ROAD {
+                if tile.constructed {
                     segment_icon = road_rubble;
                     fg = road_rubble_fg;
                 }

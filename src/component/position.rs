@@ -48,6 +48,16 @@ impl std::cmp::PartialEq<MovePlan> for Position {
     }
 }
 
+use wfc::Coord;
+impl From<Coord> for Position {
+    fn from(coord: Coord) -> Position {
+        Position {
+            x: coord.x,
+            y: coord.y,
+        }
+    }
+}
+
 impl Position {
     pub fn new(x: i32, y: i32) -> Position {
         Position { x, y }

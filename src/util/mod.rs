@@ -1,7 +1,9 @@
 use crate::component::Position;
 pub mod colors;
 mod connectable_char;
+mod rect;
 pub use self::connectable_char::ConnectableChars;
+pub use self::rect::Rect;
 
 /// clamps a number x between range a..b
 pub fn clamp<T>(a: T, b: T, x: T) -> T

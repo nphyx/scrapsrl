@@ -143,6 +143,10 @@ pub struct StructureTemplate {
     pub max_height: i32,
     /// perimeter is *inside* the bounds, so account for it in min/max properties
     pub perimeter: i32,
+    #[serde(default)]
+    /// maps have a cap on the number of structures they can make;
+    /// this is number of slots this structure should count for
+    pub building_slots: u8,
     /// tile used for outer walls
     pub perimeter_tile: StructureTile,
     /// a special instruction for connecting to roads, other structures, etc
@@ -160,6 +164,7 @@ impl Default for StructureTemplate {
             min_height: 3,
             max_height: 3,
             perimeter: 1,
+            building_slots: 1,
             perimeter_tile: StructureTile::default(),
             connect_to: None,
             tiles: HashMap::new(),

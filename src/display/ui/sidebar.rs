@@ -99,13 +99,12 @@ pub fn draw_entity_info(
 use crate::resource::{get_tile_descriptions, Tile};
 /// draw tile in info box area of sidebar
 pub fn draw_tile_info(console: &dyn Console, tile: Tile) {
-    let t = &get_tile_descriptions()[tile.type_id as usize];
     draw_info(
         console,
         tile.icon,
         TColor::from(tile.fg),
         TColor::from(tile.bg),
-        t.short_desc,
-        t.long_desc,
+        &tile.description.short,
+        &tile.description.long,
     );
 }

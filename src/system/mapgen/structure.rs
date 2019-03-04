@@ -1,9 +1,6 @@
 use super::util::*;
-use crate::component::{Color, Position, Region};
-use crate::resource::{
-    tile_types::*, AreaMap, Assets, GeographyTemplate, StructureTemplate, StructureTile, Tile,
-    WorldState,
-};
+use crate::component::{Description, Position, Region};
+use crate::resource::{AreaMap, Assets, GeographyTemplate, StructureTemplate, Tile, WorldState};
 use crate::util::*;
 use rand::prelude::*;
 use tcod::noise::Noise;
@@ -33,7 +30,7 @@ pub fn build(
     world: &WorldState,
 ) {
     let offset = region.to_offset();
-    let mut count = 0;
+    let mut count: u8 = 0;
     let max_structures = 2;
     let mut tries = 0;
     let max_tries = 100;
@@ -42,13 +39,12 @@ pub fn build(
     let mut rng = world.region_rng(*region);
 
     while count < max_structures && tries < max_tries {
-        let mut x: i32 = 0;
-        let mut y: i32 = 0;
+        let mut top_left = Position::new(0, 0);
         while tries < max_tries {
-            x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
-            y = choose(&vert, rng.gen_range(0.0, 1.0)).unwrap_or(0);
-            if let Some(tile) = map.get(Position::new(x, y)) {
-                if tile.type_id != TYPE_GRASS {
+            top_left.x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
+            top_left.y = choose(&vert, rng.gen_range(0.0, 1.0)).unwrap_or(0);
+            if let Some(tile) = map.get(top_left) {
+                if tile.constructed {
                     tries += 1;
                 } else {
                     break;
@@ -63,203 +59,78 @@ pub fn build(
             break;
         }
 
-        let pos = [x, y];
-        let sample = rand_up(fbm_offset(noise, pos, offset, 0.1, 1));
+        let sample = rand_up(fbm_offset(noise, top_left.to_array(), offset, 0.1, 1));
 
-        if let Some(structure) = choose_structure(assets, noise, pos, offset, &map.geography) {
+        if let Some(structure) =
+            choose_structure(assets, noise, top_left.to_array(), offset, &map.geography)
+        {
             let width_range: Vec<i32> = (structure.min_width..=structure.max_width).collect();
 
             let height_range: Vec<i32> = (structure.min_height..=structure.max_height).collect();
-            let mut width: i32 = choose(&width_range, sample).unwrap_or(0);
-            let mut height: i32 = choose(&height_range, sample).unwrap_or(0);
+            let mut bottom_right = Position::new(
+                choose(&width_range, sample).unwrap_or(0),
+                choose(&height_range, sample).unwrap_or(0),
+            );
             // first check we can fit the structure in here
-            for sx in 0..width {
-                for sy in 0..height {
-                    let maybe_tile = map.get(Position::new(x + sx, y + sy));
-                    if maybe_tile.is_none() || maybe_tile.unwrap().type_id != TYPE_GRASS {
-                        // if on the first row, shrink the width
-                        if height == 0 {
-                            width = sx + 1
-                        }
-                        // else shrink the height
-                        else {
-                            height = sy + 1
-                        }
-                        break;
-                    }
-                }
-            }
+            let room = Rect::new(top_left.clone(), bottom_right.clone());
 
             // now place a structure of the size we've found
-            if width >= structure.min_width && height >= structure.min_height {
-                use wfc::{retry::NumTimes, wrap::WrapNone, RunOwn, Size};
-
-                println!("creating structure of size {}, {}", width, height);
-                let perimeter = structure.perimeter;
-                /*
-                let wx = x as u32;
-                let wy = y as u32;
-                */
-                let wp = perimeter as u32;
-                let table = structure.get_pattern_table();
-                let stats = wfc::GlobalStats::new(table);
-                let wfc_runner = RunOwn::new_wrap(
-                    Size::new(width as u32 - wp, height as u32 - wp),
-                    &stats,
-                    WrapNone,
-                    &mut rng,
-                );
-                let wave = wfc_runner
-                    .collapse_retrying(NumTimes(1000), &mut rng)
-                    .expect("failed to generate structure");
-                let grid = wave.grid();
-                let mapchar = structure.get_mapchar();
-                grid.enumerate().for_each(|(coord, wc)| {
-                    let tile = structure
-                        .get_tile(*mapchar.get(&wc.chosen_pattern_id().expect("")).unwrap());
-                    let pos = Position::new(coord.x + x, coord.y + y);
-                    let icon = assets.get_icon(&tile.icon).base_ch();
-                    map.set(
-                        pos,
-                        Tile::new(
-                            icon,
-                            tile.fg(),
-                            tile.bg(),
-                            tile.transparent,
-                            tile.walkable,
-                            TYPE_VEHICLE,
-                        ),
-                    );
-                });
-                build_rect(
-                    map,
-                    assets,
-                    &structure.perimeter_tile,
-                    Position::new(x, y),
-                    width,
-                    height,
-                );
-                count += 1;
+            if room.width() >= structure.min_width && room.height() >= structure.min_height {
+                populate_room(assets, map, &room, &structure, &mut rng);
+                count += structure.building_slots;
             }
         }
     }
 }
 
-fn build_horizontal_line(
-    map: &mut AreaMap,
-    pos: Position,
-    width: i32,
-    ch: char,
-    fg: Color,
-    bg: Color,
-    transparent: bool,
-    walkable: bool,
-) {
-    for x in pos.x..=pos.x + width {
-        let cpos = Position::new(x, pos.y);
-        map.set(
-            cpos,
-            Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
-        );
-    }
-}
-
-fn build_vertical_line(
-    map: &mut AreaMap,
-    pos: Position,
-    height: i32,
-    ch: char,
-    fg: Color,
-    bg: Color,
-    transparent: bool,
-    walkable: bool,
-) {
-    for y in pos.y..pos.y + height {
-        let cpos = Position::new(pos.x, y);
-        map.set(
-            cpos,
-            Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
-        );
-    }
-}
-
-fn build_rect(
-    map: &mut AreaMap,
+use rand_pcg::*;
+fn populate_room(
     assets: &Assets,
-    tile: &StructureTile,
-    pos: Position,
-    width: i32,
-    height: i32,
+    map: &mut AreaMap,
+    room: &Rect,
+    structure: &StructureTemplate,
+    rng: &mut Pcg32,
 ) {
-    let wall = assets.get_icon(&tile.icon);
-    let fg = Color::new(64, 64, 64);
-    let bg = Color::new(0, 0, 0);
-    let mut ch = wall.ch(false, false, true, true);
-    let transparent = false;
-    let walkable = true;
-    build_horizontal_line(
+    use wfc::{retry::NumTimes, wrap::WrapNone, RunOwn};
+
+    println!(
+        "creating structure of size {}, {}",
+        room.width(),
+        room.height()
+    );
+    let table = structure.get_pattern_table();
+    let stats = wfc::GlobalStats::new(table);
+    let wfc_runner = RunOwn::new_wrap(room.to_wave_size(), &stats, WrapNone, rng);
+    let wave = wfc_runner
+        .collapse_retrying(NumTimes(1000), rng)
+        .expect("failed to generate structure");
+    let grid = wave.grid();
+    let mapchar = structure.get_mapchar();
+    grid.enumerate().for_each(|(coord, wc)| {
+        let tile = structure.get_tile(*mapchar.get(&wc.chosen_pattern_id().expect("")).unwrap());
+        let pos = Position::from(coord) + room.t_l;
+        let icon = assets.get_icon(&tile.icon).base_ch();
+        map.set(
+            pos,
+            Tile::new(
+                icon,
+                tile.fg(),
+                tile.bg(),
+                tile.transparent,
+                tile.walkable,
+                true,
+                Description::default(),
+            ),
+        );
+    });
+    /*
+    build_rect(
         map,
-        Position::new(pos.x + 1, pos.y),
-        width - 4,
-        ch,
-        fg,
-        bg,
-        transparent,
-        walkable,
+        assets,
+        &structure.perimeter_tile,
+        Position::new(x, y),
+        width,
+        height,
     );
-    build_horizontal_line(
-        map,
-        Position::new(pos.x + 1, pos.y + height - 2),
-        width - 4,
-        ch,
-        fg,
-        bg,
-        transparent,
-        walkable,
-    );
-    ch = wall.ch(true, true, false, false);
-    build_vertical_line(
-        map,
-        Position::new(pos.x, pos.y + 1),
-        height - 3,
-        ch,
-        fg,
-        bg,
-        transparent,
-        walkable,
-    );
-    build_vertical_line(
-        map,
-        Position::new(pos.x + width - 2, pos.y + 1),
-        height - 3,
-        ch,
-        fg,
-        bg,
-        transparent,
-        walkable,
-    );
-    // top left
-    ch = wall.ch(false, true, false, true);
-    map.set(
-        pos,
-        Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
-    );
-    // top right
-    ch = wall.ch(false, true, true, false);
-    map.set(
-        Position::new(pos.x + width - 2, pos.y),
-        Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
-    );
-    // bottom left
-    ch = wall.ch(true, false, false, true);
-    map.set(
-        Position::new(pos.x, pos.y + height - 2),
-        Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
-    );
-    // bottom right
-    ch = wall.ch(true, false, true, false);
-    map.set(
-        Position::new(pos.x + width - 2, pos.y + height - 2),
-        Tile::new(ch, fg, bg, transparent, walkable, TYPE_VEHICLE),
-    );
+    */
 }
