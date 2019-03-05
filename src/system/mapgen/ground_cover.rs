@@ -1,6 +1,6 @@
 use super::util::*;
 use crate::component::{Color, Description, Position};
-use crate::resource::{AreaMap, Assets, GeographyTemplate, Tile};
+use crate::resource::{AreaMap, Assets, GeographyTemplate, GroundCover, Tile};
 use crate::util::colors::lerp;
 use crate::util::*;
 use tcod::noise::Noise;
@@ -58,22 +58,22 @@ fn select_fg(geography: &GeographyTemplate, noise_sample: f32) -> Color {
 }
 
 /// Selects the icon to display for the ground cover
-fn select_icon(geography: &GeographyTemplate, noise_sample: f32) -> String {
-    let mut icon_name = "?".to_string();
+fn select_ground_cover(geography: &GeographyTemplate, noise_sample: f32) -> GroundCover {
+    let mut selected_cover = GroundCover::default();
     let mut last_freq = 0.0;
     if let Some(ref cover_set) = geography.ground_cover {
         let mut cover_list = cover_set.iter();
         if let Some(cover) = cover_list.nth(0) {
-            icon_name = cover.icon.clone().name;
+            selected_cover = cover.clone();
             last_freq = cover.frequency;
         }
         for cover in cover_list {
             if noise_sample < last_freq {
-                return icon_name;
+                return selected_cover.clone();
             }
             let i = (noise_sample - last_freq) / (cover.frequency - last_freq);
             if i > 0.5 {
-                icon_name = cover.icon.clone().name;
+                selected_cover = cover.clone();
                 last_freq = cover.frequency;
             }
             if last_freq > noise_sample {
@@ -81,7 +81,7 @@ fn select_icon(geography: &GeographyTemplate, noise_sample: f32) -> String {
             }
         }
     }
-    return icon_name;
+    selected_cover
 }
 
 pub fn base(
@@ -96,9 +96,8 @@ pub fn base(
             let i = rand_up(fbm_offset(noise, [x, y], offset, noise_scale, 32));
             let bg = select_bg(&map.geography, i);
             let fg = select_fg(&map.geography, i);
-            let icon = templates
-                .get_icon(&select_icon(&map.geography, i))
-                .base_ch();
+            let selected_cover = select_ground_cover(&map.geography, i);
+            let icon = templates.get_icon(&selected_cover.icon.name).base_ch();
             map.set(
                 Position { x, y },
                 Tile::new(
@@ -108,7 +107,7 @@ pub fn base(
                     true,
                     true,
                     false,
-                    Description::new("grass", "Just some ordinary grass."),
+                    Description::new(&selected_cover.short, &selected_cover.long),
                 ),
             );
         }
@@ -139,12 +138,6 @@ pub fn scatter(
                         if let Some(tile) = map.get(pos) {
                             bg = tile.bg;
                         }
-                        let desc: Description;
-                        if let Some(tile_desc) = &scatter_obj.description {
-                            desc = tile_desc.clone();
-                        } else {
-                            desc = Description::new("grass", "Grass growing around some junk.");
-                        }
                         queue.insert(
                             Position { x, y },
                             Tile::new(
@@ -154,7 +147,7 @@ pub fn scatter(
                                 true,
                                 true,
                                 false,
-                                Description::new(&desc.short, &desc.long),
+                                Description::new(&scatter_obj.short, &scatter_obj.long),
                             ),
                         );
                     }

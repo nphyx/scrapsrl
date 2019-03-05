@@ -19,10 +19,12 @@
                         bg: (r: 32, g: 32, b: 32),
                 ),
                 icon: (name:"ground_concrete_1"),
+                short: "concrete",
+                long: "Tiled concrete slabs.",
             ),
     ]),
     scatter: Some([
-            (frequency: 0.021, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_2")),
-            (frequency: 0.023, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_3")),
+            (frequency: 0.021, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_2"), short: "concrete", long: "A concrete block."),
+            (frequency: 0.023, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_3"), short: "concrete", long: "An eroded concrete slab."),
     ])
 )

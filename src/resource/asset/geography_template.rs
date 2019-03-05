@@ -16,8 +16,26 @@ pub struct GroundCover {
     /// a string referring to an icon by file stem (icons/grass.ron = "grass" here)
     pub icon: IconRef,
     #[serde(default)]
-    /// a description to use for tiles of this type
-    pub description: Option<Description>,
+    /// a short description to use for tiles of this type
+    pub short: String,
+    #[serde(default)]
+    /// a long description to use for tiles of this type
+    pub long: String,
+}
+
+impl Default for GroundCover {
+    fn default() -> GroundCover {
+        GroundCover {
+            frequency: 1.0,
+            colors: Colors {
+                fg: Color::new(0, 0, 0),
+                bg: Color::new(0, 0, 0),
+            },
+            icon: IconRef::default(),
+            short: "perfectly generic ground".to_string(),
+            long: "Someone forgot to create a tile for this bit of ground.".to_string(),
+        }
+    }
 }
 
 /// stub

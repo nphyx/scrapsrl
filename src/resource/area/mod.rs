@@ -108,6 +108,20 @@ impl AreaMap {
             row_i += 1;
         }
 
+        for col in room.iter_columns() {
+            col_cells.push(Vec::new());
+            for pos in col.iter() {
+                let maybe_tile = self.get(*pos);
+                if maybe_tile.is_none() || maybe_tile.unwrap().constructed {
+                    col_cells[col_i].push(1);
+                } else {
+                    let prev = col_cells[col_i][col_cells.len()];
+                    col_cells[col_i].push(prev + 1);
+                }
+            }
+            col_i += 1;
+        }
+
         return false;
     }
 }

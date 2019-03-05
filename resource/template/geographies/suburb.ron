@@ -3,10 +3,5 @@
     structures: Some(["small_home"]),
     population_range: (0.3, 0.7),
     icon: Some((name: "map_terrain_suburb")),
-    scatter: Some([
-            (frequency: 0.023, colors: ( fg: (r: 65, g: 65, b: 55), bg: (r: 0, g: 0, b: 0),), icon:(name: "flora_mushroom_1")),
-            (frequency: 0.023, colors: ( fg: (r: 65, g: 55, b: 65), bg: (r: 0, g: 0, b: 0),), icon:(name: "flora_mushroom_2")),
-            (frequency: 0.1, colors: ( fg: (r: 15, g: 55, b: 15), bg: (r: 18, g: 12, b: 0),), icon:(name: "flora_tree_deciduous")),
-    ]),
     parent: Some("meadow")
 )

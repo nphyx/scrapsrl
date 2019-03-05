@@ -52,6 +52,15 @@ impl Rect {
             next_row: self.t_l.y,
         }
     }
+
+    /// iterates through the columns in a rectangle, yielding each column as a vector
+    /// of positions
+    pub fn iter_columns(&self) -> RectColIter {
+        RectColIter {
+            rect: self.clone(),
+            next_col: self.t_l.x,
+        }
+    }
 }
 
 use crate::resource::AreaMap;
@@ -159,6 +168,31 @@ impl Iterator for RectRowIter {
             })
             .collect();
         self.next_row += 1;
+        Some(res)
+    }
+}
+
+#[derive(Debug)]
+/// iterates through vertical slices of the rectangle as vecs of positions
+pub struct RectColIter {
+    rect: Rect,
+    next_col: i32,
+}
+
+impl Iterator for RectColIter {
+    type Item = Vec<Position>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.next_col > self.rect.b_r.x {
+            return None;
+        }
+        let res = (self.rect.t_l.y..=self.rect.b_r.y)
+            .map(|y| Position {
+                x: self.next_col,
+                y,
+            })
+            .collect();
+        self.next_col += 1;
         Some(res)
     }
 }

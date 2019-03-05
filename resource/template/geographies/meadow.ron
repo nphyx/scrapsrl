@@ -2,8 +2,8 @@
     tags: Some([Rural]),
     population_range: (0.0, 0.6),
     description: Some((
-            short: "a forest",
-            long: "Mostly trees."
+            short: "grassland",
+            long: "It's mostly grass."
     )),
     icon: Some((name: "map_terrain_meadow")),
     colors: Some((
@@ -18,6 +18,8 @@
                         bg: (r: 40, g: 34, b: 24),
                 ),
                 icon: (name: "tall_grass"),
+                short: "tall grass",
+                long: "This scraggly patch of grass grows up to a meter in height.",
             ),
             (
                 frequency: 0.8,
@@ -26,14 +28,16 @@
                         bg: (r: 45, g: 40, b: 27),
                 ),
                 icon: (name:"short_grass"),
+                short: "grass",
+                long: "Just some ordinary grass.",
             ),
     ]),
     scatter: Some([
-            (frequency: 0.00005, colors: ( fg: (r: 102, g: 104, b: 100), bg: (r: 0, g: 0, b: 0),), icon:(name: "boulder")),
-            (frequency: 0.1, colors: ( fg: (r: 118, g: 121, b: 72), bg: (r: 38, g: 36, b: 21),), icon:(name: "flora_herb")),
-            (frequency: 0.001, colors: ( fg: (r: 112, g: 108, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock")),
-            (frequency: 0.0015, colors: ( fg: (r: 112, g: 118, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_2")),
-            (frequency: 0.0004, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_3")),
-            (frequency: 0.0023, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile")),
+            (frequency: 0.00005, colors: ( fg: (r: 102, g: 104, b: 100), bg: (r: 0, g: 0, b: 0),), icon:(name: "boulder"), short: "boulder", long: "A big rock."),
+            (frequency: 0.1, colors: ( fg: (r: 118, g: 121, b: 72), bg: (r: 38, g: 36, b: 21),), icon:(name: "flora_herb"), short: "herb", long: "A leafy herb."),
+            (frequency: 0.001, colors: ( fg: (r: 112, g: 108, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock"), short: "rock", long: "A small rock."),
+            (frequency: 0.0015, colors: ( fg: (r: 112, g: 118, b: 104), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_2"), short: "rock", long: "A small rock."),
+            (frequency: 0.0004, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "small_rock_3"), short: "rock", long: "A small rock."),
+            (frequency: 0.0023, colors: ( fg: (r: 102, g: 108, b: 114), bg: (r: 0, g: 0, b: 0),), icon:(name: "rock_pile"), short: "rock pile", long: "A pile of rock."),
     ])
 )
