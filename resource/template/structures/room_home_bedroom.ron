@@ -1,0 +1,48 @@
+(
+    min_width:3,
+    max_width:5,
+    min_height:3,
+    max_height:5,
+    perimeter:0,
+    connect_to: [
+        (connection_type: Structure("room_hallway"), connection_method: Door),
+        (connection_type: Structure("room_home_common"), connection_method: Door),
+    ],
+    tiles: {
+        '1': ( // floor tiles
+            icon: "structure_floor_carpet",
+            short_desc: "tiled floor",
+            long_desc: "Linoleum tiles.",
+            fg: (16,16,16),
+            bg: (24,14,8),
+            weight: 1,
+            position: Floor,
+            allowed_neighbors: (['1'], ['1'], ['1'], ['1']),
+        ),
+        'l': ( // lamp east
+            icon: "fixture_lamp_east",
+            short_desc: "lamp",
+            long_desc: "This lamp sits upon an old end table.",
+            fg: (72,72,103),
+            bg: (24,14,8), 
+            transparent:true,
+            walkable:true,
+            position: Fixture,
+            weight: 2,
+            allowed_neighbors: (['1'], ['1'], ['1'], ['1']),
+        ),
+        'L': ( // lamp west 
+            icon: "fixture_lamp_west",
+            short_desc: "lamp",
+            long_desc: "This lamp sits upon an old end table.",
+            fg: (72,72,103),
+            bg: (24,14,8), 
+            transparent:true,
+            walkable:true,
+            position: Fixture,
+            weight: 2,
+            allowed_neighbors: (['1'], ['1'], ['1'], ['1']),
+        ),
+
+    }
+)

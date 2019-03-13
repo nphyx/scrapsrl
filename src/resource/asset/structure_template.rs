@@ -4,13 +4,17 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum StructureConnectionType {
-    Road,
-    Structure(StructureTemplate),
+    Road,              // place connection facing the nearest road, if on the structure perimeter
+    Structure(String), // place connection to an adjacent structure
+    Outside,           // place connection on the outer structure perimeter
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum StructureConnectionMethod {
-    Driveway,
+    Driveway, // draw a driveway (this is fixed functionality determined by geography, TODO)
+    Walkway,  // draw a walkway (this is fixed functionality determined by geography, TODO)
+    Door,     // place a door for this connection
+    Open,     // place an opening in the wall for this connection
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -162,6 +166,15 @@ use wfc::{PatternDescription, PatternTable};
 fn default_building_slots() -> u8 {
     1
 }
+
+fn default_empty_string_vec() -> Vec<String> {
+    return Vec::new();
+}
+
+fn default_empty_connection_vec() -> Vec<StructureConnection> {
+    return Vec::new();
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StructureTemplate {
     pub min_width: i32,
@@ -174,10 +187,15 @@ pub struct StructureTemplate {
     /// maps have a cap on the number of structures they can make;
     /// this is number of slots this structure should count for
     pub building_slots: u8,
+    #[serde(default = "StructureTile::default")]
     /// tile used for outer walls
     pub perimeter_tile: StructureTile,
+    #[serde(default = "default_empty_connection_vec")]
     /// a special instruction for connecting to roads, other structures, etc
-    pub connect_to: Option<Vec<StructureConnection>>,
+    pub connect_to: Vec<StructureConnection>,
+    #[serde(default = "default_empty_string_vec")]
+    /// nested structures that may be placed inside this structure
+    pub interior_structures: Vec<String>,
     /// this contains all the tiles and rules for the structure to pass to the wfc system
     /// 'char' is an arbitrary character for convenient use in the template
     pub tiles: HashMap<char, StructureTile>,
@@ -193,7 +211,8 @@ impl Default for StructureTemplate {
             perimeter: 1,
             building_slots: 1,
             perimeter_tile: StructureTile::default(),
-            connect_to: None,
+            connect_to: Vec::new(),
+            interior_structures: Vec::new(),
             tiles: HashMap::new(),
         }
     }
@@ -284,6 +303,7 @@ impl StructureTemplate {
                 tile.allowed_neighbors.3.insert(i);
             }
         }
+        /*
         let complete: Vec<(
             char,
             (HashSet<char>, HashSet<char>, HashSet<char>, HashSet<char>),
@@ -296,6 +316,7 @@ impl StructureTemplate {
             println!("CH --- NORTH -- EAST -- SOUTH -- WEST");
             println!("{:?}", item);
         }
+        */
     }
 
     /// builds a charmap of the structure's tiles

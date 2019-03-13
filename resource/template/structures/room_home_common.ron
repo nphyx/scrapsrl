@@ -1,19 +1,12 @@
 (
-    min_width:12,
-    max_width:18,
-    min_height:12,
-    max_height:18,
-    perimeter:1,
-    perimeter_tile: (
-        icon: "structure_wall_slat",
-        fg: (64,64,64), 
-        bg: (32,32,32),
-    ),
-    connect_to: [(connection_type: Road, connection_method: Driveway)],
-    interior_structures: [
-        "room_home_kitchen",
-        "room_home_common",
-        "room_home_bedroom",
+    min_width:3,
+    max_width:6,
+    min_height:3,
+    max_height:6,
+    perimeter:0,
+    connect_to: [
+        (connection_type: Structure("room_hallway"), connection_method: Door),
+        (connection_type: Outside, connection_method: Door),
     ],
     tiles: {
         '1': ( // floor tiles
@@ -96,5 +89,6 @@
             weight: 2,
             allowed_neighbors: ([], [], [], ['h']),
         ),
+
     }
 )
