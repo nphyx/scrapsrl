@@ -1,6 +1,6 @@
 use super::util::*;
-use crate::component::{Description, Position, Region};
-use crate::resource::{AreaMap, Assets, GeographyTemplate, StructureTemplate, Tile, WorldState};
+use crate::component::{Position, Region};
+use crate::resource::{AreaMap, Assets, GeographyTemplate, StructureTemplate, WorldState};
 use crate::util::*;
 use rand::prelude::*;
 use tcod::noise::Noise;
@@ -78,6 +78,9 @@ pub fn build(
             // first check we can fit the structure in here
             let mut room = map.fit_rect(rect);
 
+            if room.width() > structure.max_width || room.height() > structure.max_height {
+                println!("something went horribly wrong with building generation: rect: {:?}, room: {:?}", rect, room);
+            }
             // now place a structure of the size we've found
             if room.width() >= structure.min_width && room.height() >= structure.min_height {
                 count += structure.building_slots;

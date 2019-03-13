@@ -105,10 +105,10 @@ impl AreaMap {
     /// each column, then picks the overall largest
     pub fn fit_rect(&self, room: Rect) -> Rect {
         // this is our height histogram, we populate it from the map
-        let zero: u32 = 0;
+        let zero: i32 = 0;
         let mut cells = vec![vec![zero; self.width as usize]; self.height as usize];
-        let mut height: u32 = 0;
-        let mut max_area: u32 = 0;
+        let mut height: i32 = 0;
+        let mut max_area: i32 = 0;
         // build the heightmap
         for col in room.iter_columns() {
             for pos in col.iter() {
@@ -130,42 +130,48 @@ impl AreaMap {
             }
             height = 0;
         }
+        // dbg!(debug_fit_rect(&cells));
 
         // solve largest rectangle in histogram for each column
-        let mut stack: Vec<(usize, u32)> = Vec::new();
+        let mut stack: Vec<(i32, i32)> = Vec::new();
         // bottom-right corner
         let mut b_r: Position = Position::new(0, 0);
         let mut t_l: Position = Position::new(0, 0);
-        let mut check = |x: usize, y: usize, (stack_x, stack_height): (usize, u32)| {
-            let cur_width = (x - stack_x) as u32;
+        let mut check = |x: i32, y: i32, (stack_x, stack_height): (i32, i32)| {
+            let cur_width = x - stack_x;
             let temp_area = stack_height * cur_width;
             if temp_area > max_area {
+                // check fires at X+1, so decrement it
                 max_area = temp_area;
-                t_l = Position::new(stack_x as i32, y as i32 - (stack_height as i32 - 1));
-                b_r = Position::new(t_l.x + (cur_width as i32 - 1), y as i32);
+                t_l = Position::new(x - cur_width, y - (stack_height - 1));
+                b_r = Position::new(x - 1, y);
             }
         };
-        for (y, row) in cells.iter().enumerate() {
-            for (x, height) in row.iter().cloned().enumerate() {
-                let last: Option<(usize, u32)>;
+        for (row_i, row) in room.iter_rows().enumerate() {
+            for pos in row.iter() {
+                let x = pos.x;
+                let y = pos.y;
+                let height = *(cells.get(y as usize).unwrap().get(x as usize).unwrap());
+                let last: Option<(i32, i32)>;
                 {
                     last = stack.iter().cloned().last();
                 }
                 if stack.len() == 0 {
                     stack.push((x, height));
-                }
-                if let Some(entry) = last {
+                } else if let Some(entry) = last {
                     if height > entry.1 {
                         {
                             stack.push((x, height));
                         }
                     } else if height < entry.1 {
                         let mut consumed: usize = 0;
+                        let mut temp_x: i32 = 0;
                         for entry in stack.iter().cloned().rev() {
                             if height > entry.1 {
                                 break;
                             } else {
                                 check(x, y, entry);
+                                temp_x = entry.0;
                                 consumed += 1;
                             }
                         }
@@ -174,16 +180,20 @@ impl AreaMap {
                                 stack.pop();
                                 consumed -= 1;
                             }
-                            let len = stack.len();
-                            stack.push((len, height));
+                            stack.push((temp_x, height));
                         }
                     }
-                }
-            }
+                } // end if let Some(entry) = last
+            } // end pos in row.iter()
             for entry in stack.drain(0..).rev() {
-                check(row.len(), y, entry);
+                check(room.b_r.x + 1, room.t_l.y + row_i as i32, entry);
             }
         }
+        /*
+        for (y, row) in cells.iter().enumerate() {
+            for (x, height) in row.iter().cloned().enumerate() {
+        }
+        */
         Rect { t_l, b_r }
     }
 }
@@ -287,7 +297,7 @@ mod tests {
     use crate::component::{Color, Description, Position};
     #[test]
     fn fit_rect() {
-        let mut map = AreaMap::with_dimensions(5, 5);
+        let mut map = AreaMap::with_dimensions(8, 8);
         let occupied = Tile::new(
             '#',
             Color::default(),
@@ -297,34 +307,105 @@ mod tests {
             true,
             Description::default(),
         );
-        map.set(Position::new(0, 0), occupied.clone());
-        map.set(Position::new(3, 0), occupied.clone());
-        map.set(Position::new(0, 3), occupied.clone());
-        map.set(Position::new(3, 4), occupied.clone());
+        /* 0 1 2 3 4 5 6 7
+         0 . . # . . . . .
+         1 . . # . # . . .
+         2 . . # . . . . #
+         3 . # . . . . . .
+         4 . # . . # # # #
+         5 # # # # . . . .
+         6 . # . . . . . .
+         7 . # . . . . . #
+        */
+        map.set(Position::new(0, 5), occupied.clone());
+        map.set(Position::new(1, 3), occupied.clone());
+        map.set(Position::new(1, 4), occupied.clone());
+        map.set(Position::new(1, 5), occupied.clone());
+        map.set(Position::new(1, 6), occupied.clone());
+        map.set(Position::new(1, 7), occupied.clone());
+        map.set(Position::new(2, 0), occupied.clone());
+        map.set(Position::new(2, 1), occupied.clone());
+        map.set(Position::new(2, 2), occupied.clone());
+        map.set(Position::new(2, 5), occupied.clone());
+        map.set(Position::new(3, 5), occupied.clone());
+        map.set(Position::new(4, 1), occupied.clone());
         map.set(Position::new(4, 4), occupied.clone());
+        map.set(Position::new(5, 4), occupied.clone());
+        map.set(Position::new(6, 4), occupied.clone());
+        map.set(Position::new(7, 2), occupied.clone());
+        map.set(Position::new(7, 4), occupied.clone());
+        map.set(Position::new(7, 7), occupied.clone());
         {
-            let rect = Rect::new(Position::new(0, 0), Position::new(4, 4));
-            let expect_t_l = Position::new(1, 1);
-            let expect_b_r = Position::new(4, 3);
+            /* 1 2 3 4 5
+             0 . # . . .
+             1 . # . # .
+             2 . # . . .
+             3 # . . . .
+             4 # . # # #
+            */
+            let rect = Rect::new(Position::new(1, 0), Position::new(5, 4));
+            let expect_t_l = dbg!(Position::new(3, 2));
+            let expect_b_r = dbg!(Position::new(5, 3));
             let res = dbg!(map.fit_rect(rect));
             assert!(res.t_l == expect_t_l, "top left correct");
             assert!(res.b_r == expect_b_r, "bottom right correct");
         };
         {
-            let rect = Rect::new(Position::new(1, 1), Position::new(3, 3));
-            let expect_t_l = Position::new(1, 1);
-            let expect_b_r = Position::new(3, 3);
+            /* 0 1 2 3 4 5 6
+             4 . # . . # # #
+             5 # # # # . . .
+             6 . # . . . . .
+             7 . # . . . . .
+            */
+            let rect = Rect::new(Position::new(0, 4), Position::new(6, 7));
+            let expect_t_l = dbg!(Position::new(2, 6));
+            let expect_b_r = dbg!(Position::new(6, 7));
             let res = dbg!(map.fit_rect(rect));
             assert!(res.t_l == expect_t_l, "top left correct");
             assert!(res.b_r == expect_b_r, "bottom right correct");
         };
         {
-            let rect = Rect::new(Position::new(0, 0), Position::new(1, 3));
-            let expect_t_l = Position::new(0, 1);
-            let expect_b_r = Position::new(1, 2);
+            /* 3 4 5 6 7
+             0 . . . . .
+             1 . # . . .
+             2 . . . . #
+             3 . . . . .
+             4 . # # # #
+             5 # . . . .
+             6 . . . . .
+            */
+            let rect = Rect::new(Position::new(3, 0), Position::new(7, 6));
+            let expect_t_l = Position::new(5, 0);
+            let expect_b_r = Position::new(6, 3);
             let res = dbg!(map.fit_rect(rect));
             assert!(res.t_l == expect_t_l, "top left correct");
             assert!(res.b_r == expect_b_r, "bottom right correct");
         };
+    }
+}
+
+#[allow(unused)]
+fn debug_fit_rect(cells: &Vec<Vec<i32>>) {
+    println!(
+        "   {}",
+        (0..cells.len())
+            .enumerate()
+            .map(|(i, _)| format!("{: >2}", i))
+            .collect::<String>()
+    );
+    println!(
+        "  +{}",
+        (0..cells.len())
+            .map(|_| "--".to_string())
+            .collect::<String>()
+    );
+    for (x, row) in cells.iter().enumerate() {
+        println!(
+            "{: >2}|{}",
+            x,
+            row.iter()
+                .map(|i: &i32| format!("{: >2}", *i))
+                .collect::<String>()
+        );
     }
 }
