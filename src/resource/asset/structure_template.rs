@@ -1,6 +1,5 @@
 use crate::component::Description;
-use crate::resource::area::Tile;
-use crate::resource::Assets;
+use crate::resource::{Assets, Tile};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

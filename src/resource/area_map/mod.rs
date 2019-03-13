@@ -130,7 +130,6 @@ impl AreaMap {
             }
             height = 0;
         }
-        // println!("BUILT \n{:?}", cells);
 
         // solve largest rectangle in histogram for each column
         let mut stack: Vec<(usize, u32)> = Vec::new();
@@ -140,40 +139,24 @@ impl AreaMap {
         let mut check = |x: usize, y: usize, (stack_x, stack_height): (usize, u32)| {
             let cur_width = (x - stack_x) as u32;
             let temp_area = stack_height * cur_width;
-            /*
-            println!(
-                "CHECKING pos: x:{},y:{} - stack_x:{}, stack_height: {} - GOT {}",
-                x, y, stack_x, stack_height, temp_area
-            );
-            */
             if temp_area > max_area {
                 max_area = temp_area;
                 t_l = Position::new(stack_x as i32, y as i32 - (stack_height as i32 - 1));
                 b_r = Position::new(t_l.x + (cur_width as i32 - 1), y as i32);
-                /*
-                println!(
-                    "FOUND CANDIDATE: AREA:{}, TOP_LEFT: {:?}, BOTTOM_RIGHT: {:?}",
-                    max_area, t_l, b_r
-                );
-                */
             }
         };
         for (y, row) in cells.iter().enumerate() {
-            //println!("\nCHECKING ROW {}:{:?}\n", y, row);
             for (x, height) in row.iter().cloned().enumerate() {
                 let last: Option<(usize, u32)>;
                 {
                     last = stack.iter().cloned().last();
                 }
-                //println!("STACK BEFORE I{}: {:?}", x, stack);
                 if stack.len() == 0 {
-                    //println!("PUSHING {},{} - EMPTY", x, height);
                     stack.push((x, height));
                 }
                 if let Some(entry) = last {
                     if height > entry.1 {
                         {
-                            //println!("PUSHING {},{} - GREATER THAN", x, height);
                             stack.push((x, height));
                         }
                     } else if height < entry.1 {
@@ -184,23 +167,19 @@ impl AreaMap {
                             } else {
                                 check(x, y, entry);
                                 consumed += 1;
-                                //println!("CONSUMED {}", consumed);
                             }
                         }
                         if consumed > 0 {
                             while consumed > 0 {
-                                //println!("REMOVING {}", consumed);
                                 stack.pop();
                                 consumed -= 1;
                             }
                             let len = stack.len();
-                            //println!("PUSHING {}, {} - POST CONSUME", len, height);
                             stack.push((len, height));
                         }
                     }
                 }
             }
-            //println!("UNWINDING STACK {:?}", stack);
             for entry in stack.drain(0..).rev() {
                 check(row.len(), y, entry);
             }
@@ -306,7 +285,6 @@ impl AreaMaps {
 mod tests {
     use super::*;
     use crate::component::{Color, Description, Position};
-    use crate::resource::area::tile;
     #[test]
     fn fit_rect() {
         let mut map = AreaMap::with_dimensions(5, 5);
@@ -329,7 +307,6 @@ mod tests {
             let expect_t_l = Position::new(1, 1);
             let expect_b_r = Position::new(4, 3);
             let res = dbg!(map.fit_rect(rect));
-            println!("GOT {:?}", rect);
             assert!(res.t_l == expect_t_l, "top left correct");
             assert!(res.b_r == expect_b_r, "bottom right correct");
         };
