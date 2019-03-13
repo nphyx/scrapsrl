@@ -112,18 +112,6 @@ fn populate_room(
     grid.enumerate().for_each(|(coord, wc)| {
         let tile = structure.get_tile(*mapchar.get(&wc.chosen_pattern_id().expect("")).unwrap());
         let pos = Position::from(coord) + room.t_l;
-        let icon = assets.get_icon(&tile.icon).base_ch();
-        map.set(
-            pos,
-            Tile::new(
-                icon,
-                tile.fg(),
-                tile.bg(),
-                tile.transparent,
-                tile.walkable,
-                true,
-                Description::default(),
-            ),
-        );
+        map.set(pos, tile.to_tile(assets));
     });
 }

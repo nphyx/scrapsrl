@@ -51,6 +51,10 @@ fn default_weight() -> u32 {
     1
 }
 
+fn default_empty_string() -> String {
+    "".to_string()
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StructureTile {
     /// identify a tile by a single char, this is arbitrary
@@ -63,6 +67,10 @@ pub struct StructureTile {
     fg: (u8, u8, u8),
     #[serde(default)]
     bg: (u8, u8, u8),
+    #[serde(default = "default_empty_string")]
+    short_desc: String,
+    #[serde(default = "default_empty_string")]
+    long_desc: String,
     #[serde(default = "default_true")]
     pub transparent: bool,
     #[serde(default = "default_true")]
@@ -85,6 +93,8 @@ impl Default for StructureTile {
             transparent: true,
             walkable: true,
             position: StructureTilePosition::Any,
+            short_desc: "".to_string(),
+            long_desc: "".to_string(),
             weight: 1,
             allowed_neighbors: (
                 HashSet::new(),
@@ -142,7 +152,7 @@ impl StructureTile {
             transparent: self.transparent,
             walkable: self.walkable,
             constructed: true,
-            description: Description::default(),
+            description: Description::new(&self.short_desc, &self.long_desc),
         }
     }
 }

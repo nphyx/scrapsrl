@@ -13,8 +13,8 @@
     tiles: {
         '1': ( // floor tiles
             icon: "structure_floor_carpet",
-            name: "a tiled floor",
-            description: "Linoleum tiles.",
+            short_desc: "tiled floor",
+            long_desc: "Linoleum tiles.",
             fg: (16,16,16),
             bg: (24,14,8),
             weight: 1,
@@ -23,8 +23,8 @@
         ),
         'h': (
             icon: "fixture_chair",
-            name: "a chair",
-            description: "A chair. It's a little musty.",
+            short_desc: "chair",
+            long_desc: "A chair. It's a little musty.",
             fg: (72,72,103),
             bg: (24,14,8), 
             position: Fixture,
@@ -33,8 +33,8 @@
         ),
         'b': ( // bookshelf left
             icon: "fixture_bookshelf",
-            name: "a bookshelf",
-            description: "These old paper books are completely rotted out.",
+            short_desc: "bookshelf",
+            long_desc: "These old paper books are completely rotted out.",
             fg: (32,22,8),
             bg: (0,0,0), 
             transparent:false,
@@ -45,8 +45,8 @@
         ),
         'B': ( // bookshelf right
             icon: "fixture_bookshelf",
-            name: "a bookshelf",
-            description: "These old paper books are completely rotted out.",
+            short_desc: "bookshelf",
+            long_desc: "These old paper books are completely rotted out.",
             fg: (32,22,8),
             bg: (0,0,0), 
             transparent:false,
@@ -57,8 +57,8 @@
         ),
         's': ( // shelf east
             icon: "fixture_shelf_east",
-            name: "a bookshelf",
-            description: "These old paper books are completely rotted out.",
+            short_desc: "bookshelf",
+            long_desc: "These old paper books are completely rotted out.",
             fg: (32,22,8),
             bg: (0,0,0), 
             transparent:false,
@@ -69,8 +69,8 @@
         ),
         'l': ( // lamp east
             icon: "fixture_lamp_east",
-            name: "lamp",
-            description: "This lamp sits upon an old end table.",
+            short_desc: "lamp",
+            long_desc: "This lamp sits upon an old end table.",
             fg: (72,72,103),
             bg: (24,14,8), 
             transparent:true,
@@ -81,8 +81,8 @@
         ),
         'L': ( // lamp west 
             icon: "fixture_lamp_west",
-            name: "lamp",
-            description: "This lamp sits upon an old end table.",
+            short_desc: "lamp",
+            long_desc: "This lamp sits upon an old end table.",
             fg: (72,72,103),
             bg: (24,14,8), 
             transparent:true,
@@ -95,8 +95,8 @@
         // KITCHEN STUFF
         'v': ( // stove
             icon: "fixture_stove",
-            name: "stove",
-            description: "People used to cook food with this.",
+            short_desc: "stove",
+            long_desc: "People used to cook food with this.",
             fg: (72,72,103),
             bg: (24,14,8), 
             walkable:false,
@@ -106,8 +106,8 @@
         ),
         'i': ( // sink
             icon: "fixture_sink",
-            name: "sink",
-            description: "Water used to flow from this spigot, but now it's bone dry.",
+            short_desc: "sink",
+            long_desc: "Water used to flow from this spigot, but now it's bone dry.",
             fg: (72,72,103),
             bg: (24,14,8), 
             walkable:false,
@@ -117,8 +117,8 @@
         ),
         'D': ( // dishwasher 
             icon: "fixture_dishwasher",
-            name: "dishwasher",
-            description: "What luxury! Too bad it's busted.",
+            short_desc: "dishwasher",
+            long_desc: "What luxury! Too bad it's busted.",
             fg: (72,72,103),
             bg: (24,14,8), 
             walkable:false,
@@ -128,8 +128,8 @@
         ),
         'c': ( // kitchen counter
             icon: "fixture_counter_cabinet",
-            name: "kitchen counter",
-            description: "Ah the joy of preparing to cook.",
+            short_desc: "kitchen counter",
+            long_desc: "Ah the joy of preparing to cook.",
             fg: (72,72,103),
             bg: (24,14,8), 
             walkable:false,
