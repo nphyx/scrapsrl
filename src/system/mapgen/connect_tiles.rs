@@ -1,4 +1,4 @@
-use crate::component::{IconRef, Position};
+use crate::component::Position;
 use crate::resource::AreaMap;
 use crate::util::ConnectableChars;
 

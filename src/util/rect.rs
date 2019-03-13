@@ -1,5 +1,4 @@
 use crate::component::Position;
-use std::slice::Iter;
 use wfc::Size;
 
 #[derive(Copy, Clone, Debug)]
@@ -46,6 +45,7 @@ impl Rect {
         self.b_r.y -= 1;
     }
 
+    #[allow(unused)]
     pub fn is_corner(&self, pos: Position) -> bool {
         return pos == self.t_l
             || pos == self.b_r
@@ -302,7 +302,7 @@ mod tests {
         {
             let rect = Rect::new(Position::new(0, 0), Position::new(4, 4));
             let mut count: u8 = 0;
-            for pos in rect.iter() {
+            for _pos in rect.iter() {
                 count += 1;
             }
             assert_eq!(count, 25);
@@ -310,7 +310,7 @@ mod tests {
         {
             let rect = Rect::new(Position::new(0, 0), Position::new(2, 0));
             let mut count: u8 = 0;
-            for pos in rect.iter() {
+            for _pos in rect.iter() {
                 count += 1;
             }
             assert_eq!(count, 3);
@@ -318,7 +318,7 @@ mod tests {
         {
             let rect = Rect::new(Position::new(0, 0), Position::new(0, 4));
             let mut count: u8 = 0;
-            for pos in rect.iter() {
+            for _pos in rect.iter() {
                 count += 1;
             }
             assert_eq!(count, 5);

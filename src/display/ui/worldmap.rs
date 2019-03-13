@@ -99,7 +99,7 @@ pub fn draw_worldmap(
         y += 1;
     }
     console.set_alignment(TextAlignment::Center);
-    let mut mode_string: &str = match state.map_mode {
+    let mode_string: &str = match state.map_mode {
         MapMode::Hybrid => "[M]ode:hybrid",
         MapMode::Terrain => "[M]ode:terrain",
         MapMode::Street => "[M]ode:street",

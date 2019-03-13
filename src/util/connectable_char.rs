@@ -29,7 +29,7 @@ impl ConnectableChars {
     /// builds a map of base tiles and the tiles they can connect to
     /// TODO move the maps out to a config file and load them here
     pub fn new() -> ConnectableChars {
-        let mut map = ConnectMap::new();
+        let map = ConnectMap::new();
         /*
         map.insert(
             LINE,

@@ -88,7 +88,7 @@ impl<'a> System<'a> for RegionSystem {
         } // end entity region change loop
           // prune entities outside the currently loaded regions
         if player_changed_region {
-            for (region, icon, entity) in (&regions, &icons, &entities).join() {
+            for (region, _icon, entity) in (&regions, &icons, &entities).join() {
                 if !maps.has(*region) {
                     entities.delete(entity).expect("failed to delete entity");
                 }

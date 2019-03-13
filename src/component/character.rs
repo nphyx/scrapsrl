@@ -35,6 +35,8 @@ impl Component for Character {
     type Storage = VecStorage<Self>;
 }
 
+#[allow(unused)]
+/// a character sheet, with shared statistics that all characters should have
 impl Character {
     pub fn blank() -> Character {
         Character {
@@ -137,41 +139,59 @@ impl Character {
         )
     }
 
-    /* TODO use when these are needed
-    pub fn set_body(&mut self, val:u8) { self.body = val }
-    pub fn set_mind(&mut self, val:u8) { self.mind = val }
+    pub fn set_body(&mut self, val: u8) {
+        self.body = val
+    }
+    pub fn set_mind(&mut self, val: u8) {
+        self.mind = val
+    }
 
-    pub fn set_intellect(&mut self, val:u8) { self.intellect = val }
-    pub fn set_wits(&mut self, val:u8) { self.wits = val }
-    pub fn set_resolve(&mut self, val:u8) { self.resolve = val }
+    pub fn set_intellect(&mut self, val: u8) {
+        self.intellect = val
+    }
+    pub fn set_wits(&mut self, val: u8) {
+        self.wits = val
+    }
+    pub fn set_resolve(&mut self, val: u8) {
+        self.resolve = val
+    }
 
-    pub fn set_strength(&mut self, val:u8) { self.strength = val }
-    pub fn set_grace(&mut self, val:u8) { self.grace = val }
+    pub fn set_strength(&mut self, val: u8) {
+        self.strength = val
+    }
+    pub fn set_grace(&mut self, val: u8) {
+        self.grace = val
+    }
 
-    pub fn set_charisma(&mut self, val:u8) { self.charisma = val }
-    pub fn set_empathy(&mut self, val:u8) { self.empathy = val }
-    pub fn set_will(&mut self, val:u8) { self.will = val }
+    pub fn set_charisma(&mut self, val: u8) {
+        self.charisma = val
+    }
+    pub fn set_empathy(&mut self, val: u8) {
+        self.empathy = val
+    }
+    pub fn set_will(&mut self, val: u8) {
+        self.will = val
+    }
     pub fn spend_stamina(&mut self, amt: u8) -> bool {
-      if amt <= self.cur_stamina {
-        self.cur_stamina -= amt;
-        return true;
-      }
-      return false;
+        if amt <= self.cur_stamina {
+            self.cur_stamina -= amt;
+            return true;
+        }
+        return false;
     }
 
     pub fn spend_focus(&mut self, amt: u8) -> bool {
-      if amt >= self.cur_focus {
-        self.cur_focus -= amt;
-        return true;
-      }
-      return false;
+        if amt >= self.cur_focus {
+            self.cur_focus -= amt;
+            return true;
+        }
+        return false;
     }
     pub fn spend_grit(&mut self, amt: u8) -> bool {
-      if amt >= self.cur_grit {
-        self.cur_grit -= amt;
-        return true;
-      }
-      return false;
+        if amt >= self.cur_grit {
+            self.cur_grit -= amt;
+            return true;
+        }
+        return false;
     }
-    */
 }
