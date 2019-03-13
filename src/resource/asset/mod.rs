@@ -14,9 +14,6 @@ pub use structure_template::*;
 use specs::{Component, VecStorage};
 use std::collections::HashMap;
 
-use crate::component::Region;
-use crate::resource::WorldState;
-
 #[derive(Component)]
 #[storage(VecStorage)]
 pub struct Assets {
@@ -78,6 +75,7 @@ impl Assets {
         }
     }
 
+    #[allow(unused)]
     pub fn get_geography(&self, name: &str) -> GeographyTemplate {
         if let Some(template) = self.geographies.get(name) {
             template.clone()

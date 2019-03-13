@@ -31,12 +31,18 @@ pub fn build(
 ) {
     let offset = region.to_offset();
     let mut count: u8 = 0;
-    let max_structures = 2;
+    // roughly 1.5 slots per .1 pop
+    let max_structures: u8 = (world.get_pop(*region) * 15.0).floor() as u8;
     let mut tries = 0;
     let max_tries = 100;
-    let horiz: Vec<i32> = (0..map.width).collect();
-    let vert: Vec<i32> = (0..map.height).collect();
+    // these start at 1 to give room for a structure's perimeter tiles
+    let horiz: Vec<i32> = (1..map.width).collect();
+    let vert: Vec<i32> = (1..map.height).collect();
     let mut rng = world.region_rng(*region);
+    // map has no possible structures, let's bail
+    if map.geography.structure_len() == 0 {
+        return;
+    }
 
     while count < max_structures && tries < max_tries {
         let mut top_left = Position::new(0, 0);
@@ -52,10 +58,6 @@ pub fn build(
             }
         }
         if tries >= max_tries {
-            println!(
-                "failed to create a new structure (made {}/{}), skipping",
-                count, max_structures
-            );
             break;
         }
 
@@ -67,17 +69,24 @@ pub fn build(
             let width_range: Vec<i32> = (structure.min_width..=structure.max_width).collect();
 
             let height_range: Vec<i32> = (structure.min_height..=structure.max_height).collect();
-            let mut bottom_right = Position::new(
-                choose(&width_range, sample).unwrap_or(0),
-                choose(&height_range, sample).unwrap_or(0),
+            // these are -2 to give space for the structure perimeter
+            let bottom_right = Position::new(
+                (choose(&width_range, sample).unwrap_or(0) + top_left.x).min(map.width - 2),
+                (choose(&height_range, sample).unwrap_or(0) + top_left.y).min(map.height - 2),
             );
+            let rect = Rect::new(top_left.clone(), bottom_right.clone());
             // first check we can fit the structure in here
-            let room = Rect::new(top_left.clone(), bottom_right.clone());
+            let mut room = map.fit_rect(rect);
 
             // now place a structure of the size we've found
             if room.width() >= structure.min_width && room.height() >= structure.min_height {
-                populate_room(assets, map, &room, &structure, &mut rng);
                 count += structure.building_slots;
+                // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
+                for pos in room.iter_perimeter() {
+                    map.set(pos, structure.perimeter_tile.to_tile(assets));
+                }
+                room.shrink_perimeter(1);
+                populate_room(assets, map, &room, &structure, &mut rng);
             }
         }
     }
@@ -92,12 +101,6 @@ fn populate_room(
     rng: &mut Pcg32,
 ) {
     use wfc::{retry::NumTimes, wrap::WrapNone, RunOwn};
-
-    println!(
-        "creating structure of size {}, {}",
-        room.width(),
-        room.height()
-    );
     let table = structure.get_pattern_table();
     let stats = wfc::GlobalStats::new(table);
     let wfc_runner = RunOwn::new_wrap(room.to_wave_size(), &stats, WrapNone, rng);
@@ -123,14 +126,4 @@ fn populate_room(
             ),
         );
     });
-    /*
-    build_rect(
-        map,
-        assets,
-        &structure.perimeter_tile,
-        Position::new(x, y),
-        width,
-        height,
-    );
-    */
 }

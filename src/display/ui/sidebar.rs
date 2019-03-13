@@ -96,7 +96,7 @@ pub fn draw_entity_info(
     );
 }
 
-use crate::resource::{get_tile_descriptions, Tile};
+use crate::resource::Tile;
 /// draw tile in info box area of sidebar
 pub fn draw_tile_info(console: &dyn Console, tile: Tile) {
     draw_info(

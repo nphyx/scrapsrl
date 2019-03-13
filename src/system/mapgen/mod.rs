@@ -12,14 +12,11 @@ pub mod util;
 
 use connect_tiles::connect;
 
-pub struct MapGenerator {
-    width: i32,
-    height: i32,
-}
+pub struct MapGenerator {}
 
 impl MapGenerator {
-    pub fn new(width: i32, height: i32) -> MapGenerator {
-        MapGenerator { width, height }
+    pub fn new() -> MapGenerator {
+        MapGenerator {}
     }
 }
 
@@ -62,7 +59,6 @@ impl MapGenerator {
 
         // choose a geography variant
         let geography = world.get_geography_from_assets(assets, region);
-        println!("received {:?}", geography.tags);
         map.geography = geography.clone();
 
         // lay down a basic ground cover layer

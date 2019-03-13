@@ -2,8 +2,9 @@ use super::util::*;
 use crate::component::{Color, Description, Position};
 use crate::resource::{AreaMap, Tile};
 use crate::util::*;
-use tcod::noise::*;
 
+/*
+ * FIXME replace this with a better tree placer someday
 fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
     let pos = Position { x: cx, y: cy };
     let fg = Color { r: 14, g: 10, b: 3 };
@@ -17,16 +18,6 @@ fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
             b: 12,
         };
     }
-
-    /*
-    if size == 1 {
-        map.set(
-            Position { x: cx, y: cy },
-            Tile::new(TREE_STUMP, fg, bg, false, false, TYPE_TREE),
-        );
-        return;
-    }
-    */
     fill_rect(
         map,
         cx - (size / 2),
@@ -43,17 +34,8 @@ fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
             Description::new("a tree", "It's a tree."),
         ),
     );
-    /*
-
-    // even sized trees don't get middles
-    if size % 2 != 0 {
-        map.set(
-            Position { x: cx, y: cy },
-            Tile::new(TREE, fg, bg, false, false, TYPE_TREE),
-        );
-    }
-    */
 }
+*/
 
 fn check_tree_placement(tree_places: &[(i32, i32)], cx: i32, cy: i32, size: i32) -> bool {
     for x in cx - size - 1..=cx + size {
@@ -66,6 +48,7 @@ fn check_tree_placement(tree_places: &[(i32, i32)], cx: i32, cy: i32, size: i32)
     true
 }
 
+/*
 /// place large trees on the map, density is 0-1 with 1 being very dense
 pub fn place_trees(
     noise: &Noise,
@@ -92,3 +75,4 @@ pub fn place_trees(
         }
     }
 }
+*/

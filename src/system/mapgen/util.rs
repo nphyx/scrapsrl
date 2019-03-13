@@ -1,5 +1,5 @@
-use crate::component::{Position, Region};
-use crate::resource::{AreaMap, Tile, WorldState};
+use crate::component::Region;
+use crate::resource::{AreaMap, WorldState};
 use crate::util::{clamp, rand_up};
 use tcod::noise::Noise;
 
@@ -28,6 +28,8 @@ pub fn turb_offset(
     noise.get_turbulence(place(pos, offset, scale), octaves)
 }
 
+/*
+ * DEPRECATED replace with Rect::iter when needed
 pub fn fill_rect(
     map: &mut AreaMap,
     start_x: i32,
@@ -47,6 +49,7 @@ pub fn fill_rect(
         }
     }
 }
+*/
 
 /// determines the vertical offset of a horizontal road at a given x position
 pub fn road_center_longitudinal(

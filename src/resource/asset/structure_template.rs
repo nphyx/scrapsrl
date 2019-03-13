@@ -1,3 +1,6 @@
+use crate::component::Description;
+use crate::resource::area::Tile;
+use crate::resource::Assets;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -131,10 +134,25 @@ impl StructureTile {
             ]),
         }
     }
+
+    pub fn to_tile(&self, assets: &Assets) -> Tile {
+        Tile {
+            icon: assets.get_icon(&self.icon).base_ch(),
+            fg: self.fg(),
+            bg: self.bg(),
+            transparent: self.transparent,
+            walkable: self.walkable,
+            constructed: true,
+            description: Description::default(),
+        }
+    }
 }
 
 use std::collections::HashMap;
 use wfc::{PatternDescription, PatternTable};
+fn default_building_slots() -> u8 {
+    1
+}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StructureTemplate {
     pub min_width: i32,
@@ -143,7 +161,7 @@ pub struct StructureTemplate {
     pub max_height: i32,
     /// perimeter is *inside* the bounds, so account for it in min/max properties
     pub perimeter: i32,
-    #[serde(default)]
+    #[serde(default = "default_building_slots")]
     /// maps have a cap on the number of structures they can make;
     /// this is number of slots this structure should count for
     pub building_slots: u8,

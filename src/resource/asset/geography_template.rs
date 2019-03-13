@@ -145,4 +145,13 @@ impl GeographyTemplate {
         // and improperly duplicated
         self.parent = None;
     }
+
+    /// length of structure types list
+    pub fn structure_len(&self) -> usize {
+        if let Some(structures) = &self.structures {
+            structures.len()
+        } else {
+            0
+        }
+    }
 }

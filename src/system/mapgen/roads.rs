@@ -1,6 +1,6 @@
 use super::util::*;
 use crate::component::{Color, Description, Position, Region};
-use crate::resource::{tile_types::*, AreaMap, Assets, Tile, WorldState};
+use crate::resource::{AreaMap, Assets, Tile, WorldState};
 use crate::util::colors::lerp;
 use crate::util::*;
 use tcod::noise::Noise;

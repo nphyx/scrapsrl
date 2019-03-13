@@ -1,4 +1,5 @@
 use crate::component::Position;
+use std::slice::Iter;
 use wfc::Size;
 
 #[derive(Copy, Clone, Debug)]
@@ -22,10 +23,42 @@ impl Rect {
         self.b_r.y - self.t_l.y
     }
 
-    pub fn to_wave_size(&self) -> Size {
-        Size::new(self.width() as u32, self.height() as u32)
+    /// checks whether the given pos is within the bounds of the rectangle
+    pub fn includes(&self, pos: &Position) -> bool {
+        pos.x >= self.t_l.x && pos.y >= self.t_l.y && pos.x <= self.b_r.x && pos.y <= self.b_r.y
     }
 
+    #[allow(unused)]
+    /// expands the perimeter by <n> on each side
+    pub fn expand_perimeter(&mut self, n: u8) {
+        self.t_l.x -= 1;
+        self.t_l.y -= 1;
+        self.b_r.x += 1;
+        self.b_r.y += 1;
+    }
+
+    #[allow(unused)]
+    /// expands the perimeter by <n> on each side
+    pub fn shrink_perimeter(&mut self, n: u8) {
+        self.t_l.x += 1;
+        self.t_l.y += 1;
+        self.b_r.x -= 1;
+        self.b_r.y -= 1;
+    }
+
+    pub fn is_corner(&self, pos: Position) -> bool {
+        return pos == self.t_l
+            || pos == self.b_r
+            || (pos == Position::new(self.t_l.x, self.b_r.y))
+            || (pos == Position::new(self.b_r.x, self.t_l.y));
+    }
+
+    pub fn to_wave_size(&self) -> Size {
+        // wave size is exclusive of bottom/right bounds
+        Size::new(self.width() as u32 + 1, self.height() as u32 + 1)
+    }
+
+    #[allow(unused)]
     /// iterates row-wise through all positions in the rectangle
     pub fn iter(&self) -> RectIter {
         RectIter {
@@ -44,10 +77,11 @@ impl Rect {
         }
     }
 
+    #[allow(unused)]
     /// iterates through the rows in a rectangle, yielding each row as a vector
     /// of positions
-    pub fn iter_rows(&self) -> RectRowIter {
-        RectRowIter {
+    pub fn iter_rows(&self) -> RectRowsIter {
+        RectRowsIter {
             rect: self.clone(),
             next_row: self.t_l.y,
         }
@@ -55,10 +89,30 @@ impl Rect {
 
     /// iterates through the columns in a rectangle, yielding each column as a vector
     /// of positions
-    pub fn iter_columns(&self) -> RectColIter {
-        RectColIter {
+    pub fn iter_columns(&self) -> RectColsIter {
+        RectColsIter {
             rect: self.clone(),
             next_col: self.t_l.x,
+        }
+    }
+
+    #[allow(unused)]
+    /// iterates through a single row
+    pub fn iter_row(&self, y: i32) -> RectRowIter {
+        RectRowIter {
+            rect: self.clone(),
+            next_x: self.t_l.x,
+            y,
+        }
+    }
+
+    #[allow(unused)]
+    /// iterates through a single row
+    pub fn iter_column(&self, x: i32) -> RectColIter {
+        RectColIter {
+            rect: self.clone(),
+            next_y: self.t_l.y,
+            x,
         }
     }
 }
@@ -115,16 +169,12 @@ impl Iterator for RectIterPerimeter {
         }
         let res = self.next_pos.clone();
         if self.next_pos.y == self.rect.t_l.y && self.next_pos.x < self.rect.b_r.x {
-            println!("incrementing x");
             self.next_pos.x += 1;
         } else if self.next_pos.x == self.rect.b_r.x && self.next_pos.y < self.rect.b_r.y {
-            println!("incrementing y");
             self.next_pos.y += 1;
         } else if self.next_pos.x > self.rect.t_l.x && self.next_pos.y == self.rect.b_r.y {
-            println!("decrementing x");
             self.next_pos.x -= 1;
         } else if self.next_pos.y > self.rect.t_l.y {
-            println!("decrementing y");
             self.next_pos.y -= 1;
         }
         if self.next_pos == self.rect.t_l {
@@ -148,13 +198,14 @@ impl IntoIterator for Rect {
 }
 
 #[derive(Debug)]
+#[allow(unused)]
 /// iterates through horizontal slices of the rectangle as vecs of positions
-pub struct RectRowIter {
+pub struct RectRowsIter {
     rect: Rect,
     next_row: i32,
 }
 
-impl Iterator for RectRowIter {
+impl Iterator for RectRowsIter {
     type Item = Vec<Position>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -172,14 +223,33 @@ impl Iterator for RectRowIter {
     }
 }
 
+#[allow(unused)]
+pub struct RectRowIter {
+    rect: Rect,
+    y: i32,
+    next_x: i32,
+}
+
+impl Iterator for RectRowIter {
+    type Item = Position;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.next_x <= self.rect.b_r.x {
+            self.next_x += 1;
+            return Some(Position::new(self.next_x - 1, self.y));
+        }
+        return None;
+    }
+}
+
 #[derive(Debug)]
 /// iterates through vertical slices of the rectangle as vecs of positions
-pub struct RectColIter {
+pub struct RectColsIter {
     rect: Rect,
     next_col: i32,
 }
 
-impl Iterator for RectColIter {
+impl Iterator for RectColsIter {
     type Item = Vec<Position>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -194,6 +264,25 @@ impl Iterator for RectColIter {
             .collect();
         self.next_col += 1;
         Some(res)
+    }
+}
+
+#[allow(unused)]
+pub struct RectColIter {
+    rect: Rect,
+    x: i32,
+    next_y: i32,
+}
+
+impl Iterator for RectColIter {
+    type Item = Position;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.next_y <= self.rect.b_r.y {
+            self.next_y += 1;
+            return Some(Position::new(self.x, self.next_y - 1));
+        }
+        return None;
     }
 }
 
@@ -257,5 +346,42 @@ mod tests {
             assert_eq!(iter.next().unwrap(), Position { x: 1, y: 2 });
             assert_eq!(iter.next(), None);
         }
+    }
+
+    #[test]
+    fn rect_iter_column() {
+        let mut iter = Rect::new(Position::new(0, 0), Position::new(2, 2)).iter_column(1);
+        assert_eq!(iter.next().unwrap(), Position { x: 1, y: 0 });
+        assert_eq!(iter.next().unwrap(), Position { x: 1, y: 1 });
+        assert_eq!(iter.next().unwrap(), Position { x: 1, y: 2 });
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn rect_iter_row() {
+        let mut iter = Rect::new(Position::new(0, 0), Position::new(2, 2)).iter_row(1);
+        assert_eq!(iter.next().unwrap(), Position { x: 0, y: 1 });
+        assert_eq!(iter.next().unwrap(), Position { x: 1, y: 1 });
+        assert_eq!(iter.next().unwrap(), Position { x: 2, y: 1 });
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn rect_is_corner() {
+        type Pos = Position;
+        let tl = Pos::new(0, 0);
+        let tr = Pos::new(0, 4);
+        let bl = Pos::new(4, 0);
+        let br = Pos::new(4, 4);
+        let rect = Rect::new(tl, br);
+        assert!(rect.is_corner(tl));
+        assert!(rect.is_corner(tr));
+        assert!(rect.is_corner(bl));
+        assert!(rect.is_corner(br));
+        assert!(!rect.is_corner(Pos::new(0, 1)));
+        assert!(!rect.is_corner(Pos::new(0, 3)));
+        assert!(!rect.is_corner(Pos::new(1, 0)));
+        assert!(!rect.is_corner(Pos::new(3, 0)));
+        assert!(!rect.is_corner(Pos::new(2, 2)));
     }
 }

@@ -12,9 +12,11 @@ fn to_ucel(a: f32) -> u8 {
     (clamp(0.0, 1.0, a) * 255.0).floor() as u8
 }
 
+#[allow(unused)]
 pub fn screen_cel(a: u8, b: u8) -> u8 {
     to_ucel(1.0 - (1.0 - to_fcel(a)) * (1.0 - to_fcel(b)))
 }
+#[allow(unused)]
 pub fn screen(a: Color, b: Color) -> Color {
     Color::new(
         screen_cel(a.r, b.r),
@@ -34,6 +36,7 @@ pub fn multiply(a: Color, b: Color) -> Color {
     )
 }
 
+#[allow(unused)]
 pub fn overlay(a: Color, b: Color) -> Color {
     Color::new(
         if a.r > 127 {
@@ -110,12 +113,14 @@ pub fn lerp(a: Color, b: Color, i: f32) -> Color {
     )
 }
 
+#[allow(unused)]
 pub fn add_cel(a: u8, b: u8, i: f32) -> u8 {
     let af = to_fcel(a);
     let bf = to_fcel(b);
     to_ucel(af + i * bf)
 }
 
+#[allow(unused)]
 pub fn add(a: Color, b: Color, i: f32) -> Color {
     Color::new(
         add_cel(a.r, b.r, i),
@@ -124,6 +129,7 @@ pub fn add(a: Color, b: Color, i: f32) -> Color {
     )
 }
 
+#[allow(unused)]
 pub fn color_clamp(a: Color, b: Color, c: Color) -> Color {
     Color::new(
         clamp(a.r, b.r, c.r),
@@ -132,20 +138,24 @@ pub fn color_clamp(a: Color, b: Color, c: Color) -> Color {
     )
 }
 
+#[allow(unused)]
 pub fn min_cel(a: u8, b: u8) -> u8 {
     let af = to_fcel(a);
     let bf = to_fcel(b);
     to_ucel(af.min(bf))
 }
+#[allow(unused)]
 pub fn color_min(a: Color, b: Color) -> Color {
     Color::new(min_cel(a.r, b.r), min_cel(a.g, b.g), min_cel(a.b, b.b))
 }
 
+#[allow(unused)]
 pub fn max_cel(a: u8, b: u8) -> u8 {
     let af = to_fcel(a);
     let bf = to_fcel(b);
     to_ucel(af.max(bf))
 }
+#[allow(unused)]
 pub fn color_max(a: Color, b: Color) -> Color {
     Color::new(max_cel(a.r, b.r), max_cel(a.g, b.g), max_cel(a.b, b.b))
 }

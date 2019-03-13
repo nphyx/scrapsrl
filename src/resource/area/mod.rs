@@ -5,10 +5,8 @@ use crate::util::Rect;
 
 mod iterators;
 mod tile;
-pub use tile::Tile;
-pub mod tile_types;
 use iterators::AreaMapIter;
-pub use tile_types::{get_tile_descriptions, TileType};
+pub use tile::Tile;
 
 pub const WIDTH: usize = MAP_WIDTH as usize;
 pub const HEIGHT: usize = MAP_HEIGHT as usize;
@@ -37,6 +35,18 @@ impl Default for AreaMap {
 }
 
 impl AreaMap {
+    #[allow(unused)]
+    fn with_dimensions(width: i32, height: i32) -> AreaMap {
+        let tiles = vec![vec![Tile::default(); height as usize]; width as usize];
+        AreaMap {
+            tiles,
+            width,
+            height,
+            populated: false,
+            geography: GeographyTemplate::default(),
+        }
+    }
+
     pub fn wipe(&mut self) {
         let tile = Tile::default();
         for x in 0..WIDTH {
@@ -53,6 +63,7 @@ impl AreaMap {
         Some(self.tiles[pos.x as usize][pos.y as usize].clone())
     }
 
+    #[allow(unused)]
     pub fn get_mut(&mut self, pos: Position) -> Option<&mut Tile> {
         if 0 > pos.x || pos.x >= self.width || 0 > pos.y || pos.y >= self.height {
             return None;
@@ -88,41 +99,113 @@ impl AreaMap {
         }
     }
 
-    /// finds the largest rectangle within the given area that is unoccupied
-    pub fn fit_rect(&mut self, room: Rect) -> bool {
-        let mut row_cells: Vec<Vec<i32>> = Vec::new();
-        let mut col_cells: Vec<Vec<i32>> = Vec::new();
-        let mut row_i: usize = 0;
-        let mut col_i: usize = 0;
-        for row in room.iter_rows() {
-            row_cells.push(Vec::new());
-            for pos in row.iter() {
-                let maybe_tile = self.get(*pos);
-                if maybe_tile.is_none() || maybe_tile.unwrap().constructed {
-                    row_cells[row_i].push(1);
-                } else {
-                    let prev = row_cells[row_i][row_cells.len()];
-                    row_cells[row_i].push(prev + 1);
-                }
-            }
-            row_i += 1;
-        }
-
+    /// finds the largest rectangle that is unoccupied within the bounds provided
+    /// by <room>
+    /// uses a stack-based solution for determining the largest rectangle in
+    /// each column, then picks the overall largest
+    pub fn fit_rect(&self, room: Rect) -> Rect {
+        // this is our height histogram, we populate it from the map
+        let zero: u32 = 0;
+        let mut cells = vec![vec![zero; self.width as usize]; self.height as usize];
+        let mut height: u32 = 0;
+        let mut max_area: u32 = 0;
+        // build the heightmap
         for col in room.iter_columns() {
-            col_cells.push(Vec::new());
             for pos in col.iter() {
-                let maybe_tile = self.get(*pos);
-                if maybe_tile.is_none() || maybe_tile.unwrap().constructed {
-                    col_cells[col_i].push(1);
-                } else {
-                    let prev = col_cells[col_i][col_cells.len()];
-                    col_cells[col_i].push(prev + 1);
+                // don't bother populating areas outside bounds
+                // it would be cheaper memory-wise to only build the part
+                // we're examining, but it makes everything else more complicated
+                // TODO reexamine this and maybe make it more complicated
+                if room.includes(&pos) {
+                    let maybe_tile = self.get(*pos);
+                    if maybe_tile.is_none() || maybe_tile.unwrap().constructed {
+                        height = 0
+                    } else {
+                        height += 1
+                    }
+                    // we're iterating column-wise so we need to flip the axes for a
+                    // row-wise grid
+                    cells[pos.y as usize][pos.x as usize] = height;
                 }
             }
-            col_i += 1;
+            height = 0;
         }
+        // println!("BUILT \n{:?}", cells);
 
-        return false;
+        // solve largest rectangle in histogram for each column
+        let mut stack: Vec<(usize, u32)> = Vec::new();
+        // bottom-right corner
+        let mut b_r: Position = Position::new(0, 0);
+        let mut t_l: Position = Position::new(0, 0);
+        let mut check = |x: usize, y: usize, (stack_x, stack_height): (usize, u32)| {
+            let cur_width = (x - stack_x) as u32;
+            let temp_area = stack_height * cur_width;
+            /*
+            println!(
+                "CHECKING pos: x:{},y:{} - stack_x:{}, stack_height: {} - GOT {}",
+                x, y, stack_x, stack_height, temp_area
+            );
+            */
+            if temp_area > max_area {
+                max_area = temp_area;
+                t_l = Position::new(stack_x as i32, y as i32 - (stack_height as i32 - 1));
+                b_r = Position::new(t_l.x + (cur_width as i32 - 1), y as i32);
+                /*
+                println!(
+                    "FOUND CANDIDATE: AREA:{}, TOP_LEFT: {:?}, BOTTOM_RIGHT: {:?}",
+                    max_area, t_l, b_r
+                );
+                */
+            }
+        };
+        for (y, row) in cells.iter().enumerate() {
+            //println!("\nCHECKING ROW {}:{:?}\n", y, row);
+            for (x, height) in row.iter().cloned().enumerate() {
+                let last: Option<(usize, u32)>;
+                {
+                    last = stack.iter().cloned().last();
+                }
+                //println!("STACK BEFORE I{}: {:?}", x, stack);
+                if stack.len() == 0 {
+                    //println!("PUSHING {},{} - EMPTY", x, height);
+                    stack.push((x, height));
+                }
+                if let Some(entry) = last {
+                    if height > entry.1 {
+                        {
+                            //println!("PUSHING {},{} - GREATER THAN", x, height);
+                            stack.push((x, height));
+                        }
+                    } else if height < entry.1 {
+                        let mut consumed: usize = 0;
+                        for entry in stack.iter().cloned().rev() {
+                            if height > entry.1 {
+                                break;
+                            } else {
+                                check(x, y, entry);
+                                consumed += 1;
+                                //println!("CONSUMED {}", consumed);
+                            }
+                        }
+                        if consumed > 0 {
+                            while consumed > 0 {
+                                //println!("REMOVING {}", consumed);
+                                stack.pop();
+                                consumed -= 1;
+                            }
+                            let len = stack.len();
+                            //println!("PUSHING {}, {} - POST CONSUME", len, height);
+                            stack.push((len, height));
+                        }
+                    }
+                }
+            }
+            //println!("UNWINDING STACK {:?}", stack);
+            for entry in stack.drain(0..).rev() {
+                check(row.len(), y, entry);
+            }
+        }
+        Rect { t_l, b_r }
     }
 }
 
@@ -216,5 +299,55 @@ impl AreaMaps {
 
     pub fn iter_mut(&mut self) -> IterMut<'_, Region, AreaMap> {
         self.maps.iter_mut()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::component::{Color, Description, Position};
+    use crate::resource::area::tile;
+    #[test]
+    fn fit_rect() {
+        let mut map = AreaMap::with_dimensions(5, 5);
+        let occupied = Tile::new(
+            '#',
+            Color::default(),
+            Color::default(),
+            false,
+            false,
+            true,
+            Description::default(),
+        );
+        map.set(Position::new(0, 0), occupied.clone());
+        map.set(Position::new(3, 0), occupied.clone());
+        map.set(Position::new(0, 3), occupied.clone());
+        map.set(Position::new(3, 4), occupied.clone());
+        map.set(Position::new(4, 4), occupied.clone());
+        {
+            let rect = Rect::new(Position::new(0, 0), Position::new(4, 4));
+            let expect_t_l = Position::new(1, 1);
+            let expect_b_r = Position::new(4, 3);
+            let res = dbg!(map.fit_rect(rect));
+            println!("GOT {:?}", rect);
+            assert!(res.t_l == expect_t_l, "top left correct");
+            assert!(res.b_r == expect_b_r, "bottom right correct");
+        };
+        {
+            let rect = Rect::new(Position::new(1, 1), Position::new(3, 3));
+            let expect_t_l = Position::new(1, 1);
+            let expect_b_r = Position::new(3, 3);
+            let res = dbg!(map.fit_rect(rect));
+            assert!(res.t_l == expect_t_l, "top left correct");
+            assert!(res.b_r == expect_b_r, "bottom right correct");
+        };
+        {
+            let rect = Rect::new(Position::new(0, 0), Position::new(1, 3));
+            let expect_t_l = Position::new(0, 1);
+            let expect_b_r = Position::new(1, 2);
+            let res = dbg!(map.fit_rect(rect));
+            assert!(res.t_l == expect_t_l, "top left correct");
+            assert!(res.b_r == expect_b_r, "bottom right correct");
+        };
     }
 }

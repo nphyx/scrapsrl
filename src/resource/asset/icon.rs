@@ -1,11 +1,13 @@
 use serde::{Deserialize, Serialize};
 
+#[allow(unused)]
 pub enum DoorState {
     Closed,
     Open,
     Frame,
 }
 
+#[allow(unused)]
 pub enum DoorOrientation {
     Horizontal,
     Vertical,
@@ -143,6 +145,7 @@ impl Icon {
         self.base
     }
 
+    #[allow(unused)]
     /// for wall tiles, get a door by state and orientation
     pub fn door_ch(&self, state: DoorState, orientation: DoorOrientation) -> char {
         match orientation {
@@ -161,12 +164,14 @@ impl Icon {
         }
     }
 
+    #[allow(unused)]
     /// for wall tiles, get one of the windows
     pub fn window_ch(&self, sample: f32) -> char {
         use crate::util::choose;
         choose(&self.windows, sample).unwrap_or(self.base)
     }
 
+    #[allow(unused)]
     /// get a count of the number of windows
     pub fn window_len(&self) -> usize {
         self.windows.len()
