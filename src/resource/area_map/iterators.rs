@@ -1,4 +1,4 @@
-use super::{AreaMap, Tile, HEIGHT, WIDTH};
+use super::{AreaMap, Tile};
 use crate::component::Position;
 
 pub struct AreaMapIter<'a> {
@@ -10,22 +10,24 @@ impl<'a> Iterator for AreaMapIter<'a> {
     type Item = (Position, &'a Tile);
 
     fn next(&mut self) -> Option<(Position, &'a Tile)> {
-        let [x, y] = &mut self.cur;
-        if *x >= WIDTH {
-            *x = 0;
-            *y += 1;
+        let [mut x, mut y] = self.cur.clone();
+        let w = self.map.width as usize;
+        let h = self.map.height as usize;
+        if x >= w {
+            x = 0;
+            y += 1;
         }
-        if *y >= HEIGHT {
+        if y >= h {
             return None;
         }
         let r = (
             Position {
-                x: *x as i32,
-                y: *y as i32,
+                x: x as i32,
+                y: y as i32,
             },
-            &self.map.tiles[*x][*y],
+            self.map.tiles.get(x).unwrap().get(y).unwrap(),
         );
-        *x += 1;
+        self.cur = [x + 1, y];
         Some(r)
     }
 }

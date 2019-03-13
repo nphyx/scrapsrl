@@ -24,7 +24,7 @@ impl std::ops::AddAssign<Position> for Position {
 
 impl std::ops::Add<Position> for Position {
     type Output = Position;
-    fn add(self, coord: Position) -> Position {
+    fn add(self, coord: Position) -> Self::Output {
         Position {
             x: self.x + coord.x,
             y: self.y + coord.y,
@@ -34,10 +34,20 @@ impl std::ops::Add<Position> for Position {
 
 impl std::ops::Add<MovePlan> for Position {
     type Output = Position;
-    fn add(self, coord: MovePlan) -> Position {
+    fn add(self, coord: MovePlan) -> Self::Output {
         Position {
             x: self.x + coord.x,
             y: self.y + coord.y,
+        }
+    }
+}
+
+impl std::ops::Sub<Position> for Position {
+    type Output = Position;
+    fn sub(self, pos: Position) -> Self::Output {
+        Position {
+            x: self.x - pos.x,
+            y: self.y - pos.y,
         }
     }
 }

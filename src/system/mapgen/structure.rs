@@ -76,27 +76,32 @@ pub fn build(
             );
             let rect = Rect::new(top_left.clone(), bottom_right.clone());
             // first check we can fit the structure in here
-            let mut room = map.fit_rect(rect);
+            let mut available_area = map.fit_rect(rect);
 
-            if room.width() > structure.max_width || room.height() > structure.max_height {
-                println!("something went horribly wrong with building generation: rect: {:?}, room: {:?}", rect, room);
+            if available_area.width() > structure.max_width
+                || available_area.height() > structure.max_height
+            {
+                println!("something went horribly wrong with building generation: rect: {:?}, available_area: {:?}", rect, available_area);
             }
             // now place a structure of the size we've found
-            if room.width() >= structure.min_width && room.height() >= structure.min_height {
+            if available_area.width() >= structure.min_width
+                && available_area.height() >= structure.min_height
+            {
+                let submap = map.submap(&available_area);
                 count += structure.building_slots;
                 // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
-                for pos in room.iter_perimeter() {
+                for pos in available_area.iter_perimeter() {
                     map.set(pos, structure.perimeter_tile.to_tile(assets));
                 }
-                room.shrink_perimeter(1);
-                populate_room(assets, map, &room, &structure, &mut rng);
+                available_area.shrink_perimeter(1);
+                populate_structure(assets, map, &available_area, &structure, &mut rng);
             }
         }
     }
 }
 
 use rand_pcg::*;
-fn populate_room(
+fn populate_structure(
     assets: &Assets,
     map: &mut AreaMap,
     room: &Rect,

@@ -27,6 +27,10 @@ impl Rect {
         pos.x >= self.t_l.x && pos.y >= self.t_l.y && pos.x <= self.b_r.x && pos.y <= self.b_r.y
     }
 
+    pub fn contains(&self, rect: &Rect) -> bool {
+        return self.includes(&rect.t_l) && self.includes(&rect.b_r);
+    }
+
     #[allow(unused)]
     /// expands the perimeter by <n> on each side
     pub fn expand_perimeter(&mut self, n: u8) {
