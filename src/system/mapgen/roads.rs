@@ -123,7 +123,7 @@ pub fn place_horizontal_roads(
     let mut fg: Color;
     let mut ground_bg = Color::new(0, 0, 0);
 
-    for cx in 0..map.width {
+    for cx in 0..map.width() {
         let y = road_center_longitudinal(noise, world, map, region, cx);
         let y_min = y - (lanes * 2); // *2 because two tiles per lane
         let y_max = y + (lanes * 2);
@@ -223,7 +223,7 @@ pub fn place_vertical_roads(
     let mut segment_icon: char;
     let mut fg: Color;
 
-    for cy in 0..map.height {
+    for cy in 0..map.height() {
         let x = road_center_latitudinal(noise, world, map, region, cy);
         let x_min = x - (lanes * 2);
         let x_max = x + (lanes * 2);

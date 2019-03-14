@@ -11,8 +11,8 @@ impl<'a> Iterator for AreaMapIter<'a> {
 
     fn next(&mut self) -> Option<(Position, &'a Tile)> {
         let [mut x, mut y] = self.cur.clone();
-        let w = self.map.width as usize;
-        let h = self.map.height as usize;
+        let w = self.map.width() as usize;
+        let h = self.map.height() as usize;
         if x >= w {
             x = 0;
             y += 1;
@@ -20,13 +20,8 @@ impl<'a> Iterator for AreaMapIter<'a> {
         if y >= h {
             return None;
         }
-        let r = (
-            Position {
-                x: x as i32,
-                y: y as i32,
-            },
-            self.map.tiles.get(x).unwrap().get(y).unwrap(),
-        );
+        let pos = Position::new(x as i32, y as i32);
+        let r = (pos, self.map.get(pos).unwrap());
         self.cur = [x + 1, y];
         Some(r)
     }

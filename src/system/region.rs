@@ -53,21 +53,21 @@ impl<'a> System<'a> for RegionSystem {
                     x: plan.x + pos.x,
                     y: plan.y + pos.y,
                 };
-                if target.x >= map.width {
+                if target.x >= map.width() {
                     change_x = 1;
                     pos.x = 0;
                 }
                 if target.x < 0 {
                     change_x = -1;
-                    pos.x = map.width - 1;
+                    pos.x = map.width() - 1;
                 }
-                if target.y >= map.height {
+                if target.y >= map.height() {
                     change_y = 1;
                     pos.y = 0;
                 }
                 if target.y < 0 {
                     change_y = -1;
-                    pos.y = map.height - 1;
+                    pos.y = map.height() - 1;
                 }
                 if change_x != 0 || change_y != 0 {
                     if is_player {

@@ -8,11 +8,25 @@ use specs::{Component, VecStorage};
  * A positional coordinate.
  */
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Default, Component, Deserialize, Serialize)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Eq,
+    PartialEq,
+    Hash,
+    Default,
+    Component,
+    Deserialize,
+    Serialize,
+    Ord,
+    PartialOrd,
+)]
 #[storage(VecStorage)]
 pub struct Position {
-    pub x: i32,
+    // y, x reversed here for row-wise ordering
     pub y: i32,
+    pub x: i32,
 }
 
 impl std::ops::AddAssign<Position> for Position {

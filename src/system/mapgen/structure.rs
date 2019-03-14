@@ -22,13 +22,31 @@ fn choose_structure<'a>(
     None
 }
 
+fn choose_structure_dimensions(
+    sample: f32,
+    map: &AreaMap,
+    t_l: Position,
+    structure: &StructureTemplate,
+) -> Rect {
+    let width_range: Vec<i32> = (structure.min_width..=structure.max_width).collect();
+
+    let height_range: Vec<i32> = (structure.min_height..=structure.max_height).collect();
+    // these are -2 to give space for the structure perimeter
+    let b_r = Position::new(
+        (choose(&width_range, sample).unwrap_or(0) + t_l.x).min(map.width() - 2),
+        (choose(&height_range, sample).unwrap_or(0) + t_l.y).min(map.height() - 2),
+    );
+    // first check we can fit the structure in here
+    map.fit_rect(Rect::new(t_l, b_r))
+}
+
 pub fn build(
     assets: &Assets,
     noise: &Noise,
     map: &mut AreaMap,
     region: &Region,
     world: &WorldState,
-) {
+) -> Result<bool, &'static str> {
     let offset = region.to_offset();
     let mut count: u8 = 0;
     // roughly 1.5 slots per .1 pop
@@ -36,12 +54,12 @@ pub fn build(
     let mut tries = 0;
     let max_tries = 100;
     // these start at 1 to give room for a structure's perimeter tiles
-    let horiz: Vec<i32> = (1..map.width).collect();
-    let vert: Vec<i32> = (1..map.height).collect();
+    let horiz: Vec<i32> = (1..map.width()).collect();
+    let vert: Vec<i32> = (1..map.height()).collect();
     let mut rng = world.region_rng(*region);
     // map has no possible structures, let's bail
     if map.geography.structure_len() == 0 {
-        return;
+        return Err("no structures available for this geography");
     }
 
     while count < max_structures && tries < max_tries {
@@ -66,44 +84,32 @@ pub fn build(
         if let Some(structure) =
             choose_structure(assets, noise, top_left.to_array(), offset, &map.geography)
         {
-            let width_range: Vec<i32> = (structure.min_width..=structure.max_width).collect();
+            let bounds = choose_structure_dimensions(sample, map, top_left, &structure);
 
-            let height_range: Vec<i32> = (structure.min_height..=structure.max_height).collect();
-            // these are -2 to give space for the structure perimeter
-            let bottom_right = Position::new(
-                (choose(&width_range, sample).unwrap_or(0) + top_left.x).min(map.width - 2),
-                (choose(&height_range, sample).unwrap_or(0) + top_left.y).min(map.height - 2),
-            );
-            let rect = Rect::new(top_left.clone(), bottom_right.clone());
-            // first check we can fit the structure in here
-            let mut available_area = map.fit_rect(rect);
-
-            if available_area.width() > structure.max_width
-                || available_area.height() > structure.max_height
-            {
-                println!("something went horribly wrong with building generation: rect: {:?}, available_area: {:?}", rect, available_area);
-            }
             // now place a structure of the size we've found
-            if available_area.width() >= structure.min_width
-                && available_area.height() >= structure.min_height
-            {
-                let submap = map.submap(&available_area);
+            if structure.fits_in(bounds) {
+                let mut subgrid: Grid<Tile> = Grid::with_bounds(bounds); //map.subgrid(available_area)?;
+                let mut bounds = map.bounding_rect();
                 count += structure.building_slots;
                 // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
-                for pos in available_area.iter_perimeter() {
-                    map.set(pos, structure.perimeter_tile.to_tile(assets));
+                let wall = structure.perimeter_tile.to_tile(assets);
+                for pos in bounds.iter_perimeter() {
+                    subgrid.set(pos, wall.clone());
                 }
-                available_area.shrink_perimeter(1);
-                populate_structure(assets, map, &available_area, &structure, &mut rng);
+                bounds.shrink_perimeter(1);
+                populate_structure(assets, &mut subgrid, &bounds, &structure, &mut rng);
+                map.paste_into(Default::default(), subgrid)?;
             }
         }
     }
+    Ok(true)
 }
 
+use crate::resource::Tile;
 use rand_pcg::*;
 fn populate_structure(
     assets: &Assets,
-    map: &mut AreaMap,
+    map_grid: &mut Grid<Tile>,
     room: &Rect,
     structure: &StructureTemplate,
     rng: &mut Pcg32,
@@ -120,6 +126,6 @@ fn populate_structure(
     grid.enumerate().for_each(|(coord, wc)| {
         let tile = structure.get_tile(*mapchar.get(&wc.chosen_pattern_id().expect("")).unwrap());
         let pos = Position::from(coord) + room.t_l;
-        map.set(pos, tile.to_tile(assets));
+        map_grid.set(pos, tile.to_tile(assets))
     });
 }

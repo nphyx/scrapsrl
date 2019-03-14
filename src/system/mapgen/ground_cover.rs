@@ -91,8 +91,8 @@ pub fn base(
     noise_scale: f32,
     templates: &Assets,
 ) {
-    for x in 0..map.width {
-        for y in 0..map.height {
+    for x in 0..map.width() {
+        for y in 0..map.height() {
             let i = rand_up(fbm_offset(noise, [x, y], offset, noise_scale, 32));
             let bg = select_bg(&map.geography, i);
             let fg = select_fg(&map.geography, i);
@@ -125,36 +125,39 @@ pub fn scatter(
     if let Some(ref scatter_list) = map.geography.scatter {
         use std::collections::HashMap;
         let mut queue: HashMap<Position, Tile> = HashMap::new();
-        for x in 0..map.width {
-            for y in 0..map.height {
-                let mut scale = 0.0; // this gets twiddled every pass
-                for ref scatter_obj in scatter_list.iter() {
-                    scale = scale + (scatter_obj.frequency * noise_scale);
-                    let i = rand_up(fbm_offset(noise, [x, y], offset, scale + noise_scale, 8));
-                    if i < scatter_obj.frequency {
-                        let icon = templates.get_icon(&scatter_obj.icon.name).base_ch();
-                        let pos = Position { x, y };
-                        let mut bg = Color::default();
-                        if let Some(tile) = map.get(pos) {
-                            bg = tile.bg;
-                        }
-                        queue.insert(
-                            Position { x, y },
-                            Tile::new(
-                                icon,
-                                scatter_obj.colors.fg,
-                                bg,
-                                true,
-                                true,
-                                false,
-                                Description::new(&scatter_obj.short, &scatter_obj.long),
-                            ),
-                        );
+        for pos in map.bounds().iter() {
+            let mut scale = 0.0; // this gets twiddled every pass
+            for ref scatter_obj in scatter_list.iter() {
+                scale = scale + (scatter_obj.frequency * noise_scale);
+                let i = rand_up(fbm_offset(
+                    noise,
+                    pos.to_array(),
+                    offset,
+                    scale + noise_scale,
+                    8,
+                ));
+                if i < scatter_obj.frequency {
+                    let icon = templates.get_icon(&scatter_obj.icon.name).base_ch();
+                    let mut bg = Color::default();
+                    if let Some(tile) = map.get(pos) {
+                        bg = tile.bg;
                     }
+                    queue.insert(
+                        pos,
+                        Tile::new(
+                            icon,
+                            scatter_obj.colors.fg,
+                            bg,
+                            true,
+                            true,
+                            false,
+                            Description::new(&scatter_obj.short, &scatter_obj.long),
+                        ),
+                    );
                 }
             }
         }
-        for (pos, tile) in queue.drain() {
+        for (pos, tile) in queue.into_iter() {
             map.set(pos, tile);
         }
     }

@@ -60,8 +60,8 @@ pub fn check_connect(
 pub fn connect(map: &mut AreaMap) {
     let connectables = ConnectableChars::new();
     let mut queue: Vec<(i32, i32, char)> = Vec::new();
-    for x in 0..map.width {
-        for y in 0..map.height {
+    for x in 0..map.width() {
+        for y in 0..map.height() {
             if let Some(t) = map.get(Position { x, y }) {
                 if let Some(icon) = connectables.connect(
                     t.icon,

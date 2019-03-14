@@ -61,11 +61,11 @@ pub fn road_center_longitudinal(
 ) -> i32 {
     let lanes = world.get_road(*region).lanes_x as i32;
     let pop = world.get_pop(*region);
-    let hh = map.height / 2;
+    let hh = map.height() / 2;
     let base = (rand_up(fbm_offset(noise, [x, hh], region.to_offset(), 0.01, 1))
         * (1.0 - pop)
-        * map.height as f32) as i32;
-    clamp(0 + (lanes * 2), map.height - (lanes * 2), base)
+        * map.height() as f32) as i32;
+    clamp(0 + (lanes * 2), map.height() - (lanes * 2), base)
 }
 
 /// determines the vertical offset of a horizontal road at a given x position
@@ -78,9 +78,9 @@ pub fn road_center_latitudinal(
 ) -> i32 {
     let lanes = world.get_road(*region).lanes_y as i32;
     let pop = world.get_pop(*region);
-    let hw = map.width / 2;
+    let hw = map.width() / 2;
     let base = (rand_up(fbm_offset(noise, [hw, y], region.to_offset(), 0.01, 1))
         * (1.0 - pop)
-        * map.width as f32) as i32;
-    clamp(0 + lanes * 2, map.width - lanes * 2, base)
+        * map.width() as f32) as i32;
+    clamp(0 + lanes * 2, map.width() - lanes * 2, base)
 }

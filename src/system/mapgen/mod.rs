@@ -45,12 +45,13 @@ impl<'a> System<'a> for MapGenerator {
 impl MapGenerator {
     fn generate(&mut self, region: Region, map: &mut AreaMap, assets: &Assets, world: &WorldState) {
         let seed = world.seed();
-        // let map = AreaMap::default();
         println!(
             "Generating new map with dimensions {}x{}, seed {} for region {:?}",
-            map.width, map.height, seed, region
+            map.width(),
+            map.height(),
+            seed,
+            region
         );
-        map.wipe();
         let rng = Rng::new_with_seed(Algo::CMWC, world.seed());
         let noise = Noise::init_with_dimensions(2)
             .noise_type(NoiseType::Simplex)
@@ -75,7 +76,7 @@ impl MapGenerator {
             roads::place_vertical_roads(&assets, &noise, world, map, &region, 0.1, 0.8);
         }
 
-        structure::build(&assets, &noise, map, &region, world);
+        structure::build(&assets, &noise, map, &region, world).ok(); // always ok if this fails
 
         // connect connectable tiles
         connect(map);

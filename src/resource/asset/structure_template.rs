@@ -1,5 +1,6 @@
 use crate::component::Description;
 use crate::resource::{Assets, Tile};
+use crate::util::Rect;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -350,5 +351,9 @@ impl StructureTemplate {
         let tile = self.tiles.get(&label).unwrap_or(&default);
         // FIXME this sucks?
         tile.clone()
+    }
+
+    pub fn fits_in(&self, rect: Rect) -> bool {
+        rect.width() >= self.min_width && rect.height() >= self.min_height
     }
 }

@@ -2,13 +2,11 @@ use super::iterators::AreaMapIter;
 use super::{Tile, HEIGHT, WIDTH};
 use crate::component::Position;
 use crate::resource::GeographyTemplate;
-use crate::util::Rect;
+use crate::util::{Grid, Rect};
 
 #[derive(Clone)]
 pub struct AreaMap {
-    pub tiles: Vec<Vec<Tile>>,
-    pub width: i32,
-    pub height: i32,
+    grid: Grid<Tile>,
     /// mark true when mapgen is complete
     pub populated: bool,
     pub geography: GeographyTemplate,
@@ -16,11 +14,9 @@ pub struct AreaMap {
 
 impl Default for AreaMap {
     fn default() -> AreaMap {
-        let tiles = vec![vec![Tile::default(); HEIGHT]; WIDTH];
+        let grid = Grid::with_dimensions(WIDTH, HEIGHT);
         AreaMap {
-            tiles,
-            width: WIDTH as i32,
-            height: HEIGHT as i32,
+            grid,
             populated: false,
             geography: GeographyTemplate::default(),
         }
@@ -29,60 +25,52 @@ impl Default for AreaMap {
 
 impl AreaMap {
     #[allow(unused)]
-    fn with_dimensions(width: i32, height: i32) -> AreaMap {
-        let tiles = vec![vec![Tile::default(); height as usize]; width as usize];
+    fn with_dimensions(width: usize, height: usize) -> AreaMap {
+        let grid = Grid::with_dimensions(width as usize, height as usize);
         AreaMap {
-            tiles,
-            width,
-            height,
+            grid,
             populated: false,
             geography: GeographyTemplate::default(),
         }
     }
 
-    pub fn wipe(&mut self) {
-        let tile = Tile::default();
-        for x in 0..self.width as usize {
-            for y in 0..self.height as usize {
-                self.tiles[x][y] = tile.clone();
-            }
-        }
+    pub fn height(&self) -> i32 {
+        self.grid.height()
     }
 
-    pub fn get(&self, pos: Position) -> Option<Tile> {
-        if 0 > pos.x || pos.x >= self.width || 0 > pos.y || pos.y >= self.height {
-            return None;
-        }
-        Some(self.tiles[pos.x as usize][pos.y as usize].clone())
+    pub fn width(&self) -> i32 {
+        self.grid.width()
+    }
+
+    #[allow(unused)]
+    pub fn wipe(&mut self) {
+        self.grid.clear();
+        self.populated = false;
+    }
+
+    pub fn bounds(&self) -> Rect {
+        self.grid.bounds()
+    }
+
+    pub fn get(&self, pos: Position) -> Option<&Tile> {
+        self.grid.get(pos)
     }
 
     #[allow(unused)]
     pub fn get_mut(&mut self, pos: Position) -> Option<&mut Tile> {
-        if 0 > pos.x || pos.x >= self.width || 0 > pos.y || pos.y >= self.height {
-            return None;
-        }
-        Some(&mut self.tiles[pos.x as usize][pos.y as usize])
+        self.grid.get_mut(pos)
     }
 
     pub fn get_icon(&self, pos: Position) -> Option<char> {
-        if 0 > pos.x || pos.x >= self.width || 0 > pos.y || pos.y >= self.height {
-            return None;
-        }
-        Some(self.tiles[pos.x as usize][pos.y as usize].icon)
+        self.grid.get(pos).map(|t| t.icon)
     }
 
     pub fn set(&mut self, pos: Position, tile: Tile) {
-        if 0 > pos.x || pos.x >= self.width || 0 > pos.y || pos.y >= self.height {
-            return;
-        }
-        self.tiles[pos.x as usize][pos.y as usize] = tile;
+        self.grid.set(pos, tile)
     }
 
     pub fn set_icon(&mut self, pos: Position, icon: char) {
-        if 0 > pos.x || pos.x >= self.width || 0 > pos.y || pos.y >= self.height {
-            return;
-        }
-        self.tiles[pos.x as usize][pos.y as usize].icon = icon;
+        self.grid.get_mut(pos).unwrap().icon = icon;
     }
 
     pub fn iter(&self) -> AreaMapIter<'_> {
@@ -93,38 +81,17 @@ impl AreaMap {
     }
 
     pub fn bounding_rect(&self) -> Rect {
-        Rect {
-            t_l: Position::new(0, 0),
-            b_r: Position::new(self.width - 1, self.height - 1),
-        }
+        self.grid.bounds()
     }
 
-    /// makes a copy of a subset of the map within the requested rectangle
-    pub fn submap(&self, rect: &Rect) -> Result<AreaMap, &'static str> {
-        if self.bounding_rect().contains(rect) {
-            let mut submap = AreaMap::with_dimensions(rect.width() + 1, rect.height() + 1);
-            let t_l = rect.t_l.clone();
-            for pos in rect.iter() {
-                submap.set(pos - t_l, self.get(pos).unwrap().clone())
-            }
-            return Ok(submap);
-        }
-        return Err("rectangle out of map bounds");
+    pub fn subgrid(&self, rect: Rect) -> Result<Grid<Tile>, &'static str> {
+        self.grid.subgrid(rect)
     }
 
-    /// paste a submap into a map, starting at <t_l> top-left corner position
-    pub fn paste_at(&mut self, t_l: Position, submap: AreaMap) -> Result<bool, &'static str> {
-        let occupied_rect = &Rect::new(
-            t_l,
-            Position::new(t_l.x + submap.width - 1, t_l.y + submap.height - 1),
-        );
-        if self.bounding_rect().contains(occupied_rect) {
-            for (pos, tile) in submap.iter() {
-                self.set(pos + t_l, tile.clone());
-            }
-            return Ok(true);
-        }
-        return Err("pasted submap not contained in target map");
+    /// paste a subgrid into a map, starting at <t_l> top-left corner position
+    /// consumes the subgrid in the process
+    pub fn paste_into(&mut self, t_l: Position, subgrid: Grid<Tile>) -> Result<bool, &'static str> {
+        self.grid.paste_into(t_l, subgrid)
     }
 
     /// finds the largest rectangle that is unoccupied within the bounds provided
@@ -133,8 +100,8 @@ impl AreaMap {
     /// each column, then picks the overall largest
     pub fn fit_rect(&self, room: Rect) -> Rect {
         // this is our height histogram, we populate it from the map
-        let zero: i32 = 0;
-        let mut cells = vec![vec![zero; self.width as usize]; self.height as usize];
+        let mut cells: Grid<i32> =
+            Grid::with_dimensions(self.width() as usize, self.height() as usize);
         let mut height: i32 = 0;
         let mut max_area: i32 = 0;
         // build the heightmap
@@ -144,7 +111,7 @@ impl AreaMap {
                 // it would be cheaper memory-wise to only build the part
                 // we're examining, but it makes everything else more complicated
                 // TODO reexamine this and maybe make it more complicated
-                if room.includes(&pos) {
+                if room.includes(*pos) {
                     let maybe_tile = self.get(*pos);
                     if maybe_tile.is_none() || maybe_tile.unwrap().constructed {
                         height = 0
@@ -153,7 +120,7 @@ impl AreaMap {
                     }
                     // we're iterating column-wise so we need to flip the axes for a
                     // row-wise grid
-                    cells[pos.y as usize][pos.x as usize] = height;
+                    cells.set(*pos, height);
                 }
             }
             height = 0;
@@ -179,7 +146,7 @@ impl AreaMap {
             for pos in row.iter() {
                 let x = pos.x;
                 let y = pos.y;
-                let height = *(cells.get(y as usize).unwrap().get(x as usize).unwrap());
+                let height: i32 = *cells.get(*pos).unwrap_or(&0);
                 let last: Option<(i32, i32)>;
                 {
                     last = stack.iter().cloned().last();
@@ -217,12 +184,16 @@ impl AreaMap {
                 check(room.b_r.x + 1, room.t_l.y + row_i as i32, entry);
             }
         }
-        /*
-        for (y, row) in cells.iter().enumerate() {
-            for (x, height) in row.iter().cloned().enumerate() {
-        }
-        */
         Rect { t_l, b_r }
+    }
+}
+
+impl From<&AreaMap> for Rect {
+    fn from(map: &AreaMap) -> Rect {
+        Rect {
+            t_l: Position::new(0, 0),
+            b_r: Position::new(map.width(), map.height()),
+        }
     }
 }
 
@@ -345,7 +316,7 @@ mod tests {
     }
 
     #[test]
-    fn area_map_submap() {
+    fn area_map_subgrid() {
         let mut map = AreaMap::with_dimensions(8, 8);
         let occupied = Tile::new(
             '#',
@@ -387,22 +358,22 @@ mod tests {
         {
             let t_l = Position::new(0, 0);
             let b_r = Position::new(2, 2);
-            if let Ok(submap) = map.submap(&Rect { t_l, b_r }) {
-                assert_eq!(submap.get(Position::new(0, 0)).unwrap().icon, ' ');
-                assert_eq!(submap.get(Position::new(1, 1)).unwrap().icon, ' ');
-                assert_eq!(submap.get(Position::new(2, 0)).unwrap().icon, '#');
-                assert_eq!(submap.get(Position::new(2, 1)).unwrap().icon, '#');
-                assert_eq!(submap.get(Position::new(2, 2)).unwrap().icon, '#');
-                assert_eq!(submap.get(Position::new(0, 2)).unwrap().icon, ' ');
+            if let Ok(subgrid) = map.subgrid(Rect { t_l, b_r }) {
+                assert_eq!(subgrid.get(Position::new(0, 0)).unwrap().icon, ' ');
+                assert_eq!(subgrid.get(Position::new(1, 1)).unwrap().icon, ' ');
+                assert_eq!(subgrid.get(Position::new(2, 0)).unwrap().icon, '#');
+                assert_eq!(subgrid.get(Position::new(2, 1)).unwrap().icon, '#');
+                assert_eq!(subgrid.get(Position::new(2, 2)).unwrap().icon, '#');
+                assert_eq!(subgrid.get(Position::new(0, 2)).unwrap().icon, ' ');
             } else {
-                assert!(false, "submap creation failed with error");
+                assert!(false, "subgrid creation failed with error");
             }
         }
     }
     #[test]
-    fn area_map_paste_at() {
+    fn area_map_paste_into() {
         let mut map = AreaMap::with_dimensions(5, 5);
-        let mut submap = AreaMap::with_dimensions(3, 3);
+        let mut subgrid: Grid<Tile> = Grid::with_dimensions(3, 3);
         let occupied = Tile::new(
             '#',
             Color::default(),
@@ -417,13 +388,13 @@ mod tests {
          1 # . #
          2 . # .
         */
-        submap.set(Position::new(0, 0), occupied.clone());
-        submap.set(Position::new(0, 1), occupied.clone());
-        submap.set(Position::new(2, 1), occupied.clone());
-        submap.set(Position::new(1, 2), occupied.clone());
+        subgrid.set(Position::new(0, 0), occupied.clone());
+        subgrid.set(Position::new(0, 1), occupied.clone());
+        subgrid.set(Position::new(2, 1), occupied.clone());
+        subgrid.set(Position::new(1, 2), occupied.clone());
         {
             let t_l = Position::new(0, 0);
-            if let Ok(_) = map.paste_at(t_l, submap.clone()) {
+            if let Ok(_) = map.paste_into(t_l, subgrid.clone()) {
                 assert_eq!(map.get(Position::new(0, 0)).unwrap().icon, '#');
                 assert_eq!(map.get(Position::new(0, 1)).unwrap().icon, '#');
                 assert_eq!(map.get(Position::new(2, 1)).unwrap().icon, '#');
@@ -431,12 +402,12 @@ mod tests {
                 assert_eq!(map.get(Position::new(1, 1)).unwrap().icon, ' ');
                 map.wipe();
             } else {
-                assert!(false, "submap paste failed with error")
+                assert!(false, "subgrid paste failed with error")
             }
         }
         {
             let t_l = Position::new(2, 2);
-            if let Ok(_) = map.paste_at(t_l, submap.clone()) {
+            if let Ok(_) = map.paste_into(t_l, subgrid.clone()) {
                 assert_eq!(map.get(Position::new(2, 2)).unwrap().icon, '#');
                 assert_eq!(map.get(Position::new(2, 3)).unwrap().icon, '#');
                 assert_eq!(map.get(Position::new(4, 3)).unwrap().icon, '#');
@@ -444,7 +415,7 @@ mod tests {
                 assert_eq!(map.get(Position::new(3, 3)).unwrap().icon, ' ');
                 map.wipe();
             } else {
-                assert!(false, "submap paste failed with error")
+                assert!(false, "subgrid paste failed with error")
             }
         }
     }

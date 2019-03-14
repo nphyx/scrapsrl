@@ -47,4 +47,14 @@ impl Tile {
             description,
         }
     }
+
+    pub fn clone_from(&mut self, other: Tile) {
+        self.icon = other.icon;
+        self.fg = other.fg;
+        self.bg = other.bg;
+        self.transparent = other.transparent;
+        self.walkable = other.walkable;
+        self.constructed = other.constructed;
+        self.description = other.description.clone();
+    }
 }

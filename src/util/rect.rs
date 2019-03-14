@@ -15,20 +15,20 @@ impl Rect {
     }
 
     pub fn width(&self) -> i32 {
-        self.b_r.x - self.t_l.x
+        self.b_r.x - self.t_l.x + 1
     }
 
     pub fn height(&self) -> i32 {
-        self.b_r.y - self.t_l.y
+        self.b_r.y - self.t_l.y + 1
     }
 
     /// checks whether the given pos is within the bounds of the rectangle
-    pub fn includes(&self, pos: &Position) -> bool {
+    pub fn includes(&self, pos: Position) -> bool {
         pos.x >= self.t_l.x && pos.y >= self.t_l.y && pos.x <= self.b_r.x && pos.y <= self.b_r.y
     }
 
-    pub fn contains(&self, rect: &Rect) -> bool {
-        return self.includes(&rect.t_l) && self.includes(&rect.b_r);
+    pub fn contains(&self, rect: Rect) -> bool {
+        return self.includes(rect.t_l) && self.includes(rect.b_r);
     }
 
     #[allow(unused)]
@@ -122,14 +122,6 @@ impl Rect {
 }
 
 use crate::resource::AreaMap;
-impl From<&AreaMap> for Rect {
-    fn from(map: &AreaMap) -> Rect {
-        Rect {
-            t_l: Position::new(0, 0),
-            b_r: Position::new(map.width, map.height),
-        }
-    }
-}
 
 #[derive(Debug)]
 /// iterates inclusively through a rectangle's points

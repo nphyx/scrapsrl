@@ -1,5 +1,6 @@
-use crate::component::Region;
+use crate::component::{Position, Region};
 use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
+use crate::util::Rect;
 
 mod iterators;
 mod map;
@@ -23,20 +24,25 @@ impl AreaMaps {
     /// initialize new maps for a given <center> and <radius> radius
     /// Note that radius extends from the edge of the center, so a "size 2" map is 5x5
     pub fn init(&mut self, center: Region, size: u8) {
+        println!("SELECTED MAP DIMENSIONS: ({},{})", WIDTH, HEIGHT);
         let s = i32::from(size); // size is only u8 to enforce an unsigned parameter
         let mut count: i32 = 0;
+        let surrounding_maps = Rect {
+            t_l: Position::new(center.x - s, center.y - s),
+            b_r: Position::new(center.y + s, center.y + s),
+        };
+        /*
         let min_x = center.x - s;
         let max_x = center.x + s + 1;
         let min_y = center.y - s;
         let max_y = center.y + s + 1;
-        for x in min_x..max_x {
-            for y in min_y..max_y {
-                let region = Region::new(x, y);
-                self.maps.entry(region).or_insert_with(|| {
-                    count += 1;
-                    AreaMap::default()
-                });
-            }
+        */
+        for pos in surrounding_maps.iter() {
+            let region = Region::new(pos.x, pos.y);
+            self.maps.entry(region).or_insert_with(|| {
+                count += 1;
+                AreaMap::default()
+            });
         }
         if count > 0 {
             println!(
