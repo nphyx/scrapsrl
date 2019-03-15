@@ -8,7 +8,7 @@ mod display;
 mod resource;
 mod system;
 mod util;
-use self::component::Position;
+use self::component::Pos;
 use self::component::*;
 use self::constants::{MAP_HEIGHT, MAP_WIDTH};
 use self::display::Display;
@@ -41,7 +41,7 @@ fn main() {
     game.create_entity()
         .with(Player)
         .with(Solid)
-        .with(Position {
+        .with(Pos {
             x: MAP_WIDTH / 2,
             y: MAP_HEIGHT / 2,
         })

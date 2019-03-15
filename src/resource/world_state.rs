@@ -122,7 +122,6 @@ pub struct WorldState {
 
 impl Default for WorldState {
     fn default() -> WorldState {
-        assert!(WORLD_SIZE % 2 == 0, "world size must be a multiple of 2!");
         let mut rng = rand::thread_rng();
         WorldState {
             seed: rng.gen_range(0, std::u32::MAX),
@@ -142,7 +141,7 @@ impl Default for WorldState {
 impl WorldState {
     /// needs a getter because changing this causes the world to change ready state
     pub fn seed(&self) -> u32 {
-        self.seed.clone()
+        self.seed
     }
 
     /// needs a setter because changing this causes the world to change ready state

@@ -16,6 +16,7 @@ rand = "*"
 ron = "*"
 rand_pcg = "*"
 direction = "0.17.7"
+num = "0.2"
 
 [features]
 nightly = ["shred/nightly"]

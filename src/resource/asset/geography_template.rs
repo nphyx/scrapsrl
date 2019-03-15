@@ -109,18 +109,18 @@ impl GeographyTemplate {
             }
         }
         if let Some(ref parent_description) = parent.description {
-            if let None = self.description {
+            if self.description.is_none() {
                 self.description = Some(parent_description.clone());
             }
         }
         if let Some(ref parent_icon) = parent.icon {
-            if let None = self.icon {
+            if self.icon.is_none() {
                 self.icon = Some(parent_icon.clone());
             }
         }
         if let Some(ref parent_colors) = parent.colors {
-            if let None = self.colors {
-                self.colors = Some(parent_colors.clone());
+            if self.colors.is_none() {
+                self.colors = Some(*parent_colors);
             }
         }
         if let Some(ref parent_ground_cover) = parent.ground_cover {

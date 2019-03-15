@@ -6,7 +6,7 @@ pub struct CollisionSystem;
 impl<'a> System<'a> for CollisionSystem {
     type SystemData = (
         ReadStorage<'a, Region>,
-        ReadStorage<'a, Position>,
+        ReadStorage<'a, Pos>,
         ReadStorage<'a, Solid>,
         Write<'a, CollisionMaps>,
     );

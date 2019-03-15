@@ -10,7 +10,7 @@ impl<'a> System<'a> for BumpInteract {
         ReadStorage<'a, MovePlan>,
         ReadStorage<'a, Solid>,
         ReadStorage<'a, NotificationInteraction>,
-        WriteStorage<'a, Position>,
+        WriteStorage<'a, Pos>,
         Write<'a, InteractionTarget>,
     );
 
@@ -19,7 +19,7 @@ impl<'a> System<'a> for BumpInteract {
         (players, plans, solids, interactions, mut positions, mut target): Self::SystemData,
     ) {
         // look up player position & plan
-        let mut p_pos: Position = Position::default();
+        let mut p_pos: Pos = Pos::default();
         let mut p_plan: MovePlan = MovePlan::default();
         for (plan, pos, _player) in (&plans, &positions, &players).join() {
             if plan.x == 0 && plan.y == 0 {

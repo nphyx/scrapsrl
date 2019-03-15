@@ -8,7 +8,7 @@ pub struct AI;
 impl<'a> System<'a> for AI {
     type SystemData = (
         WriteStorage<'a, AIBrain>,
-        ReadStorage<'a, Position>,
+        ReadStorage<'a, Pos>,
         WriteStorage<'a, MovePlan>,
         Read<'a, AreaMap>,
         Read<'a, GameState>,
@@ -25,15 +25,15 @@ impl<'a> System<'a> for AI {
                     let mut tries: i8 = 0;
                     let mut done: bool = false;
                     while tries < 10 && !done {
-                        let to = Position {
+                        let to = MovePlan {
                             x: rng.gen_range(-1, 2),
                             y: rng.gen_range(-1, 2),
                         };
-                        let target = Position {
-                            x: pos.x + to.x,
-                            y: pos.y + to.y,
+                        let target = MovePlan {
+                            x: pos.x as i32 + to.x,
+                            y: pos.y as i32 + to.y,
                         };
-                        if let Some(tile) = map.get(target) {
+                        if let Some(tile) = map.get(Pos::from(target)) {
                             if tile.walkable {
                                 plan.x = to.x;
                                 plan.y = to.y;

@@ -1,4 +1,4 @@
-use crate::component::{Cursor, Direction, MovePlan, Orientation, Player, Position, Region};
+use crate::component::{Cursor, Direction, MovePlan, Orientation, Player, Pos, Region};
 use crate::resource::{GameState, UserInput};
 use specs::{Entities, Join, Read, ReadStorage, System, Write, WriteStorage};
 use tcod::input::Key;
@@ -12,7 +12,7 @@ impl<'a> System<'a> for PlayerInput {
     type SystemData = (
         WriteStorage<'a, Cursor>,
         WriteStorage<'a, Orientation>,
-        WriteStorage<'a, Position>,
+        WriteStorage<'a, Pos>,
         WriteStorage<'a, MovePlan>,
         ReadStorage<'a, Player>,
         WriteStorage<'a, Region>,
@@ -35,7 +35,7 @@ impl<'a> System<'a> for PlayerInput {
             entities,
         ): Self::SystemData,
     ) {
-        let mut player_pos: Position = Position::default();
+        let mut player_pos: Pos = Pos::default();
         let mut player_region: Region = Region::default();
         if state.paused {
             return;
@@ -69,7 +69,7 @@ impl<'a> System<'a> for PlayerInput {
                     )
                     .with(MovePlan::default(), &mut plans)
                     .with(
-                        Position {
+                        Pos {
                             x: player_pos.x,
                             y: player_pos.y,
                         },

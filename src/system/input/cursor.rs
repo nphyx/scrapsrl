@@ -1,4 +1,4 @@
-use crate::component::{Cursor, MovePlan, Position};
+use crate::component::{Cursor, MovePlan, Pos};
 use crate::resource::{GameState, InteractionTarget, UserInput};
 use specs::{Entities, Join, ReadStorage, System, Write, WriteStorage};
 use tcod::input::Key;
@@ -10,7 +10,7 @@ use super::movement_util::get_movement;
 pub struct CursorInput;
 impl<'a> System<'a> for CursorInput {
     type SystemData = (
-        ReadStorage<'a, Position>,
+        ReadStorage<'a, Pos>,
         WriteStorage<'a, MovePlan>,
         WriteStorage<'a, Cursor>,
         Write<'a, UserInput>,

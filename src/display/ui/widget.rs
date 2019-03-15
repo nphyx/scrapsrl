@@ -53,8 +53,8 @@ pub fn draw_centered_dialog(console: &dyn Console, dialog: &Arc<Mutex<dyn Widget
     let lock = dialog.lock().unwrap();
     draw_dialog(
         console,
-        cx,
-        cy,
+        cx as i32,
+        cy as i32,
         lock.get_title(),
         lock.get_body(),
         lock.get_footer(),

@@ -1,4 +1,4 @@
-use crate::component::Position;
+use crate::component::Pos;
 use specs::{Component, Entity, VecStorage};
 
 pub enum InteractionMethod {
@@ -12,7 +12,7 @@ pub enum InteractionMethod {
 pub struct InteractionTarget {
     /// chosen interaction method
     pub method: InteractionMethod,
-    pub pos: Option<Position>,
+    pub pos: Option<Pos>,
     pub entity: Option<Entity>,
 }
 

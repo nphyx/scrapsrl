@@ -1,4 +1,4 @@
-use crate::component::{Position, Region};
+use crate::component::{Pos, Region};
 use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
 use std::collections::HashMap;
 
@@ -16,7 +16,7 @@ impl CollisionMap {
         }
     }
 
-    pub fn get(&self, position: Position) -> bool {
+    pub fn get(&self, position: Pos) -> bool {
         self.map[position.x as usize][position.y as usize]
     }
 }
@@ -40,7 +40,7 @@ impl CollisionMaps {
       CollisionMaps{maps: HashMap::new()}
     }
     */
-    pub fn get(&self, region: Region, position: Position) -> bool {
+    pub fn get(&self, region: Region, position: Pos) -> bool {
         match self.maps.get(&region) {
             Some(region) => region.get(position),
             None => {
@@ -52,7 +52,7 @@ impl CollisionMaps {
             }
         }
     }
-    pub fn set(&mut self, region: Region, position: Position, v: bool) {
+    pub fn set(&mut self, region: Region, position: Pos, v: bool) {
         match self.maps.get_mut(&region) {
             Some(mut region) => region.map[position.x as usize][position.y as usize] = v,
             None => {

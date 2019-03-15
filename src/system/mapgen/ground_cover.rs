@@ -1,5 +1,5 @@
 use super::util::*;
-use crate::component::{Color, Description, Position};
+use crate::component::{Color, Description, Pos};
 use crate::resource::{AreaMap, Assets, GeographyTemplate, GroundCover, Tile};
 use crate::util::colors::lerp;
 use crate::util::*;
@@ -33,7 +33,7 @@ fn select_bg(geography: &GeographyTemplate, noise_sample: f32) -> Color {
     if noise_sample > last_freq {
         return last_color;
     }
-    return color;
+    color
 }
 
 /// Selects a foreground color for the cover tile (does not blend, unlike fg)
@@ -54,7 +54,7 @@ fn select_fg(geography: &GeographyTemplate, noise_sample: f32) -> Color {
             }
         }
     }
-    return color;
+    color
 }
 
 /// Selects the icon to display for the ground cover
@@ -91,26 +91,24 @@ pub fn base(
     noise_scale: f32,
     templates: &Assets,
 ) {
-    for x in 0..map.width() {
-        for y in 0..map.height() {
-            let i = rand_up(fbm_offset(noise, [x, y], offset, noise_scale, 32));
-            let bg = select_bg(&map.geography, i);
-            let fg = select_fg(&map.geography, i);
-            let selected_cover = select_ground_cover(&map.geography, i);
-            let icon = templates.get_icon(&selected_cover.icon.name).base_ch();
-            map.set(
-                Position { x, y },
-                Tile::new(
-                    icon,
-                    fg,
-                    bg,
-                    true,
-                    true,
-                    false,
-                    Description::new(&selected_cover.short, &selected_cover.long),
-                ),
-            );
-        }
+    for pos in map.bounds().iter() {
+        let i = rand_up(fbm_offset(noise, pos.to_array(), offset, noise_scale, 32));
+        let bg = select_bg(&map.geography, i);
+        let fg = select_fg(&map.geography, i);
+        let selected_cover = select_ground_cover(&map.geography, i);
+        let icon = templates.get_icon(&selected_cover.icon.name).base_ch();
+        map.set(
+            pos,
+            Tile::new(
+                icon,
+                fg,
+                bg,
+                true,
+                true,
+                false,
+                Description::new(&selected_cover.short, &selected_cover.long),
+            ),
+        );
     }
 }
 
@@ -124,11 +122,11 @@ pub fn scatter(
 ) {
     if let Some(ref scatter_list) = map.geography.scatter {
         use std::collections::HashMap;
-        let mut queue: HashMap<Position, Tile> = HashMap::new();
+        let mut queue: HashMap<Pos, Tile> = HashMap::new();
         for pos in map.bounds().iter() {
             let mut scale = 0.0; // this gets twiddled every pass
-            for ref scatter_obj in scatter_list.iter() {
-                scale = scale + (scatter_obj.frequency * noise_scale);
+            for scatter_obj in scatter_list.iter() {
+                scale += scatter_obj.frequency * noise_scale;
                 let i = rand_up(fbm_offset(
                     noise,
                     pos.to_array(),

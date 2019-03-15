@@ -65,7 +65,7 @@ impl Assets {
         self.structures.len()
     }
     pub fn get_geographies(&self) -> &HashMap<String, GeographyTemplate> {
-        return &self.geographies;
+        &self.geographies
     }
     pub fn get_icon(&self, name: &str) -> Icon {
         if let Some(icon) = self.icons.get(name) {
@@ -100,7 +100,7 @@ impl Assets {
             queue.push((name, template));
         }
         let mut iterations = 0;
-        while queue.len() > 0 {
+        while !queue.is_empty() {
             for (i, item) in queue.iter_mut().enumerate() {
                 let (name, template) = item;
                 if let Some(ref parent_name) = template.parent {

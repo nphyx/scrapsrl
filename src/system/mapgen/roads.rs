@@ -1,5 +1,5 @@
 use super::util::*;
-use crate::component::{Color, Description, Position, Region};
+use crate::component::{Color, Description, Pos, Region};
 use crate::resource::{AreaMap, Assets, Tile, WorldState};
 use crate::util::colors::lerp;
 use crate::util::*;
@@ -22,25 +22,21 @@ fn place_car(
     assets: &Assets,
     noise: &Noise,
     map: &mut AreaMap,
-    pos: [i32; 2],
+    pos: Pos,
     offset: [i32; 2],
     scale: f32,
     damage_factor: f32,
 ) {
-    let car_chance = fbm_offset(noise, pos, offset, 1.0, 32);
+    let car_chance = fbm_offset(noise, pos.to_array(), offset, 1.0, 32);
     if car_chance < 0.95 {
         return;
     }
     let color_good = Color::new(68, 68, 68);
     let color_bad = Color::new(38, 10, 8);
-    let v = rand_up(fbm_offset(noise, pos, offset, 10.0, 1));
-    let ref icon = VEHICLES[(v * VEHICLES.len() as f32).floor() as usize].to_string();
-    let i = turb_offset(noise, pos, offset, scale, 32);
+    let v = rand_up(fbm_offset(noise, pos.to_array(), offset, 10.0, 1));
+    let icon = &VEHICLES[(v * VEHICLES.len() as f32).floor() as usize].to_string();
+    let i = turb_offset(noise, pos.to_array(), offset, scale, 32);
     let fg = lerp(color_good, color_bad, i * damage_factor);
-    let pos = Position {
-        x: pos[0],
-        y: pos[1],
-    };
     if let Some(tile) = map.get(pos) {
         map.set(
             pos,
@@ -95,7 +91,7 @@ pub fn place_horizontal_roads(
     noise: &Noise,
     world: &WorldState,
     map: &mut AreaMap,
-    region: &Region,
+    region: Region,
     noise_scale: f32,
     damage_factor: f32,
 ) {
@@ -115,7 +111,7 @@ pub fn place_horizontal_roads(
     let dashed = assets.get_icon("line_emdash").base_ch();
     let line = assets.get_icon("line_single").ch(false, false, true, true);
     let dbl = assets.get_icon("line_double").ch(false, false, true, true);
-    let lanes = world.get_road(*region).lanes_x as i32;
+    let lanes = world.get_road(region).lanes_x as usize;
     let offset = region.to_offset();
 
     let road_rubble: char = '\u{e35d}';
@@ -129,8 +125,14 @@ pub fn place_horizontal_roads(
         let y_max = y + (lanes * 2);
 
         for cy in y_min..=y_max {
-            let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
-            let pos = Position { x: cx, y: cy };
+            let i = rand_up(turb_offset(
+                noise,
+                [cx as i32, cy as i32],
+                offset,
+                noise_scale,
+                32,
+            ));
+            let pos = Pos { x: cx, y: cy };
 
             if i < damage_factor {
                 if let Some(tile) = map.get(pos) {
@@ -175,15 +177,7 @@ pub fn place_horizontal_roads(
 
             map.set(pos, road_segment(segment_icon, fg, bg));
 
-            place_car(
-                assets,
-                noise,
-                map,
-                [cx, cy],
-                offset,
-                noise_scale,
-                damage_factor,
-            );
+            place_car(assets, noise, map, pos, offset, noise_scale, damage_factor);
         }
     }
 }
@@ -195,7 +189,7 @@ pub fn place_vertical_roads(
     noise: &Noise,
     world: &WorldState,
     map: &mut AreaMap,
-    region: &Region,
+    region: Region,
     noise_scale: f32,
     damage_factor: f32,
 ) {
@@ -215,7 +209,7 @@ pub fn place_vertical_roads(
     let dashed = '|';
     let line = assets.get_icon("line_single").ch(true, true, false, false);
     let dbl = assets.get_icon("line_double").ch(true, true, false, false);
-    let lanes = world.get_road(*region).lanes_y as i32;
+    let lanes = world.get_road(region).lanes_y as usize;
     let offset = region.to_offset();
 
     let road_rubble: char = '\u{e35d}';
@@ -228,8 +222,8 @@ pub fn place_vertical_roads(
         let x_min = x - (lanes * 2);
         let x_max = x + (lanes * 2);
         for cx in x_min..=x_max {
-            let i = rand_up(turb_offset(noise, [cx, cy], offset, noise_scale, 32));
-            let pos = Position { x: cx, y: cy };
+            let pos: Pos = Coord { x: cx, y: cy };
+            let i = rand_up(turb_offset(noise, pos.to_array(), offset, noise_scale, 32));
 
             if i < damage_factor {
                 if let Some(tile) = map.get(pos) {
@@ -274,15 +268,7 @@ pub fn place_vertical_roads(
 
             map.set(pos, road_segment(segment_icon, fg, bg));
 
-            place_car(
-                assets,
-                noise,
-                map,
-                [cx, cy],
-                offset,
-                noise_scale,
-                damage_factor,
-            );
+            place_car(assets, noise, map, pos, offset, noise_scale, damage_factor);
         }
     }
 }

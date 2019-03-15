@@ -1,40 +1,39 @@
 use super::{rect::RectIter, Rect};
-use crate::component::Position;
+use crate::component::Pos;
 
 #[allow(unused)]
 #[derive(Clone)]
 pub struct Grid<T> {
     contents: Vec<Vec<T>>,
-    bounds: Rect,
+    pub bounds: Rect<usize>,
 }
 
 #[allow(unused)]
 impl<T> Grid<T> {
-    pub fn width(&self) -> i32 {
+    pub fn width(&self) -> usize {
         self.bounds.width()
     }
-    pub fn height(&self) -> i32 {
+    pub fn height(&self) -> usize {
         self.bounds.height()
     }
 
-    pub fn get(&self, pos: Position) -> Option<&T> {
+    pub fn get(&self, pos: Pos) -> Option<&T> {
+        self.contents.get(pos.y).and_then(|row| row.get(pos.x))
+    }
+
+    pub fn get_mut(&mut self, pos: Pos) -> Option<&mut T> {
         self.contents
-            .get(pos.y as usize)
-            .and_then(|row| row.get(pos.x as usize))
+            .get_mut(pos.y)
+            .and_then(|row| row.get_mut(pos.x))
     }
 
-    pub fn get_mut(&mut self, pos: Position) -> Option<&mut T> {
-        self.contents
-            .get_mut(pos.y as usize)
-            .and_then(|row| row.get_mut(pos.x as usize))
+    pub fn set(&mut self, pos: Pos, entry: T) {
+        self.contents[pos.y][pos.x] = entry;
     }
 
-    pub fn set(&mut self, pos: Position, entry: T) {
-        self.contents[pos.y as usize][pos.x as usize] = entry;
-    }
-
-    pub fn bounds(&self) -> Rect {
-        self.bounds.clone()
+    #[deprecated]
+    pub fn bounds(&self) -> Rect<usize> {
+        self.bounds
     }
 
     pub fn clear(&mut self) {
@@ -46,26 +45,25 @@ impl<T> Grid<T> {
 impl<T: Default + Clone> Grid<T> {
     pub fn with_dimensions(width: usize, height: usize) -> Grid<T> {
         let bounds = Rect {
-            t_l: Position { x: 0, y: 0 },
-            b_r: Position {
-                x: width as i32 - 1,
-                y: height as i32 - 1,
+            t_l: Pos { x: 0, y: 0 },
+            b_r: Pos {
+                x: width - 1,
+                y: height - 1,
             },
         };
         Grid::with_bounds(bounds)
     }
 
     /// creates a grid with the given bounding rectangle
-    pub fn with_bounds(bounds: Rect) -> Grid<T> {
+    pub fn with_bounds(bounds: Rect<usize>) -> Grid<T> {
         let mut contents: Vec<Vec<T>> =
-            vec![vec![Default::default(); bounds.width() as usize]; bounds.height() as usize];
+            vec![vec![Default::default(); bounds.width()]; bounds.height()];
         Grid { contents, bounds }
     }
 
-    pub fn subgrid(&self, rect: Rect) -> Result<Grid<T>, &'static str> {
+    pub fn subgrid(&self, rect: Rect<usize>) -> Result<Grid<T>, &'static str> {
         if self.bounds.contains(rect) {
-            let mut subgrid: Grid<T> =
-                Grid::with_dimensions(rect.width() as usize, rect.height() as usize);
+            let mut subgrid: Grid<T> = Grid::with_dimensions(rect.width(), rect.height());
             for pos in rect.iter() {
                 subgrid.set(pos - rect.t_l, self.get(pos).unwrap().clone());
             }
@@ -74,23 +72,19 @@ impl<T: Default + Clone> Grid<T> {
         Err("rectangle out of grid bounds")
     }
 
-    pub fn paste_into(
-        &mut self,
-        t_l: Position,
-        mut subgrid: Grid<T>,
-    ) -> Result<bool, &'static str> {
-        if self.bounds.contains(subgrid.bounds()) {
+    pub fn paste_into(&mut self, t_l: Pos, mut subgrid: Grid<T>) -> Result<bool, &'static str> {
+        if self.bounds.contains(subgrid.bounds) {
             for (pos, entry) in subgrid.iter() {
                 self.set(pos + t_l, entry);
             }
             return Ok(true);
         }
-        return Err("pasted submap not contained in target map");
+        Err("pasted submap not contained in target map")
     }
 
     pub fn iter(&self) -> GridIter<'_, T> {
         GridIter {
-            iterator: self.bounds.clone().iter(),
+            iterator: self.bounds.iter(),
             grid: self,
         }
     }
@@ -103,12 +97,12 @@ impl<T: Default + Clone> Grid<T> {
 }
 
 pub struct GridIter<'a, T> {
-    iterator: RectIter,
+    iterator: RectIter<usize>,
     grid: &'a Grid<T>,
 }
 
 impl<'a, T: Clone> Iterator for GridIter<'a, T> {
-    type Item = (Position, T);
+    type Item = (Pos, T);
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(pos) = self.iterator.next() {
@@ -132,11 +126,11 @@ pub struct GridDrain<T> {
 }
 
 impl<'a, T> Iterator for GridDrain<'a, T> {
-    type Item = (Position, T);
+    type Item = (Pos, T);
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(drain) = self.col_iter {
             if let Some((x, entry)) = drain.next() {
-                return Some((Position::new(x, self.last_y), entry));
+                return Some((Pos::new(x, self.last_y), entry));
             }
         }
         if let Some(y) = self.row_iter.next() {

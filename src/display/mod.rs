@@ -2,7 +2,7 @@ use super::component::*;
 use super::constants::*;
 use super::resource::*;
 use super::util::colors::*;
-use super::util::{clamp, distance};
+use super::util::{clamp, distance, Coord};
 use tcod::console::Root;
 use tcod::map::FovAlgorithm;
 use tcod::{
@@ -43,7 +43,7 @@ impl Display {
 
         Display {
             root,
-            map: Map::new(MAP_WIDTH, MAP_HEIGHT),
+            map: Map::new(MAP_WIDTH as i32, MAP_HEIGHT as i32),
         }
     }
 }
@@ -60,7 +60,7 @@ impl<'a> System<'a> for Display {
         ReadStorage<'a, IconRef>,
         ReadStorage<'a, Orientation>,
         ReadStorage<'a, Player>,
-        ReadStorage<'a, Position>,
+        ReadStorage<'a, Pos>,
         ReadStorage<'a, Region>,
         ReadStorage<'a, Solid>,
         Write<'a, GameState>,
@@ -225,7 +225,7 @@ impl Display {
         icons: &ReadStorage<'a, IconRef>,
         orientations: &ReadStorage<'a, Orientation>,
         players: &ReadStorage<'a, Player>,
-        positions: &ReadStorage<'a, Position>,
+        positions: &ReadStorage<'a, Pos>,
         regions: &ReadStorage<'a, Region>,
 
         assets: &Read<'a, Assets>,
@@ -233,7 +233,7 @@ impl Display {
         world: &Read<'a, WorldState>,
         maps: &Read<'a, AreaMaps>,
     ) {
-        let mut player_pos: Position = Position::default();
+        let mut player_pos: Pos = Pos::default();
         let mut player_region: Region = Region::default();
 
         for (region, pos, character, _player) in (regions, positions, characters, players).join() {
@@ -248,13 +248,14 @@ impl Display {
 
         // update fov map before computing fov
         for (pos, tile) in map.iter() {
-            self.map.set(pos.x, pos.y, tile.transparent, tile.walkable)
+            self.map
+                .set(pos.x as i32, pos.y as i32, tile.transparent, tile.walkable)
         }
 
         // Compute the FOV
         self.map.compute_fov(
-            player_pos.x,
-            player_pos.y,
+            player_pos.x as i32,
+            player_pos.y as i32,
             SCREEN_WIDTH,
             true,
             FovAlgorithm::Basic,
@@ -263,8 +264,8 @@ impl Display {
         // draw all tiles
         for (pos, tile) in map.iter() {
             self.root.put_char_ex(
-                pos.x,
-                pos.y,
+                pos.x as i32,
+                pos.y as i32,
                 tile.icon,
                 TColor::from(tile.fg),
                 TColor::from(tile.bg),
@@ -273,15 +274,16 @@ impl Display {
 
         // draw all npcs, also snag the one under the cursor if applicable
         for (region, pos, icon, color, ..) in (regions, positions, icons, colors, !players).join() {
-            if self.map.is_in_fov(pos.x, pos.y) && *region == player_region {
+            let ipos: Coord<i32> = (*pos).into();
+            if self.map.is_in_fov(ipos.x, ipos.y) && *region == player_region {
                 self.root.put_char(
-                    pos.x,
-                    pos.y,
+                    ipos.x,
+                    ipos.y,
                     assets.get_icon(&icon.name).base_ch(),
                     BackgroundFlag::None,
                 );
                 self.root
-                    .set_char_foreground(pos.x, pos.y, TColor::from(color.fg));
+                    .set_char_foreground(ipos.x, ipos.y, TColor::from(color.fg));
             }
         }
 
@@ -311,23 +313,24 @@ impl Display {
 
         // lighting pass
         for (pos, _) in map.iter() {
-            let orig_fg = Color::from(self.root.get_char_foreground(pos.x, pos.y));
-            let orig_bg = Color::from(self.root.get_char_background(pos.x, pos.y));
+            let ipos: Coord<i32> = pos.into();
+            let orig_fg = Color::from(self.root.get_char_foreground(ipos.x, ipos.y));
+            let orig_bg = Color::from(self.root.get_char_background(ipos.x, ipos.y));
             let mut fg = orig_fg;
             let mut bg = orig_bg;
             let dist = distance(player_pos, pos);
             let light_radius = 20.0;
             // this figures out the intensity and radius of the player-emitted light area
             let rel_dist =
-                (clamp(0.000001, light_radius, light_radius - dist) / light_radius).powf(2.0);
+                (clamp(0.000_001, light_radius, light_radius - dist) / light_radius).powf(2.0);
 
             // apply night time shading
-            fg = lerp(multiply(Color::from(fg), night), fg, 0.1 + time_of_day_rel);
-            bg = lerp(multiply(Color::from(bg), night), bg, 0.1 + time_of_day_rel);
+            fg = lerp(multiply(fg, night), fg, 0.1 + time_of_day_rel);
+            bg = lerp(multiply(bg, night), bg, 0.1 + time_of_day_rel);
             // ambient light enhancement
             fg = soft_light(fg, ambient, 1.0);
             bg = soft_light(bg, ambient, 0.5);
-            if self.map.is_in_fov(pos.x, pos.y) {
+            if self.map.is_in_fov(ipos.x, ipos.y) {
                 // apply light
                 if time_of_day_rel < 0.5 {
                     fg = lerp(fg, color_dodge(orig_fg, light), rel_dist);
@@ -339,22 +342,23 @@ impl Display {
                 fg = desaturate(fg, 0.65);
             }
             self.root
-                .set_char_foreground(pos.x, pos.y, TColor::from(fg));
+                .set_char_foreground(ipos.x, ipos.y, TColor::from(fg));
             self.root
-                .set_char_background(pos.x, pos.y, TColor::from(bg), BackgroundFlag::Set);
+                .set_char_background(ipos.x, ipos.y, TColor::from(bg), BackgroundFlag::Set);
         }
 
         // draw in the cursor highlight
         for (pos, ..) in (positions, cursors).join() {
             self.root.set_char_background(
-                pos.x,
-                pos.y,
+                pos.x as i32,
+                pos.y as i32,
                 TColor::new(110, 180, 144),
                 BackgroundFlag::Overlay,
             );
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     /// render in collision mode, showing solids in a lighter background color
     /// (also ignores fov so it's a wallhack)
     fn render_map_collision<'a>(
@@ -365,7 +369,7 @@ impl Display {
         icons: &ReadStorage<'a, IconRef>,
         orientations: &ReadStorage<'a, Orientation>,
         players: &ReadStorage<'a, Player>,
-        positions: &ReadStorage<'a, Position>,
+        positions: &ReadStorage<'a, Pos>,
         regions: &ReadStorage<'a, Region>,
         solids: &ReadStorage<'a, Solid>,
 
@@ -393,8 +397,8 @@ impl Display {
                 Color::new(180, 180, 180)
             };
             self.root.put_char_ex(
-                pos.x,
-                pos.y,
+                pos.x as i32,
+                pos.y as i32,
                 tile.icon,
                 TColor::from(tile.fg),
                 TColor::from(bg),
@@ -405,21 +409,21 @@ impl Display {
         for (region, pos, icon, color, ..) in (regions, positions, icons, colors, !players).join() {
             if *region == player_region {
                 self.root.put_char(
-                    pos.x,
-                    pos.y,
+                    pos.x as i32,
+                    pos.y as i32,
                     assets.get_icon(&icon.name).base_ch(),
                     BackgroundFlag::None,
                 );
                 self.root
-                    .set_char_foreground(pos.x, pos.y, TColor::from(color.fg));
+                    .set_char_foreground(pos.x as i32, pos.y as i32, TColor::from(color.fg));
             }
         }
 
         for (region, pos, _solid, ..) in (regions, positions, solids).join() {
             if *region == player_region {
                 self.root.set_char_background(
-                    pos.x,
-                    pos.y,
+                    pos.x as i32,
+                    pos.y as i32,
                     TColor::from(Color::new(180, 180, 180)),
                     BackgroundFlag::Set,
                 );
@@ -431,8 +435,8 @@ impl Display {
         // draw in the cursor highlight
         for (pos, ..) in (positions, cursors).join() {
             self.root.set_char_background(
-                pos.x,
-                pos.y,
+                pos.x as i32,
+                pos.y as i32,
                 TColor::new(110, 180, 144),
                 BackgroundFlag::Overlay,
             );
@@ -442,7 +446,7 @@ impl Display {
     fn draw_player<'a>(
         &mut self,
         orientations: &ReadStorage<'a, Orientation>,
-        positions: &ReadStorage<'a, Position>,
+        positions: &ReadStorage<'a, Pos>,
         icons: &ReadStorage<'a, IconRef>,
         colors: &ReadStorage<'a, Colors>,
         players: &ReadStorage<'a, Player>,
@@ -471,13 +475,13 @@ impl Display {
                 }
             }
             self.root.put_char(
-                pos.x,
-                pos.y,
+                pos.x as i32,
+                pos.y as i32,
                 assets.get_icon(&icon.name).ch(north, south, east, west),
                 BackgroundFlag::None,
             );
             self.root
-                .set_char_foreground(pos.x, pos.y, TColor::from(color.fg))
+                .set_char_foreground(pos.x as i32, pos.y as i32, TColor::from(color.fg))
         }
     }
 
@@ -490,14 +494,14 @@ impl Display {
         descriptions: &ReadStorage<'a, Description>,
         icons: &ReadStorage<'a, IconRef>,
         players: &ReadStorage<'a, Player>,
-        positions: &ReadStorage<'a, Position>,
+        positions: &ReadStorage<'a, Pos>,
         regions: &ReadStorage<'a, Region>,
         maps: &Read<'a, AreaMaps>,
         assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
         ui_queue: &Read<'a, UIQueue>,
     ) {
-        let mut cursor_pos: Position = Position::default();
+        let mut cursor_pos: Pos = Pos::default();
         let mut player_region: Region = Region::default();
         let mut has_cursor: bool = false;
 
@@ -519,7 +523,7 @@ impl Display {
         let map = maps.get(player_region);
 
         // find an entity under the cursor, if it exists
-        if has_cursor && self.map.is_in_fov(cursor_pos.x, cursor_pos.y) {
+        if has_cursor && self.map.is_in_fov(cursor_pos.x as i32, cursor_pos.y as i32) {
             let mut found_entity = false;
             for (region, pos, icon, color, desc) in
                 (regions, positions, icons, colors, descriptions).join()

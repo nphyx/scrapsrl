@@ -177,7 +177,7 @@ impl Character {
             self.cur_stamina -= amt;
             return true;
         }
-        return false;
+        false
     }
 
     pub fn spend_focus(&mut self, amt: u8) -> bool {
@@ -185,13 +185,13 @@ impl Character {
             self.cur_focus -= amt;
             return true;
         }
-        return false;
+        false
     }
     pub fn spend_grit(&mut self, amt: u8) -> bool {
         if amt >= self.cur_grit {
             self.cur_grit -= amt;
             return true;
         }
-        return false;
+        false
     }
 }

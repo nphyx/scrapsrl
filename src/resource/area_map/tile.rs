@@ -48,6 +48,7 @@ impl Tile {
         }
     }
 
+    #[allow(unused)]
     pub fn clone_from(&mut self, other: Tile) {
         self.icon = other.icon;
         self.fg = other.fg;

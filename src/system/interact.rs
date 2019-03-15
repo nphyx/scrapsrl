@@ -1,5 +1,5 @@
 /// support player interactions with objects
-use crate::component::{NotificationInteraction, Position, Region};
+use crate::component::{NotificationInteraction, Pos, Region};
 use crate::resource::{GameState, InteractionMethod, InteractionTarget, Notification, UIQueue};
 
 #[derive(Default)]
@@ -9,7 +9,7 @@ use specs::{Join, Read, ReadStorage, System, Write};
 impl<'a> System<'a> for Notify {
     type SystemData = (
         ReadStorage<'a, Region>,
-        ReadStorage<'a, Position>,
+        ReadStorage<'a, Pos>,
         ReadStorage<'a, NotificationInteraction>,
         Write<'a, InteractionTarget>,
         Write<'a, UIQueue>,

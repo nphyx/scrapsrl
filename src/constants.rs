@@ -9,8 +9,8 @@ pub const DIALOG_WIDTH: i32 = 32;
 pub const SCREEN_HEIGHT: i32 = 1080 / TILE_HEIGHT - 1;
 pub const SCREEN_WIDTH: i32 = 1920 / TILE_WIDTH;
 
-pub const MAP_WIDTH: i32 = SCREEN_WIDTH - SIDEBAR_WIDTH;
-pub const MAP_HEIGHT: i32 = SCREEN_HEIGHT - 1;
+pub const MAP_WIDTH: usize = (SCREEN_WIDTH - SIDEBAR_WIDTH) as usize;
+pub const MAP_HEIGHT: usize = (SCREEN_HEIGHT - 1) as usize;
 
 pub const DEFAULT_BG: Color = Color { r: 0, g: 12, b: 9 };
 pub const DEFAULT_FG: Color = Color {

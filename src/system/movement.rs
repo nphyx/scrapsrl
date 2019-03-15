@@ -11,7 +11,7 @@ impl<'a> System<'a> for Movement {
         WriteStorage<'a, MovePlan>,
         ReadStorage<'a, Solid>,
         WriteStorage<'a, Orientation>,
-        WriteStorage<'a, Position>,
+        WriteStorage<'a, Pos>,
         Read<'a, AreaMaps>,
         Write<'a, CollisionMaps>,
         Entities<'a>,
@@ -44,9 +44,9 @@ impl<'a> System<'a> for Movement {
                 continue;
             }
             let map = area_maps.get(*region);
-            let new_pos = Position {
-                x: clamp(0, MAP_WIDTH - 1, plan.x + pos.x),
-                y: clamp(0, MAP_HEIGHT - 1, plan.y + pos.y),
+            let new_pos = Pos {
+                x: clamp(0, MAP_WIDTH as i32 - 1, plan.x + pos.x as i32) as usize,
+                y: clamp(0, MAP_HEIGHT as i32 - 1, plan.y + pos.y as i32) as usize,
             };
             let mut ok: bool;
             // only solid entities care about collisions, so let's check if it's solid

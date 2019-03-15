@@ -75,7 +75,7 @@ impl EntityTemplateBuilder {
         }
     }
 
-    pub fn from<'a>(template: EntityTemplate) -> EntityTemplateBuilder {
+    pub fn from(template: EntityTemplate) -> EntityTemplateBuilder {
         EntityTemplateBuilder { template }
     }
 

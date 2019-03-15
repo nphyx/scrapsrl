@@ -27,7 +27,7 @@ pub use self::notification::NotificationInteraction;
 pub use self::opaque::Opaque;
 pub use self::orientation::*;
 pub use self::player::Player;
-pub use self::position::Position;
+pub use self::position::Pos;
 pub use self::region::Region;
 pub use self::solid::Solid;
 
@@ -42,7 +42,7 @@ pub fn init(world: &mut World) {
     world.register::<MovePlan>();
     world.register::<NotificationInteraction>();
     world.register::<Player>();
-    world.register::<Position>();
+    world.register::<Pos>();
     world.register::<Opaque>();
     world.register::<Orientation>();
     world.register::<Region>();

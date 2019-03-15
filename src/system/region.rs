@@ -10,7 +10,7 @@ impl<'a> System<'a> for RegionSystem {
         ReadStorage<'a, Player>,
         ReadStorage<'a, IconRef>,
         WriteStorage<'a, MovePlan>,
-        WriteStorage<'a, Position>,
+        WriteStorage<'a, Pos>,
         WriteStorage<'a, Region>,
         Write<'a, CollisionMaps>,
         Write<'a, AreaMaps>,
@@ -49,11 +49,12 @@ impl<'a> System<'a> for RegionSystem {
             let mut change_x: i32 = 0;
             let mut change_y: i32 = 0;
             if plan.x != 0 || plan.y != 0 {
-                let target = Position {
-                    x: plan.x + pos.x,
-                    y: plan.y + pos.y,
+                let ipos: MovePlan = (*pos).into();
+                let target = MovePlan {
+                    x: plan.x + ipos.x,
+                    y: plan.y + ipos.y,
                 };
-                if target.x >= map.width() {
+                if target.x >= map.width() as i32 {
                     change_x = 1;
                     pos.x = 0;
                 }
@@ -61,7 +62,7 @@ impl<'a> System<'a> for RegionSystem {
                     change_x = -1;
                     pos.x = map.width() - 1;
                 }
-                if target.y >= map.height() {
+                if target.y >= map.height() as i32 {
                     change_y = 1;
                     pos.y = 0;
                 }

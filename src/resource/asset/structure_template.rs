@@ -35,7 +35,7 @@ fn default_true() -> bool {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub enum StructureTilePosition {
+pub enum StructureTilePos {
     /// can be placed in any position
     Any,
     /// acts as a floor
@@ -48,8 +48,8 @@ pub enum StructureTilePosition {
     NoAuto,
 }
 
-fn default_tile_position() -> StructureTilePosition {
-    StructureTilePosition::Any
+fn default_tile_position() -> StructureTilePos {
+    StructureTilePos::Any
 }
 
 fn default_weight() -> u32 {
@@ -81,7 +81,7 @@ pub struct StructureTile {
     #[serde(default = "default_true")]
     pub walkable: bool,
     #[serde(default = "default_tile_position")]
-    pub position: StructureTilePosition,
+    pub position: StructureTilePos,
     #[serde(default = "default_weight")]
     weight: u32,
     #[serde(default)]
@@ -97,7 +97,7 @@ impl Default for StructureTile {
             bg: (0, 0, 0),
             transparent: true,
             walkable: true,
-            position: StructureTilePosition::Any,
+            position: StructureTilePos::Any,
             short_desc: "".to_string(),
             long_desc: "".to_string(),
             weight: 1,
@@ -169,21 +169,21 @@ fn default_building_slots() -> u8 {
 }
 
 fn default_empty_string_vec() -> Vec<String> {
-    return Vec::new();
+    Vec::new()
 }
 
 fn default_empty_connection_vec() -> Vec<StructureConnection> {
-    return Vec::new();
+    Vec::new()
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StructureTemplate {
-    pub min_width: i32,
-    pub max_width: i32,
-    pub min_height: i32,
-    pub max_height: i32,
+    pub min_width: usize,
+    pub max_width: usize,
+    pub min_height: usize,
+    pub max_height: usize,
     /// perimeter is *inside* the bounds, so account for it in min/max properties
-    pub perimeter: i32,
+    pub perimeter: usize,
     #[serde(default = "default_building_slots")]
     /// maps have a cap on the number of structures they can make;
     /// this is number of slots this structure should count for
@@ -229,14 +229,13 @@ impl StructureTemplate {
         // and we don't want to have to write them over and over again
         // in templates
         for (ch, tile) in &mut self.tiles {
-            if tile.position == StructureTilePosition::Floor {
+            if tile.position == StructureTilePos::Floor {
                 floors.insert(*ch);
             };
         }
         // add floors as neighbors to Any and Fixture types
-        for (_, tile) in &mut self.tiles {
-            if tile.position == StructureTilePosition::Fixture
-                || tile.position == StructureTilePosition::Any
+        for tile in self.tiles.values_mut() {
+            if tile.position == StructureTilePos::Fixture || tile.position == StructureTilePos::Any
             {
                 for ch in &floors {
                     tile.allowed_neighbors.0.insert(*ch);
@@ -255,27 +254,27 @@ impl StructureTemplate {
         let mut south_of: HashMap<char, HashSet<char>> = HashMap::new();
         for (ch, tile) in self.tiles.clone() {
             for i in tile.allowed_neighbors.0 {
-                let entry = south_of.entry(ch).or_insert(HashSet::new());
+                let entry = south_of.entry(ch).or_insert_with(HashSet::new);
                 entry.insert(i);
-                let entry = north_of.entry(i).or_insert(HashSet::new());
+                let entry = north_of.entry(i).or_insert_with(HashSet::new);
                 entry.insert(ch);
             }
             for i in tile.allowed_neighbors.2 {
-                let entry = north_of.entry(ch).or_insert(HashSet::new());
+                let entry = north_of.entry(ch).or_insert_with(HashSet::new);
                 entry.insert(i);
-                let entry = south_of.entry(i).or_insert(HashSet::new());
+                let entry = south_of.entry(i).or_insert_with(HashSet::new);
                 entry.insert(ch);
             }
             for i in tile.allowed_neighbors.1 {
-                let entry = west_of.entry(ch).or_insert(HashSet::new());
+                let entry = west_of.entry(ch).or_insert_with(HashSet::new);
                 entry.insert(i);
-                let entry = east_of.entry(i).or_insert(HashSet::new());
+                let entry = east_of.entry(i).or_insert_with(HashSet::new);
                 entry.insert(ch);
             }
             for i in tile.allowed_neighbors.3 {
-                let entry = east_of.entry(ch).or_insert(HashSet::new());
+                let entry = east_of.entry(ch).or_insert_with(HashSet::new);
                 entry.insert(i);
-                let entry = west_of.entry(i).or_insert(HashSet::new());
+                let entry = west_of.entry(i).or_insert_with(HashSet::new);
                 entry.insert(ch);
             }
         }
@@ -326,14 +325,14 @@ impl StructureTemplate {
         self.tiles.keys().enumerate().for_each(|(i, key)| {
             charmap.insert(*key, i as u32);
         });
-        return charmap;
+        charmap
     }
     pub fn get_mapchar(&self) -> MapChar {
         let mut mapchar: MapChar = HashMap::new();
         self.tiles.keys().enumerate().for_each(|(i, key)| {
             mapchar.insert(i as u32, *key);
         });
-        return mapchar;
+        mapchar
     }
 
     pub fn get_pattern_table(&self) -> PatternTable<PatternDescription> {
@@ -343,7 +342,7 @@ impl StructureTemplate {
             .values()
             .map(|tile| tile.pattern_description(&charmap))
             .collect();
-        return PatternTable::from_vec(descs);
+        PatternTable::from_vec(descs)
     }
 
     pub fn get_tile(&self, label: char) -> StructureTile {
@@ -353,7 +352,7 @@ impl StructureTemplate {
         tile.clone()
     }
 
-    pub fn fits_in(&self, rect: Rect) -> bool {
+    pub fn fits_in(&self, rect: Rect<usize>) -> bool {
         rect.width() >= self.min_width && rect.height() >= self.min_height
     }
 }

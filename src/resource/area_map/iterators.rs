@@ -1,5 +1,5 @@
 use super::{AreaMap, Tile};
-use crate::component::Position;
+use crate::component::Pos;
 
 pub struct AreaMapIter<'a> {
     pub map: &'a AreaMap,
@@ -7,10 +7,10 @@ pub struct AreaMapIter<'a> {
 }
 
 impl<'a> Iterator for AreaMapIter<'a> {
-    type Item = (Position, &'a Tile);
+    type Item = (Pos, &'a Tile);
 
-    fn next(&mut self) -> Option<(Position, &'a Tile)> {
-        let [mut x, mut y] = self.cur.clone();
+    fn next(&mut self) -> Option<(Pos, &'a Tile)> {
+        let [mut x, mut y] = self.cur;
         let w = self.map.width() as usize;
         let h = self.map.height() as usize;
         if x >= w {
@@ -20,9 +20,9 @@ impl<'a> Iterator for AreaMapIter<'a> {
         if y >= h {
             return None;
         }
-        let pos = Position::new(x as i32, y as i32);
-        let r = (pos, self.map.get(pos).unwrap());
+        let pos = Pos::new(x, y);
+        let res = (pos, self.map.get(pos).unwrap());
         self.cur = [x + 1, y];
-        Some(r)
+        Some(res)
     }
 }

@@ -67,7 +67,7 @@ fn road_lanes(noise: &Noise, sample_coord: [f32; 2], pop: f32) -> u8 {
         adj_sample = (base_sample) * (6.0 * (1.0 - pop));
     } else if pop > 0.4 {
         // mid size pop has frequent mid-sized roads, biased toward edge regions
-        adj_sample = (base_sample) * (6.0 * (1.0 - pop));
+        adj_sample = (base_sample) * (4.0 * (1.0 - pop));
     } else if pop > 0.2 {
         // suburban populations have smaller roads
         adj_sample = (0.1 + base_sample.powf(2.0)) * (8.0 * pop);
@@ -75,7 +75,7 @@ fn road_lanes(noise: &Noise, sample_coord: [f32; 2], pop: f32) -> u8 {
         // rural areas have infrequent, small roads
         adj_sample = (base_sample * pop).powf(2.0) - 0.1;
     }
-    return adj_sample.min(7.0).max(0.0).round() as u8;
+    adj_sample.min(7.0).max(0.0).round() as u8
 }
 
 /// cleans up orphaned roads

@@ -1,92 +1,58 @@
+/*
+*/
 use super::MovePlan;
 use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
 use crate::util::clamp;
+use crate::util::Coord;
+/*
 use serde::{Deserialize, Serialize};
 use specs::{Component, VecStorage};
+*/
 
 /**
  * A positional coordinate.
  */
 
-#[derive(
-    Copy,
-    Clone,
-    Debug,
-    Eq,
-    PartialEq,
-    Hash,
-    Default,
-    Component,
-    Deserialize,
-    Serialize,
-    Ord,
-    PartialOrd,
-)]
-#[storage(VecStorage)]
-pub struct Position {
-    // y, x reversed here for row-wise ordering
-    pub y: i32,
-    pub x: i32,
-}
+pub type Pos = Coord<usize>;
 
-impl std::ops::AddAssign<Position> for Position {
-    fn add_assign(&mut self, coord: Position) {
-        self.x = clamp(0, MAP_WIDTH, self.x + coord.x);
-        self.y = clamp(0, MAP_HEIGHT, self.y + coord.y);
+impl Pos {
+    pub fn to_array(&self) -> [i32; 2] {
+        [self.x as i32, self.y as i32]
     }
 }
 
-impl std::ops::Add<Position> for Position {
-    type Output = Position;
-    fn add(self, coord: Position) -> Self::Output {
-        Position {
-            x: self.x + coord.x,
-            y: self.y + coord.y,
+impl std::ops::Add<MovePlan> for Pos {
+    type Output = Pos;
+    fn add(self, other: MovePlan) -> Self::Output {
+        Coord {
+            x: self.x + other.x as usize,
+            y: self.y + other.y as usize,
         }
     }
 }
 
-impl std::ops::Add<MovePlan> for Position {
-    type Output = Position;
-    fn add(self, coord: MovePlan) -> Self::Output {
-        Position {
-            x: self.x + coord.x,
-            y: self.y + coord.y,
-        }
-    }
-}
-
-impl std::ops::Sub<Position> for Position {
-    type Output = Position;
-    fn sub(self, pos: Position) -> Self::Output {
-        Position {
-            x: self.x - pos.x,
-            y: self.y - pos.y,
-        }
-    }
-}
-
-impl std::cmp::PartialEq<MovePlan> for Position {
+impl std::cmp::PartialEq<MovePlan> for Pos {
     fn eq(&self, &cmp: &MovePlan) -> bool {
-        self.x == cmp.x && self.y == cmp.y
+        self.x == cmp.x as usize && self.y == cmp.y as usize
     }
 }
 
-use wfc::Coord;
-impl From<Coord> for Position {
-    fn from(coord: Coord) -> Position {
-        Position {
-            x: coord.x,
-            y: coord.y,
+impl From<MovePlan> for Pos {
+    fn from(plan: MovePlan) -> Pos {
+        Pos {
+            x: clamp(0, MAP_WIDTH as i32, plan.x) as usize,
+            y: clamp(0, MAP_HEIGHT as i32, plan.x) as usize,
         }
     }
 }
 
-impl Position {
-    pub fn new(x: i32, y: i32) -> Position {
-        Position { x, y }
-    }
-    pub fn to_array(self) -> [i32; 2] {
-        [self.x, self.y]
+impl From<[i32; 2]> for Pos {
+    fn from(arr: [i32; 2]) -> Pos {
+        assert!(arr[0] >= 0);
+        assert!(arr[0] >= 0);
+        Pos {
+            x: arr[0] as usize,
+            y: arr[1] as usize,
+        }
     }
 }

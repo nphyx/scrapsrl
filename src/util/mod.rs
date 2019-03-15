@@ -1,9 +1,11 @@
-use crate::component::Position;
+use crate::component::Pos;
 pub mod colors;
 mod connectable_char;
+mod coord;
 mod grid;
 mod rect;
 pub use self::connectable_char::ConnectableChars;
+pub use self::coord::Coord;
 pub use self::grid::Grid;
 pub use self::rect::Rect;
 
@@ -22,7 +24,7 @@ where
 }
 
 /// finds the absolute distance between two points
-pub fn distance(p: Position, d: Position) -> f32 {
+pub fn distance(p: Pos, d: Pos) -> f32 {
     ((d.x as f32 - p.x as f32).powf(2.0) + (d.y as f32 - p.y as f32).powf(2.0)).sqrt()
 }
 
@@ -32,7 +34,7 @@ pub fn rand_up(v: f32) -> f32 {
 }
 
 /// chooses an item from a vec of options given an f32 sample between 0.0 and 1.0
-pub fn choose<T>(options: &Vec<T>, sample: f32) -> Option<T>
+pub fn choose<T>(options: &[T], sample: f32) -> Option<T>
 where
     T: Clone,
 {

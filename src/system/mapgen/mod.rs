@@ -69,14 +69,14 @@ impl MapGenerator {
         let road_data = world.get_road(region);
 
         if road_data.lanes_x > 0 {
-            roads::place_horizontal_roads(&assets, &noise, world, map, &region, 0.1, 0.8);
+            roads::place_horizontal_roads(&assets, &noise, world, map, region, 0.1, 0.8);
         }
 
         if road_data.lanes_y > 0 {
-            roads::place_vertical_roads(&assets, &noise, world, map, &region, 0.1, 0.8);
+            roads::place_vertical_roads(&assets, &noise, world, map, region, 0.1, 0.8);
         }
 
-        structure::build(&assets, &noise, map, &region, world).ok(); // always ok if this fails
+        structure::build(&assets, &noise, map, region, world).ok(); // always ok if this fails
 
         // connect connectable tiles
         connect(map);

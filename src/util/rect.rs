@@ -1,82 +1,132 @@
-use crate::component::Position;
+use super::Coord;
+use num::*;
+use std::cmp::PartialOrd;
+use std::ops::{AddAssign, SubAssign};
 use wfc::Size;
 
 #[derive(Copy, Clone, Debug)]
-pub struct Rect {
+pub struct Rect<T> {
     /// top left corner
-    pub t_l: Position,
+    pub t_l: Coord<T>,
     /// bottom right corner
-    pub b_r: Position,
+    pub b_r: Coord<T>,
 }
 
-impl Rect {
-    pub fn new(t_l: Position, b_r: Position) -> Rect {
-        Rect { t_l, b_r }
-    }
-
-    pub fn width(&self) -> i32 {
+impl Rect<usize> {
+    pub fn width(&self) -> usize {
         self.b_r.x - self.t_l.x + 1
     }
 
-    pub fn height(&self) -> i32 {
+    pub fn height(&self) -> usize {
         self.b_r.y - self.t_l.y + 1
-    }
-
-    /// checks whether the given pos is within the bounds of the rectangle
-    pub fn includes(&self, pos: Position) -> bool {
-        pos.x >= self.t_l.x && pos.y >= self.t_l.y && pos.x <= self.b_r.x && pos.y <= self.b_r.y
-    }
-
-    pub fn contains(&self, rect: Rect) -> bool {
-        return self.includes(rect.t_l) && self.includes(rect.b_r);
-    }
-
-    #[allow(unused)]
-    /// expands the perimeter by <n> on each side
-    pub fn expand_perimeter(&mut self, n: u8) {
-        self.t_l.x -= 1;
-        self.t_l.y -= 1;
-        self.b_r.x += 1;
-        self.b_r.y += 1;
-    }
-
-    #[allow(unused)]
-    /// expands the perimeter by <n> on each side
-    pub fn shrink_perimeter(&mut self, n: u8) {
-        self.t_l.x += 1;
-        self.t_l.y += 1;
-        self.b_r.x -= 1;
-        self.b_r.y -= 1;
-    }
-
-    #[allow(unused)]
-    pub fn is_corner(&self, pos: Position) -> bool {
-        return pos == self.t_l
-            || pos == self.b_r
-            || (pos == Position::new(self.t_l.x, self.b_r.y))
-            || (pos == Position::new(self.b_r.x, self.t_l.y));
     }
 
     pub fn to_wave_size(&self) -> Size {
         // wave size is exclusive of bottom/right bounds
-        Size::new(self.width() as u32 + 1, self.height() as u32 + 1)
+        Size::new((self.width() + 1) as u32, (self.height() + 1) as u32)
+    }
+}
+
+#[allow(unused)]
+impl Rect<i32> {
+    pub fn width(&self) -> usize {
+        (self.b_r.x - self.t_l.x + 1) as usize
+    }
+
+    pub fn height(&self) -> usize {
+        (self.b_r.y - self.t_l.y + 1) as usize
+    }
+
+    pub fn to_wave_size(&self) -> Size {
+        // wave size is exclusive of bottom/right bounds
+        Size::new((self.width() + 1) as u32, (self.height() + 1) as u32)
+    }
+
+    /// iterates row-wise through all positions in the rectangle
+    pub fn iter(&self) -> RectIter<i32> {
+        RectIter {
+            rect: *self,
+            next_coord: self.t_l,
+        }
+    }
+}
+
+#[allow(unused)]
+impl Rect<u32> {
+    pub fn width(&self) -> usize {
+        (self.b_r.x - self.t_l.x + 1) as usize
+    }
+
+    pub fn height(&self) -> usize {
+        (self.b_r.y - self.t_l.y + 1) as usize
+    }
+
+    pub fn to_wave_size(&self) -> Size {
+        // wave size is exclusive of bottom/right bounds
+        Size::new((self.width() + 1) as u32, (self.height() + 1) as u32)
+    }
+}
+
+impl<T: Integer + PartialOrd + AddAssign + SubAssign + Into<usize> + Copy> Rect<T> {
+    pub fn new(t_l: Coord<T>, b_r: Coord<T>) -> Rect<T> {
+        Rect { t_l, b_r }
+    }
+
+    /// checks whether the given pos is within the bounds of the rectangle
+    pub fn includes(&self, coord: Coord<T>) -> bool {
+        coord.x >= self.t_l.x
+            && coord.y >= self.t_l.y
+            && coord.x <= self.b_r.x
+            && coord.y <= self.b_r.y
+    }
+
+    pub fn contains(&self, rect: Rect<T>) -> bool {
+        self.includes(rect.t_l) && self.includes(rect.b_r)
     }
 
     #[allow(unused)]
+    /// expands the perimeter by <n> on each side
+    pub fn expand_perimeter(&mut self, n: T) {
+        self.t_l.x -= n;
+        self.t_l.y -= n;
+        self.b_r.x += n;
+        self.b_r.y += n;
+    }
+
+    #[allow(unused)]
+    /// expands the perimeter by <n> on each side
+    pub fn shrink_perimeter(&mut self, n: T) {
+        self.t_l.x += n;
+        self.t_l.y += n;
+        self.b_r.x -= n;
+        self.b_r.y -= n;
+    }
+
+    #[allow(unused)]
+    pub fn is_corner(&self, coord: Coord<T>) -> bool {
+        coord == self.t_l
+            || coord == self.b_r
+            || (coord == Coord::new(self.t_l.x, self.b_r.y))
+            || (coord == Coord::new(self.b_r.x, self.t_l.y))
+    }
+}
+
+impl Rect<usize> {
+    #[allow(unused)]
     /// iterates row-wise through all positions in the rectangle
-    pub fn iter(&self) -> RectIter {
+    pub fn iter(&self) -> RectIter<usize> {
         RectIter {
-            rect: self.clone(),
-            next_pos: self.t_l.clone(),
+            rect: *self,
+            next_coord: self.t_l,
         }
     }
 
     /// iterates through all the perimeter positions in the rectangle,
     /// inclusive, clockwise from top-left corner
-    pub fn iter_perimeter(&self) -> RectIterPerimeter {
+    pub fn iter_perimeter(&self) -> RectIterPerimeter<usize> {
         RectIterPerimeter {
-            rect: self.clone(),
-            next_pos: self.t_l.clone(),
+            rect: *self,
+            next_coord: self.t_l,
             final_item: false,
         }
     }
@@ -84,64 +134,79 @@ impl Rect {
     #[allow(unused)]
     /// iterates through the rows in a rectangle, yielding each row as a vector
     /// of positions
-    pub fn iter_rows(&self) -> RectRowsIter {
+    pub fn iter_rows(&self) -> RectRowsIter<usize> {
         RectRowsIter {
-            rect: self.clone(),
-            next_row: self.t_l.y,
+            rect: *self,
+            next_row: self.t_l.y as usize,
         }
     }
 
     /// iterates through the columns in a rectangle, yielding each column as a vector
     /// of positions
-    pub fn iter_columns(&self) -> RectColsIter {
+    pub fn iter_columns(&self) -> RectColsIter<usize> {
         RectColsIter {
-            rect: self.clone(),
-            next_col: self.t_l.x,
+            rect: *self,
+            next_col: self.t_l.x as usize,
         }
     }
 
     #[allow(unused)]
     /// iterates through a single row
-    pub fn iter_row(&self, y: i32) -> RectRowIter {
+    pub fn iter_row(&self, y: usize) -> RectRowIter<usize> {
         RectRowIter {
-            rect: self.clone(),
-            next_x: self.t_l.x,
+            rect: *self,
+            next_x: self.t_l.x as usize,
             y,
         }
     }
 
     #[allow(unused)]
     /// iterates through a single row
-    pub fn iter_column(&self, x: i32) -> RectColIter {
+    pub fn iter_column(&self, x: usize) -> RectColIter<usize> {
         RectColIter {
-            rect: self.clone(),
-            next_y: self.t_l.y,
+            rect: *self,
+            next_y: self.t_l.y as usize,
             x,
         }
     }
 }
 
-use crate::resource::AreaMap;
-
 #[derive(Debug)]
 /// iterates inclusively through a rectangle's points
-pub struct RectIter {
-    rect: Rect,
-    next_pos: Position,
+pub struct RectIter<T> {
+    rect: Rect<T>,
+    next_coord: Coord<T>,
 }
 
-impl Iterator for RectIter {
-    type Item = Position;
+impl Iterator for RectIter<usize> {
+    type Item = Coord<usize>;
 
-    fn next(&mut self) -> Option<Position> {
-        let res = self.next_pos.clone();
+    fn next(&mut self) -> Option<Self::Item> {
+        let res = self.next_coord;
         if res.y > self.rect.b_r.y {
             return None;
         }
-        self.next_pos.x += 1;
-        if self.next_pos.x > self.rect.b_r.x {
-            self.next_pos.x = self.rect.t_l.x;
-            self.next_pos.y += 1;
+        self.next_coord.x += 1;
+        if self.next_coord.x > self.rect.b_r.x {
+            self.next_coord.x = self.rect.t_l.x;
+            self.next_coord.y += 1;
+        }
+        Some(res)
+    }
+}
+
+impl Iterator for RectIter<i32> {
+    type Item = Coord<i32>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let res = self.next_coord;
+        if res.y > self.rect.b_r.y {
+            return None;
+        }
+        self.next_coord.x += 1;
+        if self.next_coord.x > self.rect.b_r.x {
+            self.next_coord.x = self.rect.t_l.x;
+            self.next_coord.y += 1;
         }
         Some(res)
     }
@@ -150,66 +215,77 @@ impl Iterator for RectIter {
 #[derive(Debug)]
 /// iterates clockwise inclusively through a rectangle's perimeter, starting at the top
 /// left corner and stopping at one tile below the top left corner
-pub struct RectIterPerimeter {
-    rect: Rect,
-    next_pos: Position,
+pub struct RectIterPerimeter<T> {
+    rect: Rect<T>,
+    next_coord: Coord<T>,
     final_item: bool,
 }
 
-impl Iterator for RectIterPerimeter {
-    type Item = Position;
+impl Iterator for RectIterPerimeter<usize> {
+    type Item = Coord<usize>;
 
-    fn next(&mut self) -> Option<Position> {
-        if self.final_item == true {
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.final_item {
             return None;
         }
-        let res = self.next_pos.clone();
-        if self.next_pos.y == self.rect.t_l.y && self.next_pos.x < self.rect.b_r.x {
-            self.next_pos.x += 1;
-        } else if self.next_pos.x == self.rect.b_r.x && self.next_pos.y < self.rect.b_r.y {
-            self.next_pos.y += 1;
-        } else if self.next_pos.x > self.rect.t_l.x && self.next_pos.y == self.rect.b_r.y {
-            self.next_pos.x -= 1;
-        } else if self.next_pos.y > self.rect.t_l.y {
-            self.next_pos.y -= 1;
+        let res = self.next_coord;
+        if self.next_coord.y == self.rect.t_l.y && self.next_coord.x < self.rect.b_r.x {
+            self.next_coord.x += 1;
+        } else if self.next_coord.x == self.rect.b_r.x && self.next_coord.y < self.rect.b_r.y {
+            self.next_coord.y += 1;
+        } else if self.next_coord.x > self.rect.t_l.x && self.next_coord.y == self.rect.b_r.y {
+            self.next_coord.x -= 1;
+        } else if self.next_coord.y > self.rect.t_l.y {
+            self.next_coord.y -= 1;
         }
-        if self.next_pos == self.rect.t_l {
+        if self.next_coord == self.rect.t_l {
             self.final_item = true;
         }
         Some(res)
     }
 }
 
-impl IntoIterator for Rect {
-    type Item = Position;
-    type IntoIter = RectIter;
+impl IntoIterator for Rect<usize> {
+    type Item = Coord<usize>;
+    type IntoIter = RectIter<usize>;
 
-    fn into_iter(self) -> RectIter {
-        let iter = RectIter {
-            next_pos: Position::new(self.t_l.x, self.t_l.y),
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            next_coord: Self::Item::new(self.t_l.x, self.t_l.y),
             rect: self,
-        };
-        return iter;
+        }
+    }
+}
+
+impl IntoIterator for Rect<i32> {
+    type Item = Coord<i32>;
+    type IntoIter = RectIter<i32>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            next_coord: Self::Item::new(self.t_l.x, self.t_l.y),
+            rect: self,
+        }
     }
 }
 
 #[derive(Debug)]
 #[allow(unused)]
 /// iterates through horizontal slices of the rectangle as vecs of positions
-pub struct RectRowsIter {
-    rect: Rect,
-    next_row: i32,
+pub struct RectRowsIter<T> {
+    rect: Rect<T>,
+    next_row: usize,
 }
 
-impl Iterator for RectRowsIter {
-    type Item = Vec<Position>;
+impl Iterator for RectRowsIter<usize> {
+    type Item = Vec<Coord<usize>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next_row > self.rect.b_r.y {
             return None;
         }
         let res = (self.rect.t_l.x..=self.rect.b_r.x)
-            .map(|x| Position {
+            .map(|x| Coord {
                 x,
                 y: self.next_row,
             })
@@ -220,40 +296,40 @@ impl Iterator for RectRowsIter {
 }
 
 #[allow(unused)]
-pub struct RectRowIter {
-    rect: Rect,
-    y: i32,
-    next_x: i32,
+pub struct RectRowIter<T> {
+    rect: Rect<T>,
+    y: usize,
+    next_x: usize,
 }
 
-impl Iterator for RectRowIter {
-    type Item = Position;
+impl Iterator for RectRowIter<usize> {
+    type Item = Coord<usize>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next_x <= self.rect.b_r.x {
             self.next_x += 1;
-            return Some(Position::new(self.next_x - 1, self.y));
+            return Some(Coord::new(self.next_x - 1, self.y));
         }
-        return None;
+        None
     }
 }
 
 #[derive(Debug)]
 /// iterates through vertical slices of the rectangle as vecs of positions
-pub struct RectColsIter {
-    rect: Rect,
-    next_col: i32,
+pub struct RectColsIter<T> {
+    rect: Rect<T>,
+    next_col: usize,
 }
 
-impl Iterator for RectColsIter {
-    type Item = Vec<Position>;
+impl Iterator for RectColsIter<usize> {
+    type Item = Vec<Coord<usize>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next_col > self.rect.b_r.x {
             return None;
         }
         let res = (self.rect.t_l.y..=self.rect.b_r.y)
-            .map(|y| Position {
+            .map(|y| Coord {
                 x: self.next_col,
                 y,
             })
@@ -264,39 +340,40 @@ impl Iterator for RectColsIter {
 }
 
 #[allow(unused)]
-pub struct RectColIter {
-    rect: Rect,
-    x: i32,
-    next_y: i32,
+pub struct RectColIter<T> {
+    rect: Rect<T>,
+    x: T,
+    next_y: T,
 }
 
-impl Iterator for RectColIter {
-    type Item = Position;
+impl Iterator for RectColIter<usize> {
+    type Item = Coord<usize>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next_y <= self.rect.b_r.y {
             self.next_y += 1;
-            return Some(Position::new(self.x, self.next_y - 1));
+            return Some(Coord::new(self.x, self.next_y - 1));
         }
-        return None;
+        None
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::component::Pos;
     #[test]
     fn rect_iter() {
         {
-            let mut iter = Rect::new(Position::new(0, 0), Position::new(1, 1)).into_iter();
-            assert_eq!(iter.next().unwrap(), Position { x: 0, y: 0 });
-            assert_eq!(iter.next().unwrap(), Position { x: 1, y: 0 });
-            assert_eq!(iter.next().unwrap(), Position { x: 0, y: 1 });
-            assert_eq!(iter.next().unwrap(), Position { x: 1, y: 1 });
+            let mut iter = Rect::new(Pos::new(0, 0), Pos::new(1, 1)).into_iter();
+            assert_eq!(iter.next().unwrap(), Pos { x: 0, y: 0 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 0 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 0, y: 1 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 1 });
             assert_eq!(iter.next(), None);
         }
         {
-            let rect = Rect::new(Position::new(0, 0), Position::new(4, 4));
+            let rect = Rect::new(Pos::new(0, 0), Pos::new(4, 4));
             let mut count: u8 = 0;
             for _pos in rect.iter() {
                 count += 1;
@@ -304,7 +381,7 @@ mod tests {
             assert_eq!(count, 25);
         }
         {
-            let rect = Rect::new(Position::new(0, 0), Position::new(2, 0));
+            let rect = Rect::new(Pos::new(0, 0), Pos::new(2, 0));
             let mut count: u8 = 0;
             for _pos in rect.iter() {
                 count += 1;
@@ -312,7 +389,7 @@ mod tests {
             assert_eq!(count, 3);
         }
         {
-            let rect = Rect::new(Position::new(0, 0), Position::new(0, 4));
+            let rect = Rect::new(Pos::new(0, 0), Pos::new(0, 4));
             let mut count: u8 = 0;
             for _pos in rect.iter() {
                 count += 1;
@@ -323,48 +400,47 @@ mod tests {
     #[test]
     fn rect_iter_perimeter() {
         {
-            let mut iter = Rect::new(Position::new(0, 0), Position::new(2, 2)).iter_perimeter();
-            assert_eq!(iter.next().unwrap(), Position { x: 0, y: 0 });
-            assert_eq!(iter.next().unwrap(), Position { x: 1, y: 0 });
-            assert_eq!(iter.next().unwrap(), Position { x: 2, y: 0 });
-            assert_eq!(iter.next().unwrap(), Position { x: 2, y: 1 });
-            assert_eq!(iter.next().unwrap(), Position { x: 2, y: 2 });
-            assert_eq!(iter.next().unwrap(), Position { x: 1, y: 2 });
-            assert_eq!(iter.next().unwrap(), Position { x: 0, y: 2 });
-            assert_eq!(iter.next().unwrap(), Position { x: 0, y: 1 });
+            let mut iter = Rect::new(Pos::new(0, 0), Pos::new(2, 2)).iter_perimeter();
+            assert_eq!(iter.next().unwrap(), Pos { x: 0, y: 0 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 0 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 2, y: 0 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 2, y: 1 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 2, y: 2 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 2 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 0, y: 2 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 0, y: 1 });
             assert_eq!(iter.next(), None);
         }
         {
-            let mut iter = Rect::new(Position::new(1, 1), Position::new(2, 2)).iter_perimeter();
-            assert_eq!(iter.next().unwrap(), Position { x: 1, y: 1 });
-            assert_eq!(iter.next().unwrap(), Position { x: 2, y: 1 });
-            assert_eq!(iter.next().unwrap(), Position { x: 2, y: 2 });
-            assert_eq!(iter.next().unwrap(), Position { x: 1, y: 2 });
+            let mut iter = Rect::new(Pos::new(1, 1), Pos::new(2, 2)).iter_perimeter();
+            assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 1 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 2, y: 1 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 2, y: 2 });
+            assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 2 });
             assert_eq!(iter.next(), None);
         }
     }
 
     #[test]
     fn rect_iter_column() {
-        let mut iter = Rect::new(Position::new(0, 0), Position::new(2, 2)).iter_column(1);
-        assert_eq!(iter.next().unwrap(), Position { x: 1, y: 0 });
-        assert_eq!(iter.next().unwrap(), Position { x: 1, y: 1 });
-        assert_eq!(iter.next().unwrap(), Position { x: 1, y: 2 });
+        let mut iter = Rect::new(Pos::new(0, 0), Pos::new(2, 2)).iter_column(1);
+        assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 0 });
+        assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 1 });
+        assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 2 });
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn rect_iter_row() {
-        let mut iter = Rect::new(Position::new(0, 0), Position::new(2, 2)).iter_row(1);
-        assert_eq!(iter.next().unwrap(), Position { x: 0, y: 1 });
-        assert_eq!(iter.next().unwrap(), Position { x: 1, y: 1 });
-        assert_eq!(iter.next().unwrap(), Position { x: 2, y: 1 });
+        let mut iter = Rect::new(Pos::new(0, 0), Pos::new(2, 2)).iter_row(1);
+        assert_eq!(iter.next().unwrap(), Pos { x: 0, y: 1 });
+        assert_eq!(iter.next().unwrap(), Pos { x: 1, y: 1 });
+        assert_eq!(iter.next().unwrap(), Pos { x: 2, y: 1 });
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn rect_is_corner() {
-        type Pos = Position;
         let tl = Pos::new(0, 0);
         let tr = Pos::new(0, 4);
         let bl = Pos::new(4, 0);

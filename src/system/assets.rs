@@ -8,7 +8,7 @@ use crate::resource::{
     Assets, EntityTemplate, GameStage, GameState, GeographyTemplate, Icon, StructureTemplate,
 };
 
-fn type_dir<'a>(template_type: AssetType) -> String {
+fn type_dir(template_type: AssetType) -> String {
     match template_type {
         AssetType::Icon => format!("{}/{}", ICON_DIR, "icons"),
         AssetType::Entity => format!("{}/{}", TEMPLATE_DIR, "entities"),

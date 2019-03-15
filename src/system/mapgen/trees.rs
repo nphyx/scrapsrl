@@ -1,12 +1,12 @@
 /*
  * TODO FIXME this whole module is presently unused and needs reimplementation someday
 use super::util::*;
-use crate::component::{Color, Description, Position};
+use crate::component::{Color, Description, Pos};
 use crate::resource::{AreaMap, Tile};
 use crate::util::*;
 
 fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
-    let pos = Position { x: cx, y: cy };
+    let pos = Pos { x: cx, y: cy };
     let fg = Color { r: 14, g: 10, b: 3 };
     let bg: Color;
     if let Some(tile) = map.get(pos) {

@@ -19,7 +19,7 @@ impl Color {
         Color { r, g, b }
     }
 
-    pub fn to_tuple(&self) -> (u8, u8, u8) {
+    pub fn to_tuple(self) -> (u8, u8, u8) {
         (self.r, self.g, self.b)
     }
 }
