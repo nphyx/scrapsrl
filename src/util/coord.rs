@@ -9,13 +9,10 @@ use std::ops::{AddAssign, SubAssign};
  * A positional coordinate.
  */
 
-#[derive(
-    Copy, Clone, Debug, Eq, PartialEq, Hash, Default, Deserialize, Serialize, Ord, PartialOrd,
-)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Default, Deserialize, Serialize, Ord, PartialOrd)]
 pub struct Coord<Integer> {
-    // y, x reversed here for row-wise ordering
-    pub y: Integer,
     pub x: Integer,
+    pub y: Integer,
 }
 
 impl Component for Coord<u32> {
@@ -30,9 +27,14 @@ impl Component for Coord<usize> {
     type Storage = VecStorage<Self>;
 }
 
-impl<T: Integer> Coord<T> {
+impl<T: Integer + Clone> Coord<T> {
     pub fn new(x: T, y: T) -> Coord<T> {
         Coord { x, y }
+    }
+
+    /// this is used exclusively in ndarray lookups, which use a flipped axis order (y, x)
+    pub fn as_tuple(&self) -> (T, T) {
+        (self.y.clone(), self.x.clone())
     }
 }
 
@@ -125,5 +127,32 @@ impl From<Coord<i32>> for Coord<usize> {
             x: coord.x as usize,
             y: coord.y as usize,
         }
+    }
+}
+
+impl<T: std::fmt::Debug> std::fmt::Debug for Coord<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Coord({:?}, {:?})", self.x, self.y)
+    }
+}
+
+impl<T: std::fmt::Display> std::fmt::Display for Coord<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn coord_debug() {
+        assert_eq!(format!("{:?}", Coord::new(1, 1)), "Coord(1, 1)");
+    }
+
+    #[test]
+    fn coord_display() {
+        assert_eq!(format!("{}", Coord::new(1, 1)), "(1, 1)");
     }
 }

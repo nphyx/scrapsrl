@@ -4,7 +4,7 @@ use std::cmp::PartialOrd;
 use std::ops::{AddAssign, SubAssign};
 use wfc::Size;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub struct Rect<T> {
     /// top left corner
     pub t_l: Coord<T>,
@@ -358,10 +358,33 @@ impl Iterator for RectColIter<usize> {
     }
 }
 
+impl<T: std::fmt::Debug> std::fmt::Debug for Rect<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Rect({:?}, {:?})", self.t_l, self.b_r)
+    }
+}
+
+impl<T: std::fmt::Display> std::fmt::Display for Rect<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Rect({}, {})", self.t_l, self.b_r)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::component::Pos;
+
+    #[test]
+    fn rect_contains() {
+        let rect = Rect::new(Pos::new(1, 1), Pos::new(4, 4));
+        assert!(rect.contains(Rect::new(Pos::new(1, 1), Pos::new(2, 2))));
+        assert!(rect.contains(Rect::new(Pos::new(1, 1), Pos::new(4, 4))));
+        assert!(!rect.contains(Rect::new(Pos::new(1, 1), Pos::new(5, 5))));
+        assert!(!rect.contains(Rect::new(Pos::new(0, 0), Pos::new(2, 2))));
+        assert!(!rect.contains(Rect::new(Pos::new(4, 4), Pos::new(7, 7))));
+    }
+
     #[test]
     fn rect_iter() {
         {

@@ -136,10 +136,7 @@ pub fn scatter(
                 ));
                 if i < scatter_obj.frequency {
                     let icon = templates.get_icon(&scatter_obj.icon.name).base_ch();
-                    let mut bg = Color::default();
-                    if let Some(tile) = map.get(pos) {
-                        bg = tile.bg;
-                    }
+                    let bg = map.get(pos).bg;
                     queue.insert(
                         pos,
                         Tile::new(

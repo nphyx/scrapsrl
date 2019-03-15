@@ -110,33 +110,25 @@ impl ConnectableChars {
     pub fn connect(
         &self,
         orig: char,
-        up: Option<char>,
-        down: Option<char>,
-        left: Option<char>,
-        right: Option<char>,
+        up: char,
+        down: char,
+        left: char,
+        right: char,
     ) -> Option<char> {
         let chosen: char;
         if let Some(connectable) = self.map.get(&orig) {
             let mut matched = (false, false, false, false);
-            if let Some(ch) = up {
-                if ch == connectable.base {
-                    matched.0 = true;
-                }
+            if up == connectable.base {
+                matched.0 = true;
             }
-            if let Some(ch) = down {
-                if ch == connectable.base {
-                    matched.1 = true;
-                }
+            if down == connectable.base {
+                matched.1 = true;
             }
-            if let Some(ch) = left {
-                if ch == connectable.base {
-                    matched.2 = true;
-                }
+            if left == connectable.base {
+                matched.2 = true;
             }
-            if let Some(ch) = right {
-                if ch == connectable.base {
-                    matched.3 = true;
-                }
+            if right == connectable.base {
+                matched.3 = true;
             }
             match matched {
                 (true, true, false, false) => chosen = connectable.vertical_line,

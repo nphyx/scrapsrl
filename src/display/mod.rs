@@ -539,9 +539,7 @@ impl Display {
                 }
             }
             if !found_entity {
-                if let Some(tile) = map.get(cursor_pos) {
-                    ui::draw_tile_info(&self.root, tile);
-                }
+                ui::draw_tile_info(&self.root, map.get(cursor_pos));
             }
         }
 

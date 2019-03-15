@@ -54,15 +54,7 @@ impl<'a> System<'a> for Movement {
             match solid {
                 Some(_) => {
                     // got a solid, so run collision checks
-                    match map.get(new_pos) {
-                        // check the tileset first
-                        Some(tile) => {
-                            ok = tile.walkable;
-                        }
-                        None => {
-                            ok = false;
-                        } // there's no tile there? don't walk on it then...
-                    }
+                    ok = map.get(new_pos).walkable;
                     // if we're still ok, check if there's a colliding object
                     if ok {
                         ok = !collision_maps.get(*region, new_pos);

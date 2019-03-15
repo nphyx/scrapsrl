@@ -33,12 +33,10 @@ impl<'a> System<'a> for AI {
                             x: pos.x as i32 + to.x,
                             y: pos.y as i32 + to.y,
                         };
-                        if let Some(tile) = map.get(Pos::from(target)) {
-                            if tile.walkable {
-                                plan.x = to.x;
-                                plan.y = to.y;
-                                done = true;
-                            }
+                        if map.get(Pos::from(target)).walkable {
+                            plan.x = to.x;
+                            plan.y = to.y;
+                            done = true;
                         }
                         tries += 1;
                     }

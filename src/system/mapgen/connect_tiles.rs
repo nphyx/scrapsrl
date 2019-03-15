@@ -61,28 +61,27 @@ pub fn connect(map: &mut AreaMap) {
     let connectables = ConnectableChars::new();
     let mut queue: Vec<(Pos, char)> = Vec::new();
     for pos in map.bounds().iter() {
-        if let Some(t) = map.get(pos) {
-            if let Some(icon) = connectables.connect(
-                t.icon,
-                map.get_icon(Pos {
-                    x: pos.x,
-                    y: pos.y - 1,
-                }),
-                map.get_icon(Pos {
-                    x: pos.x,
-                    y: pos.y + 1,
-                }),
-                map.get_icon(Pos {
-                    x: pos.x - 1,
-                    y: pos.y,
-                }),
-                map.get_icon(Pos {
-                    x: pos.x + 1,
-                    y: pos.y,
-                }),
-            ) {
-                queue.push((pos, icon));
-            }
+        let t = map.get(pos);
+        if let Some(icon) = connectables.connect(
+            t.icon,
+            map.get_icon(Pos {
+                x: pos.x,
+                y: (pos.y as i32 - 1).min(0) as usize,
+            }),
+            map.get_icon(Pos {
+                x: pos.x,
+                y: (pos.y + 1).max(map.height()),
+            }),
+            map.get_icon(Pos {
+                x: (pos.x as i32 - 1).min(0) as usize,
+                y: pos.y,
+            }),
+            map.get_icon(Pos {
+                x: (pos.x + 1).max(map.width()),
+                y: pos.y,
+            }),
+        ) {
+            queue.push((pos, icon));
         }
     }
 

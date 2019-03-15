@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate specs_derive;
+#[macro_use(s)]
+extern crate ndarray;
 use specs::{Builder, DispatcherBuilder, RunNow, World as Game};
 
 mod component;

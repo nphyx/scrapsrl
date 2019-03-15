@@ -37,20 +37,18 @@ fn place_car(
     let icon = &VEHICLES[(v * VEHICLES.len() as f32).floor() as usize].to_string();
     let i = turb_offset(noise, pos.to_array(), offset, scale, 32);
     let fg = lerp(color_good, color_bad, i * damage_factor);
-    if let Some(tile) = map.get(pos) {
-        map.set(
-            pos,
-            Tile::new(
-                assets.get_icon(icon).base_ch(),
-                fg,
-                tile.bg,
-                true,
-                false,
-                true,
-                Description::new("vehicle", "the rusted hulk of an old automobile"),
-            ),
-        )
-    }
+    map.set(
+        pos,
+        Tile::new(
+            assets.get_icon(icon).base_ch(),
+            fg,
+            map.get(pos).bg,
+            true,
+            false,
+            true,
+            Description::new("vehicle", "the rusted hulk of an old automobile"),
+        ),
+    );
 }
 
 fn damaged_road(ground_bg: Color, road_bg: Color, blend_factor: f32) -> Tile {
@@ -117,7 +115,7 @@ pub fn place_horizontal_roads(
     let road_rubble: char = '\u{e35d}';
     let mut segment_icon: char;
     let mut fg: Color;
-    let mut ground_bg = Color::new(0, 0, 0);
+    let mut ground_bg: Color;
 
     for cx in 0..map.width() {
         let y = road_center_longitudinal(noise, world, map, region, cx);
@@ -135,9 +133,7 @@ pub fn place_horizontal_roads(
             let pos = Pos { x: cx, y: cy };
 
             if i < damage_factor {
-                if let Some(tile) = map.get(pos) {
-                    ground_bg = tile.bg;
-                }
+                ground_bg = map.get(pos).bg;
                 map.set(pos, damaged_road(ground_bg, bg, i));
                 continue;
             }
@@ -156,7 +152,7 @@ pub fn place_horizontal_roads(
                     segment_icon = dashed;
                 }
                 fg = road_line_center;
-            } else if (cy - y) % 2 == 0 {
+            } else if (cy as i32 - y as i32) % 2 == 0 {
                 // place a lane divider
                 segment_icon = dashed;
                 fg = road_line_fg;
@@ -168,11 +164,9 @@ pub fn place_horizontal_roads(
 
             // check if overlapping a horizontal road and draw correct tile
             // if so
-            if let Some(tile) = map.get(pos) {
-                if tile.constructed {
-                    segment_icon = road_rubble;
-                    fg = road_rubble_fg;
-                }
+            if map.get(pos).constructed {
+                segment_icon = road_rubble;
+                fg = road_rubble_fg;
             }
 
             map.set(pos, road_segment(segment_icon, fg, bg));
@@ -213,7 +207,7 @@ pub fn place_vertical_roads(
     let offset = region.to_offset();
 
     let road_rubble: char = '\u{e35d}';
-    let mut ground_bg = Color::new(0, 0, 0);
+    let mut ground_bg: Color;
     let mut segment_icon: char;
     let mut fg: Color;
 
@@ -226,9 +220,7 @@ pub fn place_vertical_roads(
             let i = rand_up(turb_offset(noise, pos.to_array(), offset, noise_scale, 32));
 
             if i < damage_factor {
-                if let Some(tile) = map.get(pos) {
-                    ground_bg = tile.bg;
-                }
+                ground_bg = map.get(pos).bg;
                 map.set(pos, damaged_road(ground_bg, bg, i));
                 continue;
             }
@@ -247,7 +239,7 @@ pub fn place_vertical_roads(
                     segment_icon = dashed;
                 }
                 fg = road_line_center;
-            } else if (cx - x) % 2 == 0 {
+            } else if (cx as i32 - x as i32) % 2 == 0 {
                 // place a lane divider
                 segment_icon = dashed;
                 fg = road_line_fg;
@@ -259,11 +251,9 @@ pub fn place_vertical_roads(
 
             // check if overlapping a horizontal road and draw correct tile
             // if so
-            if let Some(tile) = map.get(pos) {
-                if tile.constructed {
-                    segment_icon = road_rubble;
-                    fg = road_rubble_fg;
-                }
+            if map.get(pos).constructed {
+                segment_icon = road_rubble;
+                fg = road_rubble_fg;
             }
 
             map.set(pos, road_segment(segment_icon, fg, bg));

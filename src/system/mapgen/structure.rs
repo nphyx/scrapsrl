@@ -67,12 +67,10 @@ pub fn build(
         while tries < max_tries {
             top_left.x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
             top_left.y = choose(&vert, rng.gen_range(0.0, 1.0)).unwrap_or(0);
-            if let Some(tile) = map.get(top_left) {
-                if tile.constructed {
-                    tries += 1;
-                } else {
-                    break;
-                }
+            if map.get(top_left).constructed {
+                tries += 1;
+            } else {
+                break;
             }
         }
         if tries >= max_tries {
