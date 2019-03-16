@@ -195,6 +195,9 @@ impl<T: Default + Clone> Grid<T> {
         if self.bounds.contains(rect) {
             let width = rect.width();
             let height = rect.height();
+            // this macro doesn't seem to allow avoiding this clippy complaint
+            // and it's not a big deal
+            #[allow(clippy::deref_addrof)]
             let mut subgrid: Grid<T> = Grid {
                 bounds: rect,
                 contents: self

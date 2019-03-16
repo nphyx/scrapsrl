@@ -74,9 +74,14 @@ impl AreaMap {
         self.grid.try_set(pos, tile)
     }
 
-    /// Shortcut function for setting the icon for a tile.
+    /// Shortcut function for setting the icon for a tile. If the tile doesn't
+    /// exist for some reason (e.g. out of bounds) it fails quietly. This shouldn't
+    /// be a problem, typically means something went midly haywire during map
+    /// generation, which we don't want to panic on.
     pub fn set_icon(&mut self, pos: Pos, icon: char) {
-        self.grid.maybe_get_mut(pos).map(|t| t.icon = icon);
+        if let Some(tile) = self.grid.maybe_get_mut(pos) {
+            tile.icon = icon
+        };
     }
 
     pub fn iter(&self) -> AreaMapIter<'_> {
@@ -86,6 +91,7 @@ impl AreaMap {
         }
     }
 
+    #[allow(unused)]
     pub fn bounding_rect(&self) -> Rect<usize> {
         self.grid.bounds
     }
