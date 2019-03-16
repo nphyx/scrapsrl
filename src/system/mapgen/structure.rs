@@ -31,10 +31,9 @@ fn choose_structure_dimensions(
     let width_range: Vec<usize> = (structure.min_width..=structure.max_width).collect();
 
     let height_range: Vec<usize> = (structure.min_height..=structure.max_height).collect();
-    // these are -2 to give space for the structure perimeter
     let b_r = Pos::new(
-        (choose(&width_range, sample).unwrap_or(0) + t_l.x).min(map.width() - 2),
-        (choose(&height_range, sample).unwrap_or(0) + t_l.y).min(map.height() - 2),
+        (choose(&width_range, sample).unwrap_or(0) + t_l.x).min(map.width() - 1),
+        (choose(&height_range, sample).unwrap_or(0) + t_l.y).min(map.height() - 1),
     );
     // first check we can fit the structure in here
     map.fit_rect(Rect::new(t_l, b_r))
@@ -82,17 +81,16 @@ pub fn build(
         if let Some(structure) =
             choose_structure(assets, noise, top_left.to_array(), offset, &map.geography)
         {
-            let bounds = choose_structure_dimensions(sample, map, top_left, &structure);
+            let mut bounds = choose_structure_dimensions(sample, map, top_left, &structure);
 
             // now place a structure of the size we've found
             if structure.fits_in(bounds) {
                 let mut subgrid: Grid<Tile> = Grid::with_bounds(bounds); //map.subgrid(available_area)?;
-                let mut bounds = map.bounding_rect();
                 count += structure.building_slots;
                 // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
                 let wall = structure.perimeter_tile.to_tile(assets);
                 for pos in bounds.iter_perimeter() {
-                    subgrid.set(pos, wall.clone());
+                    subgrid.try_set(pos, wall.clone()).ok();
                 }
                 bounds.shrink_perimeter(1);
                 populate_structure(assets, &mut subgrid, &bounds, &structure, &mut rng);
@@ -107,15 +105,15 @@ use crate::resource::Tile;
 use rand_pcg::*;
 fn populate_structure(
     assets: &Assets,
-    map_grid: &mut Grid<Tile>,
-    room: &Rect<usize>,
+    structure_grid: &mut Grid<Tile>,
+    bounds: &Rect<usize>,
     structure: &StructureTemplate,
     rng: &mut Pcg32,
 ) {
     use wfc::{retry::NumTimes, wrap::WrapNone, RunOwn};
     let table = structure.get_pattern_table();
     let stats = wfc::GlobalStats::new(table);
-    let wfc_runner = RunOwn::new_wrap(room.to_wave_size(), &stats, WrapNone, rng);
+    let wfc_runner = RunOwn::new_wrap(bounds.to_wave_size(), &stats, WrapNone, rng);
     let wave = wfc_runner
         .collapse_retrying(NumTimes(1000), rng)
         .expect("failed to generate structure");
@@ -123,7 +121,7 @@ fn populate_structure(
     let mapchar = structure.get_mapchar();
     grid.enumerate().for_each(|(coord, wc)| {
         let tile = structure.get_tile(mapchar[&wc.chosen_pattern_id().expect("")]);
-        let pos = Pos::from(coord) + room.t_l;
-        map_grid.set(pos, tile.to_tile(assets))
+        let pos = Pos::from(coord) + bounds.t_l;
+        structure_grid.unchecked_set(pos, tile.to_tile(assets))
     });
 }

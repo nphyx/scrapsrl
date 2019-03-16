@@ -25,8 +25,21 @@ impl<T> Grid<T> {
         &mut self.contents[(pos - self.bounds.t_l).as_tuple()]
     }
 
+    #[deprecated]
     pub fn set(&mut self, pos: Pos, entry: T) {
         self.contents[(pos - self.bounds.t_l).as_tuple()] = entry;
+    }
+
+    pub fn unchecked_set(&mut self, pos: Pos, entry: T) {
+        self.contents[(pos - self.bounds.t_l).as_tuple()] = entry;
+    }
+
+    pub fn try_set(&mut self, pos: Pos, entry: T) -> Result<bool, &'static str> {
+        if self.bounds.includes(pos) {
+            self.contents[(pos - self.bounds.t_l).as_tuple()] = entry;
+            return Ok(true);
+        }
+        Err("out of bounds")
     }
 
     #[deprecated]
@@ -39,6 +52,12 @@ impl<T> Grid<T> {
     /// uses a stack-based solution for determining the largest rectangle in
     /// each column, then picks the overall largest
     pub fn fit_rect(&self, bounds: Rect<usize>, occupied: &Fn(&T) -> bool) -> Rect<usize> {
+        if (!self.bounds.contains(bounds)) {
+            // this shouldn't happen but it isn't fatal, let's log it so we can look into it
+            // further
+            println!("warning: tried to fit_rect on a map but the rect outside the map bounds");
+            return Rect::new(Pos::new(0, 0), Pos::new(0, 0));
+        }
         // this is our height histogram, we populate it from the map
         let mut cells: Grid<usize> = Grid::with_bounds(bounds);
         let mut height: usize = 0;
@@ -51,12 +70,12 @@ impl<T> Grid<T> {
                     } else {
                         height += 1
                     }
-                    cells.set(pos, height);
+                    cells.unchecked_set(pos, height);
                 }
             }
             height = 0;
         }
-        dbg!(&cells);
+        // dbg!(&cells); FIXME create a debug CLI option and then do this when it's enabled
 
         // solve largest rectangle in histogram for each column
         let mut stack: Vec<(usize, usize)> = Vec::new();
@@ -162,7 +181,7 @@ impl<T: Default + Clone> Grid<T> {
     pub fn paste_into(&mut self, t_l: Pos, mut subgrid: Grid<T>) -> Result<bool, &'static str> {
         if self.bounds.contains(subgrid.bounds) {
             for pos in subgrid.bounds.iter() {
-                self.set(pos + t_l, subgrid.get(pos).clone());
+                self.unchecked_set(pos + t_l, subgrid.get(pos).clone());
             }
             return Ok(true);
         }
@@ -297,24 +316,24 @@ mod tests {
          6 . # . . . . . .
          7 . # . . . . . #
         */
-        grid.set(Pos::new(0, 5), true);
-        grid.set(Pos::new(1, 3), true);
-        grid.set(Pos::new(1, 4), true);
-        grid.set(Pos::new(1, 5), true);
-        grid.set(Pos::new(1, 6), true);
-        grid.set(Pos::new(1, 7), true);
-        grid.set(Pos::new(2, 0), true);
-        grid.set(Pos::new(2, 1), true);
-        grid.set(Pos::new(2, 2), true);
-        grid.set(Pos::new(2, 5), true);
-        grid.set(Pos::new(3, 5), true);
-        grid.set(Pos::new(4, 1), true);
-        grid.set(Pos::new(4, 4), true);
-        grid.set(Pos::new(5, 4), true);
-        grid.set(Pos::new(6, 4), true);
-        grid.set(Pos::new(7, 2), true);
-        grid.set(Pos::new(7, 4), true);
-        grid.set(Pos::new(7, 7), true);
+        grid.unchecked_set(Pos::new(0, 5), true);
+        grid.unchecked_set(Pos::new(1, 3), true);
+        grid.unchecked_set(Pos::new(1, 4), true);
+        grid.unchecked_set(Pos::new(1, 5), true);
+        grid.unchecked_set(Pos::new(1, 6), true);
+        grid.unchecked_set(Pos::new(1, 7), true);
+        grid.unchecked_set(Pos::new(2, 0), true);
+        grid.unchecked_set(Pos::new(2, 1), true);
+        grid.unchecked_set(Pos::new(2, 2), true);
+        grid.unchecked_set(Pos::new(2, 5), true);
+        grid.unchecked_set(Pos::new(3, 5), true);
+        grid.unchecked_set(Pos::new(4, 1), true);
+        grid.unchecked_set(Pos::new(4, 4), true);
+        grid.unchecked_set(Pos::new(5, 4), true);
+        grid.unchecked_set(Pos::new(6, 4), true);
+        grid.unchecked_set(Pos::new(7, 2), true);
+        grid.unchecked_set(Pos::new(7, 4), true);
+        grid.unchecked_set(Pos::new(7, 7), true);
 
         grid
     }
@@ -404,10 +423,10 @@ mod tests {
          1 # . #
          2 . # .
         */
-        subgrid.set(Pos::new(0, 0), true);
-        subgrid.set(Pos::new(0, 1), true);
-        subgrid.set(Pos::new(2, 1), true);
-        subgrid.set(Pos::new(1, 2), true);
+        subgrid.unchecked_set(Pos::new(0, 0), true);
+        subgrid.unchecked_set(Pos::new(0, 1), true);
+        subgrid.unchecked_set(Pos::new(2, 1), true);
+        subgrid.unchecked_set(Pos::new(1, 2), true);
         {
             let t_l = Pos::new(0, 0);
             if let Ok(_) = grid.paste_into(t_l, subgrid.clone()) {

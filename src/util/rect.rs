@@ -23,7 +23,7 @@ impl Rect<usize> {
 
     pub fn to_wave_size(&self) -> Size {
         // wave size is exclusive of bottom/right bounds
-        Size::new((self.width() + 1) as u32, (self.height() + 1) as u32)
+        Size::new(self.width() as u32, self.height() as u32)
     }
 }
 
@@ -37,9 +37,10 @@ impl Rect<i32> {
         (self.b_r.y - self.t_l.y + 1) as usize
     }
 
+    #[deprecated]
     pub fn to_wave_size(&self) -> Size {
         // wave size is exclusive of bottom/right bounds
-        Size::new((self.width() + 1) as u32, (self.height() + 1) as u32)
+        Size::new(self.width() as u32, self.height() as u32)
     }
 
     /// iterates row-wise through all positions in the rectangle

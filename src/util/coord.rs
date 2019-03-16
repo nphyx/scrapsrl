@@ -74,8 +74,8 @@ impl<T: Integer + SubAssign> std::ops::SubAssign<Coord<T>> for Coord<T> {
 
 impl From<wfc::Coord> for Coord<usize> {
     fn from(other: wfc::Coord) -> Coord<usize> {
-        assert!(other.x > 0);
-        assert!(other.y > 0);
+        assert!(other.x >= 0);
+        assert!(other.y >= 0);
         Coord {
             x: other.x as usize,
             y: other.y as usize,

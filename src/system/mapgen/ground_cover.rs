@@ -97,7 +97,7 @@ pub fn base(
         let fg = select_fg(&map.geography, i);
         let selected_cover = select_ground_cover(&map.geography, i);
         let icon = templates.get_icon(&selected_cover.icon.name).base_ch();
-        map.set(
+        map.unchecked_set(
             pos,
             Tile::new(
                 icon,
@@ -153,7 +153,7 @@ pub fn scatter(
             }
         }
         for (pos, tile) in queue.into_iter() {
-            map.set(pos, tile);
+            map.unchecked_set(pos, tile);
         }
     }
 }

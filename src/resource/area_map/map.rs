@@ -65,8 +65,12 @@ impl AreaMap {
         self.grid.get(pos).icon
     }
 
-    pub fn set(&mut self, pos: Pos, tile: Tile) {
-        self.grid.set(pos, tile)
+    pub fn unchecked_set(&mut self, pos: Pos, tile: Tile) {
+        self.grid.unchecked_set(pos, tile)
+    }
+
+    pub fn try_set(&mut self, pos: Pos, tile: Tile) -> Result<bool, &'static str> {
+        self.grid.try_set(pos, tile)
     }
 
     pub fn set_icon(&mut self, pos: Pos, icon: char) {

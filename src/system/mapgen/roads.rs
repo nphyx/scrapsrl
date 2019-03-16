@@ -37,7 +37,7 @@ fn place_car(
     let icon = &VEHICLES[(v * VEHICLES.len() as f32).floor() as usize].to_string();
     let i = turb_offset(noise, pos.to_array(), offset, scale, 32);
     let fg = lerp(color_good, color_bad, i * damage_factor);
-    map.set(
+    map.try_set(
         pos,
         Tile::new(
             assets.get_icon(icon).base_ch(),
@@ -48,7 +48,8 @@ fn place_car(
             true,
             Description::new("vehicle", "the rusted hulk of an old automobile"),
         ),
-    );
+    )
+    .ok();
 }
 
 fn damaged_road(ground_bg: Color, road_bg: Color, blend_factor: f32) -> Tile {
@@ -134,7 +135,7 @@ pub fn place_horizontal_roads(
 
             if i < damage_factor {
                 ground_bg = map.get(pos).bg;
-                map.set(pos, damaged_road(ground_bg, bg, i));
+                map.try_set(pos, damaged_road(ground_bg, bg, i)).ok();
                 continue;
             }
 
@@ -169,7 +170,7 @@ pub fn place_horizontal_roads(
                 fg = road_rubble_fg;
             }
 
-            map.set(pos, road_segment(segment_icon, fg, bg));
+            map.try_set(pos, road_segment(segment_icon, fg, bg)).ok();
 
             place_car(assets, noise, map, pos, offset, noise_scale, damage_factor);
         }
@@ -221,7 +222,7 @@ pub fn place_vertical_roads(
 
             if i < damage_factor {
                 ground_bg = map.get(pos).bg;
-                map.set(pos, damaged_road(ground_bg, bg, i));
+                map.try_set(pos, damaged_road(ground_bg, bg, i)).ok();
                 continue;
             }
 
@@ -256,7 +257,7 @@ pub fn place_vertical_roads(
                 fg = road_rubble_fg;
             }
 
-            map.set(pos, road_segment(segment_icon, fg, bg));
+            map.try_set(pos, road_segment(segment_icon, fg, bg)).ok();
 
             place_car(assets, noise, map, pos, offset, noise_scale, damage_factor);
         }
