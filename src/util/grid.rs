@@ -298,7 +298,7 @@ impl std::fmt::Debug for Grid<bool> {
                         "{: >2} |{}\n",
                         x - 1 + self.bounds.t_l.y,
                         row.iter()
-                            .map(|i| if *i { "#" } else { "." })
+                            .map(|i| if *i { " #" } else { " ." })
                             .collect::<String>(),
                     )
                 })
@@ -347,12 +347,12 @@ mod tests {
     #[test]
     /// test bool debug output
     fn grid_debug_bool() {
-        let grid: Grid<bool> = Grid::with_dimensions(2, 2);
-        grid.unchecked_set(Position::new(0, 0), true);
-        grid.unchecked_set(Position::new(1, 1), true);
+        let mut grid: Grid<bool> = Grid::with_dimensions(2, 2);
+        grid.unchecked_set(Pos::new(0, 0), true);
+        grid.unchecked_set(Pos::new(1, 1), true);
         assert_eq!(
             format!("{:?}", grid),
-            "\n\n   | 0 1\n---+--\n 0 | # .\n 1 | . #\n"
+            "\n\n   | 0 1\n---+----\n 0 | # .\n 1 | . #\n"
         );
     }
 

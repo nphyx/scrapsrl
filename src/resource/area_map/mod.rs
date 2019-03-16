@@ -1,6 +1,6 @@
 use crate::component::Region;
 use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
-use crate::util::{Coord, Rect};
+use crate::util::Rect;
 
 mod iterators;
 mod map;
@@ -24,19 +24,14 @@ impl AreaMaps {
     /// initialize new maps for a given <center> and <radius> radius
     /// Note that radius extends from the edge of the center, so a "size 2" map is 5x5
     pub fn init(&mut self, center: Region, size: u8) {
-        println!("SELECTED MAP DIMENSIONS: ({},{})", WIDTH, HEIGHT);
         let s = i32::from(size); // size is only u8 to enforce an unsigned parameter
         let mut count: i32 = 0;
-        let surrounding_maps: Rect<i32> = Rect {
-            t_l: Coord::new(center.x - s, center.y - s),
-            b_r: Coord::new(center.y + s, center.y + s),
+        let mut surrounding_maps: Rect<i32> = Rect {
+            t_l: center.into(),
+            b_r: center.into(),
         };
-        /*
-        let min_x = center.x - s;
-        let max_x = center.x + s + 1;
-        let min_y = center.y - s;
-        let max_y = center.y + s + 1;
-        */
+        surrounding_maps.expand_perimeter(s);
+
         for region in surrounding_maps.iter() {
             self.maps.entry(region.into()).or_insert_with(|| {
                 count += 1;
@@ -88,9 +83,11 @@ impl AreaMaps {
         let s = i32::from(size);
         let mut count: u32 = 0;
         let mut marked: Vec<Region> = Vec::new();
+        let mut bounds = Rect::new(center.into(), center.into());
+        bounds.expand_perimeter(s);
         for (region, _) in self.maps.iter() {
-            if (center.x - region.x).abs() > s || (center.y - region.y).abs() > s {
-                marked.push(region.clone());
+            if !bounds.includes((*region).into()) {
+                marked.push(*region);
             }
         }
         for mark in marked {

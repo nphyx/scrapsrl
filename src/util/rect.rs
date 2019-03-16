@@ -12,6 +12,50 @@ pub struct Rect<T> {
     pub b_r: Coord<T>,
 }
 
+impl<T: Integer + PartialOrd + AddAssign + SubAssign + Copy> Rect<T> {
+    pub fn new(t_l: Coord<T>, b_r: Coord<T>) -> Rect<T> {
+        Rect { t_l, b_r }
+    }
+
+    /// checks whether the given pos is within the bounds of the rectangle
+    pub fn includes(&self, coord: Coord<T>) -> bool {
+        coord.x >= self.t_l.x
+            && coord.y >= self.t_l.y
+            && coord.x <= self.b_r.x
+            && coord.y <= self.b_r.y
+    }
+
+    pub fn contains(&self, rect: Rect<T>) -> bool {
+        self.includes(rect.t_l) && self.includes(rect.b_r)
+    }
+
+    #[allow(unused)]
+    pub fn is_corner(&self, coord: Coord<T>) -> bool {
+        coord == self.t_l
+            || coord == self.b_r
+            || (coord == Coord::new(self.t_l.x, self.b_r.y))
+            || (coord == Coord::new(self.b_r.x, self.t_l.y))
+    }
+
+    #[allow(unused)]
+    /// expands the perimeter by <n> on each side
+    pub fn expand_perimeter(&mut self, n: T) {
+        self.t_l.x -= n;
+        self.t_l.y -= n;
+        self.b_r.x += n;
+        self.b_r.y += n;
+    }
+
+    #[allow(unused)]
+    /// expands the perimeter by <n> on each side
+    pub fn shrink_perimeter(&mut self, n: T) {
+        self.t_l.x += n;
+        self.t_l.y += n;
+        self.b_r.x -= n;
+        self.b_r.y -= n;
+    }
+}
+
 impl Rect<usize> {
     pub fn width(&self) -> usize {
         self.b_r.x - self.t_l.x + 1
@@ -65,50 +109,6 @@ impl Rect<u32> {
     pub fn to_wave_size(&self) -> Size {
         // wave size is exclusive of bottom/right bounds
         Size::new((self.width() + 1) as u32, (self.height() + 1) as u32)
-    }
-}
-
-impl<T: Integer + PartialOrd + AddAssign + SubAssign + Into<usize> + Copy> Rect<T> {
-    pub fn new(t_l: Coord<T>, b_r: Coord<T>) -> Rect<T> {
-        Rect { t_l, b_r }
-    }
-
-    /// checks whether the given pos is within the bounds of the rectangle
-    pub fn includes(&self, coord: Coord<T>) -> bool {
-        coord.x >= self.t_l.x
-            && coord.y >= self.t_l.y
-            && coord.x <= self.b_r.x
-            && coord.y <= self.b_r.y
-    }
-
-    pub fn contains(&self, rect: Rect<T>) -> bool {
-        self.includes(rect.t_l) && self.includes(rect.b_r)
-    }
-
-    #[allow(unused)]
-    /// expands the perimeter by <n> on each side
-    pub fn expand_perimeter(&mut self, n: T) {
-        self.t_l.x -= n;
-        self.t_l.y -= n;
-        self.b_r.x += n;
-        self.b_r.y += n;
-    }
-
-    #[allow(unused)]
-    /// expands the perimeter by <n> on each side
-    pub fn shrink_perimeter(&mut self, n: T) {
-        self.t_l.x += n;
-        self.t_l.y += n;
-        self.b_r.x -= n;
-        self.b_r.y -= n;
-    }
-
-    #[allow(unused)]
-    pub fn is_corner(&self, coord: Coord<T>) -> bool {
-        coord == self.t_l
-            || coord == self.b_r
-            || (coord == Coord::new(self.t_l.x, self.b_r.y))
-            || (coord == Coord::new(self.b_r.x, self.t_l.y))
     }
 }
 
@@ -384,6 +384,17 @@ mod tests {
         assert!(!rect.contains(Rect::new(Pos::new(1, 1), Pos::new(5, 5))));
         assert!(!rect.contains(Rect::new(Pos::new(0, 0), Pos::new(2, 2))));
         assert!(!rect.contains(Rect::new(Pos::new(4, 4), Pos::new(7, 7))));
+    }
+
+    #[test]
+    fn expand_perimeter() {
+        let center: Coord<i32> = Coord::new(0, 0);
+        let t_l: Coord<i32> = Coord::new(-2, -2);
+        let b_r: Coord<i32> = Coord::new(2, 2);
+        let mut rect: Rect<i32> = Rect::new(center, center);
+        rect.expand_perimeter(2);
+        assert_eq!(rect.t_l, t_l);
+        assert_eq!(rect.b_r, b_r);
     }
 
     #[test]
