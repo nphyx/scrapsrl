@@ -21,7 +21,7 @@ impl<'a> Iterator for AreaMapIter<'a> {
             return None;
         }
         let pos = Pos::new(x, y);
-        let res = (pos, self.map.get(pos));
+        let res = (pos, self.map.get(pos).unwrap());
         self.cur = [x + 1, y];
         Some(res)
     }

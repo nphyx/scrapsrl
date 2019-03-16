@@ -31,6 +31,7 @@ fn place_car(
     if car_chance < 0.95 {
         return;
     }
+    let default_bg = Color::new(4, 4, 4);
     let color_good = Color::new(68, 68, 68);
     let color_bad = Color::new(38, 10, 8);
     let v = rand_up(fbm_offset(noise, pos.to_array(), offset, 10.0, 1));
@@ -42,7 +43,7 @@ fn place_car(
         Tile::new(
             assets.get_icon(icon).base_ch(),
             fg,
-            map.get(pos).bg,
+            map.get(pos).map_or(default_bg, |t| t.bg),
             true,
             false,
             true,
@@ -104,7 +105,8 @@ pub fn place_horizontal_roads(
         g: 90,
         b: 61,
     };
-    let bg = Color { r: 4, g: 4, b: 4 };
+    let default_bg = Color { r: 4, g: 4, b: 4 };
+    let bg = default_bg;
     let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
 
     let dashed = assets.get_icon("line_emdash").base_ch();
@@ -134,7 +136,7 @@ pub fn place_horizontal_roads(
             let pos = Pos { x: cx, y: cy };
 
             if i < damage_factor {
-                ground_bg = map.get(pos).bg;
+                ground_bg = map.get(pos).map_or(default_bg, |t| t.bg);
                 map.try_set(pos, damaged_road(ground_bg, bg, i)).ok();
                 continue;
             }
@@ -165,7 +167,7 @@ pub fn place_horizontal_roads(
 
             // check if overlapping a horizontal road and draw correct tile
             // if so
-            if map.get(pos).constructed {
+            if map.get(pos).map_or(false, |t| t.constructed) {
                 segment_icon = road_rubble;
                 fg = road_rubble_fg;
             }
@@ -198,7 +200,8 @@ pub fn place_vertical_roads(
         g: 90,
         b: 61,
     };
-    let bg = Color { r: 4, g: 4, b: 4 };
+    let default_bg = Color { r: 4, g: 4, b: 4 };
+    let bg = default_bg;
     let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
 
     let dashed = '|';
@@ -221,7 +224,7 @@ pub fn place_vertical_roads(
             let i = rand_up(turb_offset(noise, pos.to_array(), offset, noise_scale, 32));
 
             if i < damage_factor {
-                ground_bg = map.get(pos).bg;
+                ground_bg = map.get(pos).map_or(default_bg, |t| t.bg);
                 map.try_set(pos, damaged_road(ground_bg, bg, i)).ok();
                 continue;
             }
@@ -252,7 +255,7 @@ pub fn place_vertical_roads(
 
             // check if overlapping a horizontal road and draw correct tile
             // if so
-            if map.get(pos).constructed {
+            if map.get(pos).map_or(false, |t| t.constructed) {
                 segment_icon = road_rubble;
                 fg = road_rubble_fg;
             }

@@ -52,17 +52,18 @@ impl AreaMap {
         self.grid.bounds
     }
 
-    pub fn get(&self, pos: Pos) -> &Tile {
-        self.grid.get(pos)
+    pub fn get(&self, pos: Pos) -> Option<&Tile> {
+        self.grid.maybe_get(pos)
     }
 
     #[allow(unused)]
-    pub fn get_mut(&mut self, pos: Pos) -> &mut Tile {
-        self.grid.get_mut(pos)
+    pub fn get_mut(&mut self, pos: Pos) -> Option<&mut Tile> {
+        self.grid.maybe_get_mut(pos)
     }
 
+    /// Shortcut function for getting the icon for a tile.
     pub fn get_icon(&self, pos: Pos) -> char {
-        self.grid.get(pos).icon
+        self.grid.maybe_get(pos).map_or('?', |t| t.icon)
     }
 
     pub fn unchecked_set(&mut self, pos: Pos, tile: Tile) {
@@ -73,8 +74,9 @@ impl AreaMap {
         self.grid.try_set(pos, tile)
     }
 
+    /// Shortcut function for setting the icon for a tile.
     pub fn set_icon(&mut self, pos: Pos, icon: char) {
-        self.grid.get_mut(pos).icon = icon;
+        self.grid.maybe_get_mut(pos).map(|t| t.icon = icon);
     }
 
     pub fn iter(&self) -> AreaMapIter<'_> {
@@ -94,6 +96,10 @@ impl AreaMap {
         self.grid.paste_into(t_l, subgrid)
     }
 
+    /// Finds the largest rectangle that will fit within the given bounds without
+    /// overlapping 'constructed' tiles - e.g. tiles that are something other than
+    /// basic ground cover. The constructed property of a tile is determined during
+    /// map generation.
     pub fn fit_rect(&self, rect: Rect<usize>) -> Rect<usize> {
         self.grid
             .fit_rect(rect, &|tile: &Tile| -> bool { tile.constructed })
@@ -109,6 +115,10 @@ impl From<&AreaMap> for Rect<usize> {
     }
 }
 
+/// Prints a nicely formated map with axis labels using the UTF-8 codepoint corresponding to the
+/// tile index. Most of the tile output will be nonsensical since the bitmap font used as a tileset
+/// does not attempt to match up to sensible characters, but this will at least show what is going
+/// on with the map.
 impl std::fmt::Debug for AreaMap {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let width = self.width();

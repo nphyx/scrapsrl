@@ -123,6 +123,7 @@ pub fn scatter(
     if let Some(ref scatter_list) = map.geography.scatter {
         use std::collections::HashMap;
         let mut queue: HashMap<Pos, Tile> = HashMap::new();
+        let default_bg = Color::new(4, 4, 4);
         for pos in map.bounds().iter() {
             let mut scale = 0.0; // this gets twiddled every pass
             for scatter_obj in scatter_list.iter() {
@@ -136,7 +137,7 @@ pub fn scatter(
                 ));
                 if i < scatter_obj.frequency {
                     let icon = templates.get_icon(&scatter_obj.icon.name).base_ch();
-                    let bg = map.get(pos).bg;
+                    let bg = map.get(pos).map_or(default_bg, |t| t.bg);
                     queue.insert(
                         pos,
                         Tile::new(

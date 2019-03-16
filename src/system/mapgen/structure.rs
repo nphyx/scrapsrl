@@ -66,7 +66,7 @@ pub fn build(
         while tries < max_tries {
             top_left.x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
             top_left.y = choose(&vert, rng.gen_range(0.0, 1.0)).unwrap_or(0);
-            if map.get(top_left).constructed {
+            if map.get(top_left).map_or(false, |t| t.constructed) {
                 tries += 1;
             } else {
                 break;

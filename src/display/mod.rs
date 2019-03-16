@@ -539,7 +539,7 @@ impl Display {
                 }
             }
             if !found_entity {
-                ui::draw_tile_info(&self.root, map.get(cursor_pos));
+                ui::draw_tile_info(&self.root, map.get(cursor_pos).unwrap());
             }
         }
 

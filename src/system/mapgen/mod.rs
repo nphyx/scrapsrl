@@ -79,7 +79,7 @@ impl MapGenerator {
         structure::build(&assets, &noise, map, region, world).ok(); // always ok if this fails
 
         // connect connectable tiles
-        // connect(map);
+        connect(map);
 
         // mark map generation done
         map.populated = true;

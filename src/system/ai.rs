@@ -33,7 +33,7 @@ impl<'a> System<'a> for AI {
                             x: pos.x as i32 + to.x,
                             y: pos.y as i32 + to.y,
                         };
-                        if map.get(Pos::from(target)).walkable {
+                        if map.get(Pos::from(target)).map_or(false, |t| t.walkable) {
                             plan.x = to.x;
                             plan.y = to.y;
                             done = true;

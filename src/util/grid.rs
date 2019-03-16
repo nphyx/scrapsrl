@@ -9,6 +9,9 @@ pub struct Grid<T> {
 }
 
 #[allow(unused)]
+/// A generic grid employing a Rect to define its bounds, backed by an ndarray.
+/// There is no general ::new() constructor for a grid, but if T is Default + Clone
+/// there are with_bounds and with_dimensions constructors.
 impl<T> Grid<T> {
     pub fn width(&self) -> usize {
         self.bounds.width()
@@ -17,23 +20,46 @@ impl<T> Grid<T> {
         self.bounds.height()
     }
 
-    pub fn get(&self, pos: Pos) -> &T {
+    /// Bounds-checked getter for a grid cell. Returns None when out of bounds.
+    pub fn maybe_get(&self, pos: Pos) -> Option<&T> {
+        if self.bounds.includes(pos) {
+            return Some(&self.contents[(pos - self.bounds.t_l).as_tuple()]);
+        }
+        None
+    }
+
+    /// Unchecked getter for a grid cell.
+    /// # Panics
+    /// Panics if the requested position is out of bounds.
+    pub fn unchecked_get(&self, pos: Pos) -> &T {
         &self.contents[(pos - self.bounds.t_l).as_tuple()]
     }
 
-    pub fn get_mut(&mut self, pos: Pos) -> &mut T {
+    /// Bounds-checked mutable get for a grid cell.
+    pub fn maybe_get_mut(&mut self, pos: Pos) -> Option<&mut T> {
+        if self.bounds.includes(pos) {
+            return Some(&mut self.contents[(pos - self.bounds.t_l).as_tuple()]);
+        }
+        None
+    }
+
+    /// Unchecked mutable getter for a grid cell.
+    /// # Panics
+    /// Panics if the requested position is out of bounds.
+    pub fn unchecked_get_mut(&mut self, pos: Pos) -> &mut T {
         &mut self.contents[(pos - self.bounds.t_l).as_tuple()]
     }
 
-    #[deprecated]
-    pub fn set(&mut self, pos: Pos, entry: T) {
-        self.contents[(pos - self.bounds.t_l).as_tuple()] = entry;
-    }
-
+    /// Unchecked setter for a grid cell.
+    /// # Panics
+    /// Panics if the requested position is out of bounds.
     pub fn unchecked_set(&mut self, pos: Pos, entry: T) {
         self.contents[(pos - self.bounds.t_l).as_tuple()] = entry;
     }
 
+    /// Bounds-checked setter for a grid cell.
+    /// # Errors
+    /// Returns an error result when out of bounds.
     pub fn try_set(&mut self, pos: Pos, entry: T) -> Result<bool, &'static str> {
         if self.bounds.includes(pos) {
             self.contents[(pos - self.bounds.t_l).as_tuple()] = entry;
@@ -65,7 +91,7 @@ impl<T> Grid<T> {
         for col in bounds.iter_columns() {
             for pos in col.iter().cloned() {
                 if bounds.includes(pos) {
-                    if occupied(self.get(pos)) {
+                    if occupied(self.unchecked_get(pos)) {
                         height = 0
                     } else {
                         height += 1
@@ -96,7 +122,7 @@ impl<T> Grid<T> {
         for (y, row) in bounds.iter_rows().enumerate() {
             for pos in row.iter() {
                 let last: Option<(usize, usize)>;
-                let height = *cells.get(*pos);
+                let height = *cells.unchecked_get(*pos);
                 {
                     last = stack.iter().cloned().last();
                 }
@@ -138,14 +164,16 @@ impl<T> Grid<T> {
 }
 
 #[allow(unused)]
+/// Implements functions that are only available for Grids with cells that implement Default +
+/// Clone.
 impl<T: Default + Clone> Grid<T> {
-    /// creates a grid with the given bounding rectangle
+    /// Constructor creating a grid with the given bounding rectangle
     pub fn with_bounds(bounds: Rect<usize>) -> Grid<T> {
         let mut contents: Array2<T> = Array2::default((bounds.height(), bounds.width()));
         Grid { contents, bounds }
     }
 
-    /// creates a grid with the given dimensions
+    /// Constructor creating a grid with the given dimensions
     pub fn with_dimensions(width: usize, height: usize) -> Grid<T> {
         let bounds = Rect {
             t_l: Pos { x: 0, y: 0 },
@@ -157,6 +185,7 @@ impl<T: Default + Clone> Grid<T> {
         Grid::with_bounds(bounds)
     }
 
+    /// Resets all the cells in the grid to defaults.
     pub fn clear(&mut self) {
         self.contents.fill(Default::default())
     }
@@ -178,25 +207,31 @@ impl<T: Default + Clone> Grid<T> {
         Err("rectangle out of grid bounds")
     }
 
+    /// Pastes the contents of another grid into the grid.
+    /// # Error
+    /// Returns an error result if the pasted grid would not fit in the grid's bounds.
     pub fn paste_into(&mut self, t_l: Pos, mut subgrid: Grid<T>) -> Result<bool, &'static str> {
         if self.bounds.contains(subgrid.bounds) {
             for pos in subgrid.bounds.iter() {
-                self.unchecked_set(pos + t_l, subgrid.get(pos).clone());
+                self.unchecked_set(pos + t_l, subgrid.unchecked_get(pos).clone());
             }
             return Ok(true);
         }
         Err("pasted submap not contained in target map")
     }
 
+    /// A row-wise iterator over the contents of the grid.
     pub fn iter(&self) -> ndarray::iter::Iter<'_, T, ndarray::Dim<[usize; 2]>> {
         self.contents.iter()
     }
 
+    /// An iterator that returns the contents of the grid by row.
     pub fn iter_rows(&self) -> ndarray::iter::Lanes<'_, T, ndarray::Dim<[usize; 1]>> {
         self.contents.genrows()
     }
 }
 
+/// For usize Grids, debug output that prints a nice ASCII grid with axis labels.
 impl std::fmt::Debug for Grid<usize> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let width = self.width();
@@ -232,6 +267,8 @@ impl std::fmt::Debug for Grid<usize> {
     }
 }
 
+/// For bool Grids, debug output that prints a nice ASCII grid with axis labels. False prints as
+/// '.', and true prints as '#'.
 impl std::fmt::Debug for Grid<bool> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let width = self.width();
@@ -258,7 +295,7 @@ impl std::fmt::Debug for Grid<bool> {
                         "{: >2} |{}\n",
                         x - 1 + self.bounds.t_l.y,
                         row.iter()
-                            .map(|i| format!("{: >2}", if *i { 1 } else { 0 }))
+                            .map(|i| if *i { "#" } else { "." })
                             .collect::<String>(),
                     )
                 })
@@ -302,6 +339,18 @@ mod tests {
     fn grid_debug_usize() {
         let grid: Grid<usize> = Grid::with_dimensions(1, 1);
         assert_eq!(format!("{:?}", grid), "\n\n   | 0\n---+--\n 0 | 0\n");
+    }
+
+    #[test]
+    /// test bool debug output
+    fn grid_debug_bool() {
+        let grid: Grid<bool> = Grid::with_dimensions(2, 2);
+        grid.unchecked_set(Position::new(0, 0), true);
+        grid.unchecked_set(Position::new(1, 1), true);
+        assert_eq!(
+            format!("{:?}", grid),
+            "\n\n   | 0 1\n---+--\n 0 | # .\n 1 | . #\n"
+        );
     }
 
     fn build_test_grid() -> Grid<bool> {
@@ -403,12 +452,12 @@ mod tests {
             let t_l = Pos::new(0, 0);
             let b_r = Pos::new(2, 2);
             if let Ok(subgrid) = grid.subgrid(Rect { t_l, b_r }) {
-                assert_eq!(*subgrid.get(Pos::new(0, 0)), false);
-                assert_eq!(*subgrid.get(Pos::new(1, 1)), false);
-                assert_eq!(*subgrid.get(Pos::new(2, 0)), true);
-                assert_eq!(*subgrid.get(Pos::new(2, 1)), true);
-                assert_eq!(*subgrid.get(Pos::new(2, 2)), true);
-                assert_eq!(*subgrid.get(Pos::new(0, 2)), false);
+                assert_eq!(*subgrid.unchecked_get(Pos::new(0, 0)), false);
+                assert_eq!(*subgrid.unchecked_get(Pos::new(1, 1)), false);
+                assert_eq!(*subgrid.unchecked_get(Pos::new(2, 0)), true);
+                assert_eq!(*subgrid.unchecked_get(Pos::new(2, 1)), true);
+                assert_eq!(*subgrid.unchecked_get(Pos::new(2, 2)), true);
+                assert_eq!(*subgrid.unchecked_get(Pos::new(0, 2)), false);
             } else {
                 assert!(false, "subgrid creation failed with error");
             }
@@ -430,11 +479,11 @@ mod tests {
         {
             let t_l = Pos::new(0, 0);
             if let Ok(_) = grid.paste_into(t_l, subgrid.clone()) {
-                assert_eq!(*grid.get(Pos::new(0, 0)), true);
-                assert_eq!(*grid.get(Pos::new(0, 1)), true);
-                assert_eq!(*grid.get(Pos::new(2, 1)), true);
-                assert_eq!(*grid.get(Pos::new(1, 2)), true);
-                assert_eq!(*grid.get(Pos::new(1, 1)), false);
+                assert_eq!(*grid.unchecked_get(Pos::new(0, 0)), true);
+                assert_eq!(*grid.unchecked_get(Pos::new(0, 1)), true);
+                assert_eq!(*grid.unchecked_get(Pos::new(2, 1)), true);
+                assert_eq!(*grid.unchecked_get(Pos::new(1, 2)), true);
+                assert_eq!(*grid.unchecked_get(Pos::new(1, 1)), false);
                 grid.clear();
             } else {
                 assert!(false, "subgrid paste failed with error")
@@ -443,11 +492,11 @@ mod tests {
         {
             let t_l = Pos::new(2, 2);
             if let Ok(_) = grid.paste_into(t_l, subgrid.clone()) {
-                assert_eq!(*grid.get(Pos::new(2, 2)), true);
-                assert_eq!(*grid.get(Pos::new(2, 3)), true);
-                assert_eq!(*grid.get(Pos::new(4, 3)), true);
-                assert_eq!(*grid.get(Pos::new(3, 4)), true);
-                assert_eq!(*grid.get(Pos::new(3, 3)), false);
+                assert_eq!(*grid.unchecked_get(Pos::new(2, 2)), true);
+                assert_eq!(*grid.unchecked_get(Pos::new(2, 3)), true);
+                assert_eq!(*grid.unchecked_get(Pos::new(4, 3)), true);
+                assert_eq!(*grid.unchecked_get(Pos::new(3, 4)), true);
+                assert_eq!(*grid.unchecked_get(Pos::new(3, 3)), false);
                 grid.clear();
             } else {
                 assert!(false, "subgrid paste failed with error")

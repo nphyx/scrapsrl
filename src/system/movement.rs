@@ -54,7 +54,7 @@ impl<'a> System<'a> for Movement {
             match solid {
                 Some(_) => {
                     // got a solid, so run collision checks
-                    ok = map.get(new_pos).walkable;
+                    ok = map.get(new_pos).map_or(false, |t| t.walkable);
                     // if we're still ok, check if there's a colliding object
                     if ok {
                         ok = !collision_maps.get(*region, new_pos);
