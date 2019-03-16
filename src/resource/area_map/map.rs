@@ -119,22 +119,32 @@ impl From<&AreaMap> for Rect<usize> {
     }
 }
 
-/// Prints a nicely formated map with axis labels using the UTF-8 codepoint corresponding to the
-/// tile index. Most of the tile output will be nonsensical since the bitmap font used as a tileset
-/// does not attempt to match up to sensible characters, but this will at least show what is going
-/// on with the map.
 impl std::fmt::Debug for AreaMap {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let width = self.width();
-        let mut x = 0;
         write!(
             f,
-            "\ngeography: {:?}\npopulated: {}\n\n{}\n{}\n{}",
+            "\ngeography: {:?}\npopulated: {}\n\n{:?}",
             self.geography
                 .description
                 .as_ref()
                 .map_or("unknown".to_string(), |d| d.short.clone()),
             self.populated,
+            self.grid
+        )
+    }
+}
+
+/// Prints a nicely formated map with axis labels using the UTF-8 codepoint corresponding to the
+/// tile index. Most of the tile output will be nonsensical since the bitmap font used as a tileset
+/// does not attempt to match up to sensible characters, but this will at least show what is going
+/// on with the map.
+impl std::fmt::Debug for Grid<Tile> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let width = self.width();
+        let mut x = 0;
+        write!(
+            f,
+            "{}\n{}\n{}",
             format!(
                 "   |{}",
                 (0..width)
@@ -146,8 +156,7 @@ impl std::fmt::Debug for AreaMap {
                 "---+{}",
                 (0..width).map(|_| "--".to_string()).collect::<String>()
             ),
-            self.grid
-                .iter_rows()
+            self.iter_rows()
                 .into_iter()
                 .map(|row| {
                     x += 1;

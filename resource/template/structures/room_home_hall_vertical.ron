@@ -1,0 +1,28 @@
+(
+    min_width:3,
+    max_width:3,
+    min_height:7,
+    max_height:40,
+    perimeter:1,
+    perimeter_tile: (
+        icon: "structure_wall_slat",
+        fg: (64,64,64), 
+        bg: (32,32,32),
+    ),
+    connect_to: [
+        (connection_type: Structure("room_hallway"), connection_method: Door),
+        (connection_type: Outside, connection_method: Door),
+    ],
+    tiles: {
+        '1': ( // floor tiles
+            icon: "structure_floor_carpet",
+            short_desc: "tiled floor",
+            long_desc: "Linoleum tiles.",
+            fg: (16,16,16),
+            bg: (24,14,8),
+            weight: 1,
+            position: Floor,
+            allowed_neighbors: (['1'], ['1'], ['1'], ['1']),
+        ),
+    }
+)

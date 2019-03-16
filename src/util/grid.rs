@@ -81,7 +81,9 @@ impl<T> Grid<T> {
         if (!self.bounds.contains(bounds)) {
             // this shouldn't happen but it isn't fatal, let's log it so we can look into it
             // further
-            println!("warning: tried to fit_rect on a map but the rect outside the map bounds");
+            println!(
+                "warning: tried to fit_rect on a grid but the rect is outside the grid bounds"
+            );
             return Rect::new(Pos::new(0, 0), Pos::new(0, 0));
         }
         // this is our height histogram, we populate it from the map
@@ -101,7 +103,7 @@ impl<T> Grid<T> {
             }
             height = 0;
         }
-        // dbg!(&cells); FIXME create a debug CLI option and then do this when it's enabled
+        // dbg!(&cells); // FIXME create a debug CLI option and then do this when it's enabled
 
         // solve largest rectangle in histogram for each column
         let mut stack: Vec<(usize, usize)> = Vec::new();

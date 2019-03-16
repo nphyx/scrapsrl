@@ -1,5 +1,6 @@
 use super::util::*;
 use crate::component::{Pos, Region};
+use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
 use crate::resource::{AreaMap, Assets, StructureTemplate, WorldState};
 use crate::util::*;
 use rand::prelude::*;
@@ -33,17 +34,19 @@ fn choose_structure_dimensions(
 
     let height_range: Vec<usize> = (structure.min_height..=structure.max_height).collect();
     let b_r = Pos::new(
-        (choose(&width_range, sample).unwrap_or(0) + t_l.x).min(grid.width() - 1),
-        (choose(&height_range, sample).unwrap_or(0) + t_l.y).min(grid.height() - 1),
+        (choose(&width_range, sample).unwrap_or(0) + t_l.x).min(t_l.x + grid.width() - 1),
+        (choose(&height_range, sample).unwrap_or(0) + t_l.y).min(t_l.y + grid.height() - 1),
     );
-    // Finds the largest rectangle that will fit within the given bounds without
-    // overlapping 'constructed' tiles - e.g. tiles that are something other than
-    // basic ground cover. The constructed property of a tile is determined during
-    // map generation.
-
-    grid.fit_rect(Rect::new(t_l, b_r), &|tile: &Tile| -> bool {
-        tile.constructed
-    })
+    let bounds = Rect::new(t_l, b_r);
+    if !grid.bounds.contains(bounds) {
+        return Rect::new(Pos::new(0, 0), Pos::new(0, 0));
+    }
+    /*
+    if grid.bounds.width() < MAP_WIDTH && grid.bounds.height() < MAP_HEIGHT {
+        dbg!(map_constructed(&grid));
+    }
+    */
+    grid.fit_rect(bounds, &|tile: &Tile| -> bool { tile.constructed })
 }
 
 use crate::resource::Tile;
@@ -78,32 +81,76 @@ fn build_structure(
     assets: &Assets,
     rng: &mut Pcg32,
     noise: &Noise,
-    grid: &Grid<Tile>,
-    structure: &StructureTemplate,
     region: Region,
-    top_left: Pos,
+    structure: &StructureTemplate,
+    mut bounds: Rect<usize>,
 ) -> Option<Grid<Tile>> {
-    let sample = rand_up(fbm_offset(
-        noise,
-        top_left.to_array(),
-        region.to_offset(),
-        0.1,
-        1,
-    ));
-    let mut bounds = choose_structure_dimensions(sample, grid, top_left, &structure);
     if structure.fits_in(bounds) {
         // now place a structure of the size we've found
         let mut grid: Grid<Tile> = Grid::with_bounds(bounds);
+        bounds.shrink_perimeter(1);
+        // fill in base tiles
+        populate_structure(assets, &mut grid, &bounds, &structure, rng);
+        // wipe out constructed status so rooms can be built on top
+        for pos in grid.bounds.iter() {
+            grid.unchecked_get_mut(pos).constructed = false;
+        }
+        let mut room_list = structure.interior_structures.clone();
+        let mut remaining_grid = grid.bounds;
+        let mut done = false;
+        while !done {
+            let mut built = 0;
+            room_list.shuffle(rng);
+            for room_name in &room_list {
+                if let Some(room) = assets.get_structure(&room_name) {
+                    let sample = rand_up(fbm_offset(
+                        noise,
+                        remaining_grid.t_l.to_array(),
+                        region.to_offset(),
+                        0.1,
+                        1,
+                    ));
+                    let bounds =
+                        choose_structure_dimensions(sample, &grid, remaining_grid.t_l, &room);
+                    if let Some(room_grid) =
+                        build_structure(assets, rng, noise, region, room, bounds)
+                    {
+                        built += 1;
+                        grid.paste_into(Pos::new(0, 0), room_grid).ok()?;
+                    }
+                }
+            }
+            if built == 0 {
+                done = true
+            };
+            remaining_grid =
+                grid.fit_rect(grid.bounds, &|tile: &Tile| -> bool { tile.constructed });
+        }
         // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
-        let wall = structure.perimeter_tile.to_tile(assets);
+        bounds.expand_perimeter(1);
+        let mut wall = structure.perimeter_tile.to_tile(assets).clone();
+        wall.constructed = false;
         for pos in bounds.iter_perimeter() {
-            grid.try_set(pos, wall.clone()).ok();
+            grid.unchecked_set(pos, wall.clone());
         }
         bounds.shrink_perimeter(1);
-        populate_structure(assets, &mut grid, &bounds, &structure, rng);
+        // now mark as constructed, allowing wall overlap
+        for pos in bounds.iter() {
+            grid.unchecked_get_mut(pos).constructed = true;
+        }
         return Some(grid);
     }
     None
+}
+
+// for debugging
+pub fn map_constructed(grid: &Grid<Tile>) -> Grid<bool> {
+    let bounds = grid.bounds;
+    let mut c_grid: Grid<bool> = Grid::with_bounds(bounds);
+    for pos in grid.bounds.iter() {
+        c_grid.unchecked_set(pos, grid.unchecked_get(pos).constructed);
+    }
+    c_grid
 }
 
 pub fn build(
@@ -144,15 +191,17 @@ pub fn build(
 
         if let Some(structures) = map.geography.structures_ref() {
             if let Some(structure) = choose_structure(assets, noise, top_left, region, structures) {
-                if let Some(structure_grid) = build_structure(
-                    assets,
-                    rng,
+                let sample = rand_up(fbm_offset(
                     noise,
-                    &mut map.grid,
-                    structure,
-                    region,
-                    top_left,
-                ) {
+                    top_left.to_array(),
+                    region.to_offset(),
+                    0.1,
+                    1,
+                ));
+                let bounds = choose_structure_dimensions(sample, &map.grid, top_left, &structure);
+                if let Some(structure_grid) =
+                    build_structure(assets, rng, noise, region, structure, bounds)
+                {
                     map.paste_into(Default::default(), structure_grid)?;
                     count += structure.building_slots;
                 }

@@ -14,6 +14,10 @@
         "room_home_kitchen",
         "room_home_common",
         "room_home_bedroom",
+        "room_home_bedroom",
+        "room_home_bedroom",
+        "room_home_hall_horizontal",
+        "room_home_hall_vertical",
     ],
     tiles: {
         '1': ( // floor tiles
