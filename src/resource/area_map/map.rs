@@ -6,7 +6,9 @@ use crate::util::{Grid, Rect};
 
 #[derive(Clone)]
 pub struct AreaMap {
-    grid: Grid<Tile>,
+    /// don't really like this being public FIXME
+    pub grid: Grid<Tile>,
+    // grid needs to be public for mapgen ...
     /// mark true when mapgen is complete
     pub populated: bool,
     pub geography: GeographyTemplate,
@@ -102,10 +104,6 @@ impl AreaMap {
         self.grid.paste_into(t_l, subgrid)
     }
 
-    /// Finds the largest rectangle that will fit within the given bounds without
-    /// overlapping 'constructed' tiles - e.g. tiles that are something other than
-    /// basic ground cover. The constructed property of a tile is determined during
-    /// map generation.
     pub fn fit_rect(&self, rect: Rect<usize>) -> Rect<usize> {
         self.grid
             .fit_rect(rect, &|tile: &Tile| -> bool { tile.constructed })

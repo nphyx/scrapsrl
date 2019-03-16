@@ -1,30 +1,31 @@
 use super::util::*;
 use crate::component::{Pos, Region};
-use crate::resource::{AreaMap, Assets, GeographyTemplate, StructureTemplate, WorldState};
+use crate::resource::{AreaMap, Assets, StructureTemplate, WorldState};
 use crate::util::*;
 use rand::prelude::*;
 use tcod::noise::Noise;
 
-fn choose_structure(
-    assets: &Assets,
+fn choose_structure<'a>(
+    assets: &'a Assets,
     noise: &Noise,
-    pos: [i32; 2],
-    offset: [i32; 2],
-    geography: &GeographyTemplate,
-) -> Option<StructureTemplate> {
-    if let Some(ref structures) = geography.structures {
-        let sample = rand_up(fbm_offset(noise, pos, offset, 1.0, 1));
-        // should never fail, but if it does the placeholder string is not going to cause a
-        // problem
-        let structure_name = choose(&structures, sample).unwrap_or_else(|| "Ooops".to_string());
-        return Some(assets.get_structure(&structure_name));
-    }
-    None
+    pos: Pos,
+    region: Region,
+    structures: &Vec<String>,
+) -> Option<&'a StructureTemplate> {
+    let sample = rand_up(fbm_offset(
+        noise,
+        pos.to_array(),
+        region.to_offset(),
+        1.0,
+        1,
+    ));
+    let choice = &choose(structures, sample).unwrap();
+    assets.get_structure(choice)
 }
 
 fn choose_structure_dimensions(
     sample: f32,
-    map: &AreaMap,
+    grid: &Grid<Tile>,
     t_l: Pos,
     structure: &StructureTemplate,
 ) -> Rect<usize> {
@@ -32,73 +33,17 @@ fn choose_structure_dimensions(
 
     let height_range: Vec<usize> = (structure.min_height..=structure.max_height).collect();
     let b_r = Pos::new(
-        (choose(&width_range, sample).unwrap_or(0) + t_l.x).min(map.width() - 1),
-        (choose(&height_range, sample).unwrap_or(0) + t_l.y).min(map.height() - 1),
+        (choose(&width_range, sample).unwrap_or(0) + t_l.x).min(grid.width() - 1),
+        (choose(&height_range, sample).unwrap_or(0) + t_l.y).min(grid.height() - 1),
     );
-    // first check we can fit the structure in here
-    map.fit_rect(Rect::new(t_l, b_r))
-}
+    // Finds the largest rectangle that will fit within the given bounds without
+    // overlapping 'constructed' tiles - e.g. tiles that are something other than
+    // basic ground cover. The constructed property of a tile is determined during
+    // map generation.
 
-pub fn build(
-    assets: &Assets,
-    noise: &Noise,
-    map: &mut AreaMap,
-    region: Region,
-    world: &WorldState,
-) -> Result<bool, &'static str> {
-    let offset = region.to_offset();
-    let mut count: u8 = 0;
-    // roughly 1.5 slots per .1 pop
-    let max_structures: u8 = (world.get_pop(region) * 15.0).floor() as u8;
-    let mut tries = 0;
-    let max_tries = 100;
-    // these start at 1 to give room for a structure's perimeter tiles
-    let horiz: Vec<usize> = (1..map.width()).collect();
-    let vert: Vec<usize> = (1..map.height()).collect();
-    let mut rng = world.region_rng(region);
-    // map has no possible structures, let's bail
-    if map.geography.structure_len() == 0 {
-        return Err("no structures available for this geography");
-    }
-
-    while count < max_structures && tries < max_tries {
-        let mut top_left = Pos::new(0, 0);
-        while tries < max_tries {
-            top_left.x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
-            top_left.y = choose(&vert, rng.gen_range(0.0, 1.0)).unwrap_or(0);
-            if map.get(top_left).map_or(false, |t| t.constructed) {
-                tries += 1;
-            } else {
-                break;
-            }
-        }
-        if tries >= max_tries {
-            break;
-        }
-
-        let sample = rand_up(fbm_offset(noise, top_left.to_array(), offset, 0.1, 1));
-
-        if let Some(structure) =
-            choose_structure(assets, noise, top_left.to_array(), offset, &map.geography)
-        {
-            let mut bounds = choose_structure_dimensions(sample, map, top_left, &structure);
-
-            // now place a structure of the size we've found
-            if structure.fits_in(bounds) {
-                let mut subgrid: Grid<Tile> = Grid::with_bounds(bounds); //map.subgrid(available_area)?;
-                count += structure.building_slots;
-                // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
-                let wall = structure.perimeter_tile.to_tile(assets);
-                for pos in bounds.iter_perimeter() {
-                    subgrid.try_set(pos, wall.clone()).ok();
-                }
-                bounds.shrink_perimeter(1);
-                populate_structure(assets, &mut subgrid, &bounds, &structure, &mut rng);
-                map.paste_into(Default::default(), subgrid)?;
-            }
-        }
-    }
-    Ok(true)
+    grid.fit_rect(Rect::new(t_l, b_r), &|tile: &Tile| -> bool {
+        tile.constructed
+    })
 }
 
 use crate::resource::Tile;
@@ -124,4 +69,95 @@ fn populate_structure(
         let pos = Pos::from(coord) + bounds.t_l;
         structure_grid.unchecked_set(pos, tile.to_tile(assets))
     });
+}
+
+/// Builds structures recursively.
+/// TODO revisit this, maybe find a way to have fewer parameters, it's kind of
+/// junky passing all this stuff around.
+fn build_structure(
+    assets: &Assets,
+    rng: &mut Pcg32,
+    noise: &Noise,
+    grid: &Grid<Tile>,
+    structure: &StructureTemplate,
+    region: Region,
+    top_left: Pos,
+) -> Option<Grid<Tile>> {
+    let sample = rand_up(fbm_offset(
+        noise,
+        top_left.to_array(),
+        region.to_offset(),
+        0.1,
+        1,
+    ));
+    let mut bounds = choose_structure_dimensions(sample, grid, top_left, &structure);
+    if structure.fits_in(bounds) {
+        // now place a structure of the size we've found
+        let mut grid: Grid<Tile> = Grid::with_bounds(bounds);
+        // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
+        let wall = structure.perimeter_tile.to_tile(assets);
+        for pos in bounds.iter_perimeter() {
+            grid.try_set(pos, wall.clone()).ok();
+        }
+        bounds.shrink_perimeter(1);
+        populate_structure(assets, &mut grid, &bounds, &structure, rng);
+        return Some(grid);
+    }
+    None
+}
+
+pub fn build(
+    assets: &Assets,
+    noise: &Noise,
+    map: &mut AreaMap,
+    region: Region,
+    world: &WorldState,
+) -> Result<bool, &'static str> {
+    let mut count: u8 = 0;
+    // roughly 1.5 slots per .1 pop
+    let max_structures: u8 = (world.get_pop(region) * 15.0).floor() as u8;
+    let mut tries = 0;
+    let max_tries = 100;
+    // these start at 1 to give room for a structure's perimeter tiles
+    let horiz: Vec<usize> = (1..map.width()).collect();
+    let vert: Vec<usize> = (1..map.height()).collect();
+    let rng = &mut world.region_rng(region);
+    // map has no possible structures, let's bail
+    if map.geography.structure_len() == 0 {
+        return Err("no structures available for this geography");
+    }
+
+    while count < max_structures && tries < max_tries {
+        let mut top_left = Pos::new(0, 0);
+        while tries < max_tries {
+            top_left.x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
+            top_left.y = choose(&vert, rng.gen_range(0.0, 1.0)).unwrap_or(0);
+            if map.get(top_left).map_or(false, |t| t.constructed) {
+                tries += 1;
+            } else {
+                break;
+            }
+        }
+        if tries >= max_tries {
+            break;
+        }
+
+        if let Some(structures) = map.geography.structures_ref() {
+            if let Some(structure) = choose_structure(assets, noise, top_left, region, structures) {
+                if let Some(structure_grid) = build_structure(
+                    assets,
+                    rng,
+                    noise,
+                    &mut map.grid,
+                    structure,
+                    region,
+                    top_left,
+                ) {
+                    map.paste_into(Default::default(), structure_grid)?;
+                    count += structure.building_slots;
+                }
+            }
+        }
+    }
+    Ok(true)
 }

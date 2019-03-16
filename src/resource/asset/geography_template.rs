@@ -154,4 +154,12 @@ impl GeographyTemplate {
             0
         }
     }
+
+    pub fn structures_ref(&self) -> Option<&Vec<String>> {
+        if let Some(structures) = &self.structures {
+            Some(&structures)
+        } else {
+            None
+        }
+    }
 }

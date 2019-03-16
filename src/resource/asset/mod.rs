@@ -76,19 +76,19 @@ impl Assets {
     }
 
     #[allow(unused)]
-    pub fn get_geography(&self, name: &str) -> GeographyTemplate {
+    pub fn get_geography(&self, name: &str) -> Option<&GeographyTemplate> {
         if let Some(template) = self.geographies.get(name) {
-            template.clone()
+            Some(&template)
         } else {
-            GeographyTemplate::default()
+            None
         }
     }
 
-    pub fn get_structure(&self, name: &str) -> StructureTemplate {
+    pub fn get_structure(&self, name: &str) -> Option<&StructureTemplate> {
         if let Some(structure) = self.structures.get(name) {
-            structure.clone()
+            Some(&structure)
         } else {
-            StructureTemplate::default()
+            None
         }
     }
 
