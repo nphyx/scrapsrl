@@ -80,6 +80,8 @@ pub enum ConnectDir {
 
 type IconConnectMap = HashMap<ConnectDir, Icon>;
 
+type VariantList = Vec<Icon>;
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Icon {
     /// base tile (no connections in any direction)
@@ -89,7 +91,7 @@ pub struct Icon {
     #[serde(default)]
     /// variants on the base character which should be chosen at random and have no specific
     /// connections
-    variants: Vec<Icon>,
+    variants: VariantList,
 }
 
 /// An icon spec, loaded from a resource file. Contains the base icon and all its variants.
@@ -221,9 +223,13 @@ impl From<IconConnect4> for Icon {
 /// Storage format for a set of icons.
 #[derive(Serialize, Deserialize)]
 pub struct IconSet {
+    /// characters are a series of 4 icons facing north, south, east, and west
     characters: HashMap<String, [u32; 2]>,
+    /// a 4-way connected tile with a standardized layout (see tiles.png for example)
     connected4: HashMap<String, [u32; 2]>,
+    /// a simple tile with only one variant
     simple: HashMap<String, [u32; 2]>,
+    /// an icon with a list of variants, the third array parameter is the variant count
     variant: HashMap<String, [u32; 3]>,
 }
 
@@ -231,20 +237,46 @@ impl IconSet {
     pub fn process(&self) -> Vec<(String, Icon)> {
         let mut set: Vec<(String, Icon)> = Vec::new();
         for (name, pos) in &self.characters {
-            set.push((name.clone(), Icon::new(CharPos::from(*pos))));
+            let mut connections: IconConnectMap = HashMap::new();
+            connections.insert(ConnectDir::CapDown, Icon::new(CharPos::from(*pos)));
+            connections.insert(ConnectDir::CapUp, Icon::new(CharPos::from(*pos) + [1, 0]));
+            connections.insert(ConnectDir::CapLeft, Icon::new(CharPos::from(*pos) + [2, 0]));
+            connections.insert(
+                ConnectDir::CapRight,
+                Icon::new(CharPos::from(*pos) + [3, 0]),
+            );
+            let icon = Icon {
+                base: CharPos::from(*pos),
+                connections,
+                variants: Vec::new(),
+            };
+            set.push((name.clone(), icon));
         }
+
         for (name, pos) in &self.connected4 {
             set.push((
                 name.clone(),
                 Icon::from(IconConnect4::new(CharPos::from(*pos))),
             ));
         }
+
         for (name, pos) in &self.simple {
             set.push((name.clone(), Icon::new(CharPos::from(*pos))));
         }
+
         for (name, pos) in &self.variant {
-            set.push((name.clone(), Icon::new(CharPos::from([pos[0], pos[1]]))));
+            let mut variants: VariantList = Vec::new();
+            for i in 0..pos[2] {
+                variants.push(Icon::new(CharPos::from([pos[0] + i, pos[1]])));
+            }
+            let icon = Icon {
+                base: CharPos::from([pos[0], pos[1]]),
+                variants,
+                connections: HashMap::new(),
+            };
+            set.push((name.clone(), icon));
         }
+
         set
     }
 }

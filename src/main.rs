@@ -50,7 +50,7 @@ fn main() {
         })
         .with(Region { x: 0, y: 0 })
         .with(MovePlan { x: 0, y: 0 })
-        .with(IconRef::new("person_male"))
+        .with(IconRef::new("player_female"))
         .with(Colors {
             fg: Color::new(255, 255, 255),
             bg: Color::new(255, 255, 255),
