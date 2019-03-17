@@ -52,17 +52,12 @@ fn place_car(
         .ok();
 }
 
-fn damaged_road(ground_bg: Color, road_bg: Color, blend_factor: f32) -> Tile {
-    let grass_fg = Color {
-        r: 102,
-        g: 161,
-        b: 94,
-    };
-    let bg = lerp(ground_bg, road_bg, blend_factor * 0.5);
+fn damaged_road(icon: char, road_bg: Color, ground_bg: Color, blend_factor: f32) -> Tile {
+    let fg = lerp(ground_bg, road_bg, blend_factor * 0.5);
     Tile::new(
-        ',',
-        grass_fg,
-        bg,
+        icon,
+        fg,
+        road_bg,
         true,
         true,
         true,
@@ -100,24 +95,17 @@ pub fn place_horizontal_roads(bundle: &mut MapGenBundle, noise_scale: f32, damag
     let bg = default_bg;
     let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
 
-    let dashed = bundle.assets.get_icon("line_emdash").ch();
-    let line = bundle
-        .assets
-        .get_icon("line_single")
-        .connected(false, false, true, true)
-        .ch();
-    let dbl = bundle
-        .assets
-        .get_icon("line_double")
-        .connected(false, false, true, true)
-        .ch();
+    let dashed = bundle.assets.get_icon("road_line_dashed").ch();
+    let line = bundle.assets.get_icon("road_line_single").ch();
+    let dbl = bundle.assets.get_icon("road_line_double").ch();
     let lanes = bundle.world.get_road(bundle.region).lanes_x as usize;
     let offset = bundle.region.to_offset();
 
-    let road_rubble: char = '\u{e35d}';
+    let road_rubble = bundle.assets.get_icon("floor_racked").ch();
     let mut segment_icon: char;
     let mut fg: Color;
     let mut ground_bg: Color;
+    let damage_icon = bundle.assets.get_icon("road_cracked").ch();
 
     for cx in 0..bundle.map.width() {
         let y = road_center_longitudinal(bundle, cx);
@@ -136,7 +124,10 @@ pub fn place_horizontal_roads(bundle: &mut MapGenBundle, noise_scale: f32, damag
 
             if i < damage_factor {
                 ground_bg = bundle.map.get(pos).map_or(default_bg, |t| t.bg);
-                bundle.map.try_set(pos, damaged_road(ground_bg, bg, i)).ok();
+                bundle
+                    .map
+                    .try_set(pos, damaged_road(damage_icon, bg, ground_bg, i))
+                    .ok();
                 continue;
             }
 
@@ -146,7 +137,7 @@ pub fn place_horizontal_roads(bundle: &mut MapGenBundle, noise_scale: f32, damag
                 fg = road_line_fg;
             } else if cy == y {
                 // center line
-                if lanes > 2 {
+                if lanes > 1 {
                     // larger roads don't have pass lanes
                     segment_icon = dbl;
                 } else {
@@ -198,21 +189,14 @@ pub fn place_vertical_roads(bundle: &mut MapGenBundle, noise_scale: f32, damage_
     let bg = default_bg;
     let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
 
-    let dashed = '|';
-    let line = bundle
-        .assets
-        .get_icon("line_single")
-        .connected(true, true, false, false)
-        .ch();
-    let dbl = bundle
-        .assets
-        .get_icon("line_double")
-        .connected(true, true, false, false)
-        .ch();
+    let dashed = bundle.assets.get_icon("road_line_dashed").ch();
+    let line = bundle.assets.get_icon("road_line_single").ch();
+    let dbl = bundle.assets.get_icon("road_line_double").ch();
+    let damage_icon = bundle.assets.get_icon("road_cracked").ch();
     let lanes = bundle.world.get_road(bundle.region).lanes_y as usize;
     let offset = bundle.region.to_offset();
 
-    let road_rubble: char = '\u{e35d}';
+    let road_rubble = bundle.assets.get_icon("floor_racked").ch();
     let mut ground_bg: Color;
     let mut segment_icon: char;
     let mut fg: Color;
@@ -233,7 +217,10 @@ pub fn place_vertical_roads(bundle: &mut MapGenBundle, noise_scale: f32, damage_
 
             if i < damage_factor {
                 ground_bg = bundle.map.get(pos).map_or(default_bg, |t| t.bg);
-                bundle.map.try_set(pos, damaged_road(ground_bg, bg, i)).ok();
+                bundle
+                    .map
+                    .try_set(pos, damaged_road(damage_icon, bg, ground_bg, i))
+                    .ok();
                 continue;
             }
 
@@ -243,7 +230,7 @@ pub fn place_vertical_roads(bundle: &mut MapGenBundle, noise_scale: f32, damage_
                 fg = road_line_fg;
             } else if cx == x {
                 // center line
-                if lanes > 2 {
+                if lanes > 1 {
                     // larger roads don't have pass lanes
                     segment_icon = dbl;
                 } else {

@@ -23,8 +23,8 @@
         "fixture_counter": (8, 33),
         "fixture_bookshelf": (12, 33),
         "road_line_single": (0, 39),
-        "road_line_dashed": (4, 39),
-        "road_line_double": (8, 39),
+        "road_line_double": (4, 39),
+        "road_line_dashed": (8, 39),
         "road_cracked": (12, 39),
     },
     simple: {
