@@ -1,5 +1,7 @@
 use crate::component::Region;
-use crate::resource::{Assets, GameStage, GameState, RegionMap, RegionMaps, WorldState};
+use crate::resource::{
+    Assets, GameStage, GameState, GeographyTemplate, RegionMap, RegionMaps, WorldState,
+};
 use tcod::noise::*;
 use tcod::random::{Algo, Rng};
 
@@ -11,6 +13,18 @@ mod trees;
 pub mod util;
 
 use connect_tiles::connect;
+
+/// many of the map generator functions need the same stuff, so we'll just pass
+/// it around in a bundle instead of having to pass parameters deep into the
+/// tree of functions
+pub struct MapGenBundle<'a> {
+    assets: &'a Assets,
+    map: &'a mut RegionMap,
+    noise: &'a mut Noise,
+    region: Region,
+    world: &'a WorldState,
+    geography: &'a GeographyTemplate,
+}
 
 pub struct MapGenerator {}
 
@@ -58,34 +72,44 @@ impl MapGenerator {
             seed,
             region
         );
-        let rng = Rng::new_with_seed(Algo::CMWC, world.seed());
-        let noise = Noise::init_with_dimensions(2)
+        let trng = Rng::new_with_seed(Algo::CMWC, world.seed());
+        let noise = &mut Noise::init_with_dimensions(2)
             .noise_type(NoiseType::Simplex)
-            .random(rng)
+            .random(trng)
             .init();
 
         // choose a geography variant
-        let geography = world.get_geography_from_assets(assets, region);
-        map.geography = geography.clone();
+        let geography = &world.get_geography_from_assets(assets, region).clone();
+
+        let bundle = &mut MapGenBundle {
+            assets,
+            map,
+            noise,
+            region,
+            world,
+            geography,
+        };
 
         // lay down a basic ground cover layer
-        ground_cover::base(&noise, map, region.to_offset(), 0.2, assets);
-        ground_cover::scatter(&noise, map, region.to_offset(), 1.0, assets);
+        ground_cover::base(bundle, 0.2);
+        ground_cover::scatter(bundle, 1.0);
 
         let road_data = world.get_road(region);
 
         if road_data.lanes_x > 0 {
-            roads::place_horizontal_roads(&assets, &noise, world, map, region, 0.1, 0.8);
+            roads::place_horizontal_roads(bundle, 0.1, 0.8);
         }
 
         if road_data.lanes_y > 0 {
-            roads::place_vertical_roads(&assets, &noise, world, map, region, 0.1, 0.8);
+            roads::place_vertical_roads(bundle, 0.1, 0.8);
         }
 
-        structure::build(&assets, &noise, map, region, world).ok(); // always ok if this fails
+        if bundle.geography.structure_len() > 0 {
+            structure::build(bundle).ok(); // always ok if this fails
+        }
 
         // connect connectable tiles
-        connect(&assets, map);
+        connect(bundle);
 
         // mark map generation done
         map.populated = true;

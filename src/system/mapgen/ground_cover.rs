@@ -1,9 +1,8 @@
-use super::util::*;
+use super::{util::*, MapGenBundle};
 use crate::component::{Color, Description, Pos};
-use crate::resource::{Assets, GeographyTemplate, GroundCover, RegionMap, Tile};
+use crate::resource::{GeographyTemplate, GroundCover, Tile};
 use crate::util::colors::lerp;
 use crate::util::*;
-use tcod::noise::Noise;
 
 /// Selects a background color for the cover tile, blending based on noise_sample
 fn select_bg(geography: &GeographyTemplate, noise_sample: f32) -> Color {
@@ -84,20 +83,20 @@ fn select_ground_cover(geography: &GeographyTemplate, noise_sample: f32) -> Grou
     selected_cover
 }
 
-pub fn base(
-    noise: &Noise,
-    map: &mut RegionMap,
-    offset: [i32; 2],
-    noise_scale: f32,
-    templates: &Assets,
-) {
-    for pos in map.bounds().iter() {
-        let i = rand_up(fbm_offset(noise, pos.to_array(), offset, noise_scale, 32));
-        let bg = select_bg(&map.geography, i);
-        let fg = select_fg(&map.geography, i);
-        let selected_cover = select_ground_cover(&map.geography, i);
-        let icon = templates.get_icon(&selected_cover.icon.name).ch();
-        map.unchecked_set(
+pub fn base(bundle: &mut MapGenBundle, noise_scale: f32) {
+    for pos in bundle.map.bounds().iter() {
+        let i = rand_up(fbm_offset(
+            bundle.noise,
+            pos.to_array(),
+            bundle.region.to_offset(),
+            noise_scale,
+            32,
+        ));
+        let bg = select_bg(&bundle.geography, i);
+        let fg = select_fg(&bundle.geography, i);
+        let selected_cover = select_ground_cover(&bundle.geography, i);
+        let icon = bundle.assets.get_icon(&selected_cover.icon.name).ch();
+        bundle.map.unchecked_set(
             pos,
             Tile::new(
                 icon,
@@ -113,31 +112,25 @@ pub fn base(
 }
 
 /// places scatter objects based on geography template
-pub fn scatter(
-    noise: &Noise,
-    map: &mut RegionMap,
-    offset: [i32; 2],
-    noise_scale: f32,
-    templates: &Assets,
-) {
-    if let Some(ref scatter_list) = map.geography.scatter {
+pub fn scatter(bundle: &mut MapGenBundle, noise_scale: f32) {
+    if let Some(ref scatter_list) = bundle.geography.scatter {
         use std::collections::HashMap;
         let mut queue: HashMap<Pos, Tile> = HashMap::new();
         let default_bg = Color::new(4, 4, 4);
-        for pos in map.bounds().iter() {
+        for pos in bundle.map.bounds().iter() {
             let mut scale = 0.0; // this gets twiddled every pass
             for scatter_obj in scatter_list.iter() {
                 scale += scatter_obj.frequency * noise_scale;
                 let i = rand_up(fbm_offset(
-                    noise,
+                    bundle.noise,
                     pos.to_array(),
-                    offset,
+                    bundle.region.to_offset(),
                     scale + noise_scale,
                     8,
                 ));
                 if i < scatter_obj.frequency {
-                    let icon = templates.get_icon(&scatter_obj.icon.name).ch();
-                    let bg = map.get(pos).map_or(default_bg, |t| t.bg);
+                    let icon = bundle.assets.get_icon(&scatter_obj.icon.name).ch();
+                    let bg = bundle.map.get(pos).map_or(default_bg, |t| t.bg);
                     queue.insert(
                         pos,
                         Tile::new(
@@ -154,7 +147,7 @@ pub fn scatter(
             }
         }
         for (pos, tile) in queue.into_iter() {
-            map.unchecked_set(pos, tile);
+            bundle.map.unchecked_set(pos, tile);
         }
     }
 }

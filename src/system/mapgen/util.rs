@@ -1,5 +1,4 @@
-use crate::component::Region;
-use crate::resource::{RegionMap, WorldState};
+use super::MapGenBundle;
 use crate::util::{clamp, rand_up};
 use tcod::noise::Noise;
 
@@ -28,77 +27,42 @@ pub fn turb_offset(
     noise.get_turbulence(place(pos, offset, scale), octaves)
 }
 
-/*
- * DEPRECATED replace with Rect::iter when needed
-pub fn fill_rect(
-    map: &mut RegionMap,
-    start_x: i32,
-    start_y: i32,
-    width: i32,
-    height: i32,
-    tile: Tile,
-) {
-    let min_x = clamp(0, map.width, start_x);
-    let min_y = clamp(0, map.height, start_y);
-    let max_x = clamp(0, map.width, start_x + width);
-    let max_y = clamp(0, map.height, start_y + height);
-
-    for x in min_x..max_x {
-        for y in min_y..max_y {
-            map.set(Pos { x, y }, tile.clone());
-        }
-    }
-}
-*/
-
 /// determines the vertical offset of a horizontal road at a given x position
-pub fn road_center_longitudinal(
-    noise: &Noise,
-    world: &WorldState,
-    map: &RegionMap,
-    region: Region,
-    x: usize,
-) -> usize {
-    let lanes = world.get_road(region).lanes_x;
-    let pop = world.get_pop(region);
-    let hh = map.height() as i32 / 2;
+pub fn road_center_longitudinal(bundle: &MapGenBundle, x: usize) -> usize {
+    let lanes = bundle.world.get_road(bundle.region).lanes_x;
+    let pop = bundle.world.get_pop(bundle.region);
+    let hh = bundle.map.height() as i32 / 2;
     let base = (rand_up(fbm_offset(
-        noise,
+        bundle.noise,
         [x as i32, hh],
-        region.to_offset(),
+        bundle.region.to_offset(),
         0.01,
         1,
     )) * (1.0 - pop)
-        * map.height() as f32) as i32;
+        * bundle.map.height() as f32) as i32;
     clamp(
         i32::from(lanes * 2),
-        map.height() as i32 - i32::from(lanes * 2),
+        bundle.map.height() as i32 - i32::from(lanes * 2),
         base,
     ) as usize
 }
 
 /// determines the vertical offset of a horizontal road at a given x position
-pub fn road_center_latitudinal(
-    noise: &Noise,
-    world: &WorldState,
-    map: &RegionMap,
-    region: Region,
-    y: usize,
-) -> usize {
-    let lanes = world.get_road(region).lanes_y;
-    let pop = world.get_pop(region);
-    let hw = map.width() as i32 / 2;
+pub fn road_center_latitudinal(bundle: &MapGenBundle, y: usize) -> usize {
+    let lanes = bundle.world.get_road(bundle.region).lanes_y;
+    let pop = bundle.world.get_pop(bundle.region);
+    let hw = bundle.map.width() as i32 / 2;
     let base = (rand_up(fbm_offset(
-        noise,
+        bundle.noise,
         [hw, y as i32],
-        region.to_offset(),
+        bundle.region.to_offset(),
         0.01,
         1,
     )) * (1.0 - pop)
-        * map.width() as f32) as i32;
+        * bundle.map.width() as f32) as i32;
     clamp(
         i32::from(lanes * 2),
-        map.width() as i32 - i32::from(lanes * 2),
+        bundle.map.width() as i32 - i32::from(lanes * 2),
         base,
     ) as usize
 }

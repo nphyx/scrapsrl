@@ -1,7 +1,6 @@
 use super::iterators::RegionMapIter;
 use super::{Tile, HEIGHT, WIDTH};
 use crate::component::Pos;
-use crate::resource::GeographyTemplate;
 use crate::util::{Grid, Rect};
 
 #[derive(Clone)]
@@ -11,7 +10,7 @@ pub struct RegionMap {
     // grid needs to be public for mapgen ...
     /// mark true when mapgen is complete
     pub populated: bool,
-    pub geography: GeographyTemplate,
+    pub geography: String,
 }
 
 impl Default for RegionMap {
@@ -20,7 +19,7 @@ impl Default for RegionMap {
         RegionMap {
             grid,
             populated: false,
-            geography: GeographyTemplate::default(),
+            geography: "Oops".to_string(),
         }
     }
 }
@@ -32,7 +31,7 @@ impl RegionMap {
         RegionMap {
             grid,
             populated: false,
-            geography: GeographyTemplate::default(),
+            geography: "Oops".to_string(),
         }
     }
 
@@ -114,10 +113,12 @@ impl std::fmt::Debug for RegionMap {
         write!(
             f,
             "\ngeography: {:?}\npopulated: {}\n\n{:?}",
-            self.geography
-                .description
-                .as_ref()
-                .map_or("unknown".to_string(), |d| d.short.clone()),
+            self.geography,
+            /*
+            .description
+            .as_ref()
+            .map_or("unknown".to_string(), |d| d.short.clone()),
+            */
             self.populated,
             self.grid
         )

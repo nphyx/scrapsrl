@@ -1,26 +1,23 @@
-use super::util::*;
-use crate::component::{Pos, Region};
-use crate::resource::{Assets, RegionMap, StructureTemplate, WorldState};
+use super::{util::*, MapGenBundle};
+use crate::component::Pos;
+use crate::resource::StructureTemplate;
 use crate::util::*;
 use rand::prelude::*;
-use tcod::noise::Noise;
 
 fn choose_structure<'a>(
-    assets: &'a Assets,
-    noise: &Noise,
+    bundle: &'a MapGenBundle,
     pos: Pos,
-    region: Region,
     structures: &[String],
 ) -> Option<&'a StructureTemplate> {
     let sample = rand_up(fbm_offset(
-        noise,
+        bundle.noise,
         pos.to_array(),
-        region.to_offset(),
+        bundle.region.to_offset(),
         1.0,
         1,
     ));
     let choice = &choose(structures, sample).unwrap();
-    assets.get_structure(choice)
+    bundle.assets.get_structure(choice)
 }
 
 fn choose_structure_dimensions(
@@ -49,17 +46,16 @@ fn choose_structure_dimensions(
 }
 
 use crate::resource::Tile;
-use rand_pcg::*;
 fn populate_structure(
-    assets: &Assets,
+    bundle: &MapGenBundle,
     structure_grid: &mut Grid<Tile>,
     bounds: &Rect<usize>,
     structure: &StructureTemplate,
-    rng: &mut Pcg32,
 ) {
     use wfc::{retry::NumTimes, wrap::WrapNone, RunOwn};
     let table = structure.get_pattern_table();
     let stats = wfc::GlobalStats::new(table);
+    let rng = &mut bundle.world.region_rng(bundle.region);
     let wfc_runner = RunOwn::new_wrap(bounds.to_wave_size(), &stats, WrapNone, rng);
     let wave = wfc_runner
         .collapse_retrying(NumTimes(1000), rng)
@@ -69,7 +65,7 @@ fn populate_structure(
     grid.enumerate().for_each(|(coord, wc)| {
         let tile = structure.get_tile(mapchar[&wc.chosen_pattern_id().expect("")]);
         let pos = Pos::from(coord) + bounds.t_l;
-        structure_grid.unchecked_set(pos, tile.to_tile(assets))
+        structure_grid.unchecked_set(pos, tile.to_tile(bundle.assets))
     });
 }
 
@@ -77,10 +73,7 @@ fn populate_structure(
 /// TODO revisit this, maybe find a way to have fewer parameters, it's kind of
 /// junky passing all this stuff around.
 fn build_structure(
-    assets: &Assets,
-    rng: &mut Pcg32,
-    noise: &Noise,
-    region: Region,
+    bundle: &MapGenBundle,
     structure: &StructureTemplate,
     mut bounds: Rect<usize>,
 ) -> Option<Grid<Tile>> {
@@ -89,7 +82,7 @@ fn build_structure(
         let mut grid: Grid<Tile> = Grid::with_bounds(bounds);
         bounds.shrink_perimeter(structure.perimeter);
         // fill in base tiles
-        populate_structure(assets, &mut grid, &bounds, &structure, rng);
+        populate_structure(bundle, &mut grid, &bounds, &structure);
         // wipe out constructed status so rooms can be built on top
         for pos in grid.bounds.iter() {
             grid.unchecked_get_mut(pos).constructed = false;
@@ -97,23 +90,22 @@ fn build_structure(
         let mut room_list = structure.interior_structures.clone();
         let mut remaining_grid = grid.bounds;
         let mut done = false;
+        let rng = &mut bundle.world.region_rng(bundle.region);
         while !done {
             let mut built = 0;
             room_list.shuffle(rng);
             for room_name in &room_list {
-                if let Some(room) = assets.get_structure(&room_name) {
+                if let Some(room) = bundle.assets.get_structure(&room_name) {
                     let sample = rand_up(fbm_offset(
-                        noise,
+                        bundle.noise,
                         remaining_grid.t_l.to_array(),
-                        region.to_offset(),
+                        bundle.region.to_offset(),
                         0.1,
                         1,
                     ));
                     let bounds =
                         choose_structure_dimensions(sample, &grid, remaining_grid.t_l, &room);
-                    if let Some(room_grid) =
-                        build_structure(assets, rng, noise, region, room, bounds)
-                    {
+                    if let Some(room_grid) = build_structure(bundle, room, bounds) {
                         built += 1;
                         grid.paste_into(Pos::new(0, 0), room_grid).ok()?;
                     }
@@ -129,7 +121,7 @@ fn build_structure(
             // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
             bounds.expand_perimeter(structure.perimeter);
             if let Some(wall_template) = &structure.perimeter_tile {
-                let mut wall = wall_template.to_tile(assets);
+                let mut wall = wall_template.to_tile(bundle.assets);
                 wall.constructed = false;
                 for pos in bounds.iter_perimeter() {
                     grid.unchecked_set(pos, wall.clone());
@@ -157,24 +149,20 @@ pub fn map_constructed(grid: &Grid<Tile>) -> Grid<bool> {
     c_grid
 }
 
-pub fn build(
-    assets: &Assets,
-    noise: &Noise,
-    map: &mut RegionMap,
-    region: Region,
-    world: &WorldState,
-) -> Result<bool, &'static str> {
+pub fn build(bundle: &mut MapGenBundle) -> Result<bool, &'static str> {
     let mut count: u8 = 0;
     // roughly 1.5 slots per .1 pop
+    let world = bundle.world;
+    let region = bundle.region;
     let max_structures: u8 = (world.get_pop(region) * 15.0).floor() as u8;
     let mut tries = 0;
     let max_tries = 100;
     // these start at 1 to give room for a structure's perimeter tiles
-    let horiz: Vec<usize> = (1..map.width()).collect();
-    let vert: Vec<usize> = (1..map.height()).collect();
+    let horiz: Vec<usize> = (1..bundle.map.width()).collect();
+    let vert: Vec<usize> = (1..bundle.map.height()).collect();
     let rng = &mut world.region_rng(region);
     // map has no possible structures, let's bail
-    if map.geography.structure_len() == 0 {
+    if bundle.geography.structure_len() == 0 {
         return Err("no structures available for this geography");
     }
 
@@ -183,7 +171,7 @@ pub fn build(
         while tries < max_tries {
             top_left.x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
             top_left.y = choose(&vert, rng.gen_range(0.0, 1.0)).unwrap_or(0);
-            if map.get(top_left).map_or(false, |t| t.constructed) {
+            if bundle.map.get(top_left).map_or(false, |t| t.constructed) {
                 tries += 1;
             } else {
                 break;
@@ -193,23 +181,23 @@ pub fn build(
             break;
         }
 
-        if let Some(structures) = map.geography.structures_ref() {
-            if let Some(structure) = choose_structure(assets, noise, top_left, region, structures) {
-                let sample = rand_up(fbm_offset(
-                    noise,
-                    top_left.to_array(),
-                    region.to_offset(),
-                    0.1,
-                    1,
-                ));
-                let bounds = choose_structure_dimensions(sample, &map.grid, top_left, &structure);
-                if let Some(structure_grid) =
-                    build_structure(assets, rng, noise, region, structure, bounds)
-                {
-                    map.paste_into(Default::default(), structure_grid)?;
-                    count += structure.building_slots;
-                }
-            }
+        // this should have been checked before build() was called
+        let structures = bundle.geography.structures_ref().unwrap();
+        let structure = &choose_structure(bundle, top_left, structures)
+            .unwrap()
+            .clone();
+        let sample = rand_up(fbm_offset(
+            bundle.noise,
+            top_left.to_array(),
+            region.to_offset(),
+            0.1,
+            1,
+        ));
+        let bounds = choose_structure_dimensions(sample, &bundle.map.grid, top_left, &structure);
+        let maybe_grid = build_structure(bundle, structure, bounds);
+        if let Some(structure_grid) = maybe_grid {
+            bundle.map.paste_into(Default::default(), structure_grid)?;
+            count += structure.building_slots;
         }
     }
     Ok(true)
