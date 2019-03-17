@@ -5,7 +5,7 @@
     max_height:5,
     perimeter:1,
     perimeter_tile: Some((
-        icon: "structure_wall_slat",
+        icon: "wall_slat",
         fg: (64,64,64), 
         bg: (32,32,32),
     )),
@@ -15,7 +15,7 @@
     ],
     tiles: {
         '1': ( // floor tiles
-            icon: "structure_floor_carpet",
+            icon: "floor_carpet",
             short_desc: "tiled floor",
             long_desc: "Linoleum tiles.",
             fg: (16,16,16),

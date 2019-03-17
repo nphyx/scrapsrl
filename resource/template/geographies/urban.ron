@@ -18,13 +18,13 @@
                         fg: (r: 48, g: 48, b: 48),
                         bg: (r: 32, g: 32, b: 32),
                 ),
-                icon: (name:"ground_concrete_1"),
+                icon: (name:"floor_concrete_squares"),
                 short: "concrete",
                 long: "Tiled concrete slabs.",
             ),
     ]),
     scatter: Some([
-            (frequency: 0.021, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_2"), short: "concrete", long: "A concrete block."),
-            (frequency: 0.023, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "ground_concrete_3"), short: "concrete", long: "An eroded concrete slab."),
+            (frequency: 0.021, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "floor_concrete_pitted"), short: "concrete", long: "A pitted concrete slab."),
+            (frequency: 0.023, colors: ( fg: (r: 48, g: 48, b: 48), bg: (r: 32, g: 32, b: 32),), icon:(name: "floor_concrete_rotted"), short: "concrete", long: "An eroded concrete slab."),
     ])
 )

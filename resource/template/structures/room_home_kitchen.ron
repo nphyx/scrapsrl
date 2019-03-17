@@ -5,7 +5,7 @@
     max_height:6,
     perimeter:1,
     perimeter_tile: Some((
-        icon: "structure_wall_slat",
+        icon: "wall_slat",
         fg: (64,64,64), 
         bg: (32,32,32),
     )),
@@ -16,7 +16,7 @@
     ],
     tiles: {
         '1': ( // floor
-            icon: "structure_floor_small_squares",
+            icon: "floor_tile_squares",
             fg: (64,64,64),
             bg: (32,32,32),
             weight: 1,
@@ -24,7 +24,7 @@
             allowed_neighbors: (['1'], ['1'], ['1'], ['1']),
         ),
         'v': ( // stove
-            icon: "fixture_stove",
+            icon: "fixture_counter_stove",
             short_desc: "stove",
             long_desc: "People used to cook food with this.",
             fg: (72,72,103),
@@ -35,7 +35,7 @@
             allowed_neighbors: (['1'], [], ['1'], []),
         ),
         'i': ( // sink
-            icon: "fixture_sink",
+            icon: "fixture_counter_sink",
             short_desc: "sink",
             long_desc: "Water used to flow from this spigot, but now it's bone dry.",
             fg: (72,72,103),
@@ -46,7 +46,7 @@
             allowed_neighbors: (['1'], [], ['1'], []),
         ),
         'D': ( // dishwasher 
-            icon: "fixture_dishwasher",
+            icon: "fixture_counter_dishwasher",
             short_desc: "dishwasher",
             long_desc: "What luxury! Too bad it's busted.",
             fg: (72,72,103),

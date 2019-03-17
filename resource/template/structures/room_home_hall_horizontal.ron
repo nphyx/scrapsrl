@@ -9,7 +9,7 @@
     ],
     tiles: {
         '1': ( // floor tiles
-            icon: "structure_floor_carpet",
+            icon: "floor_carpet",
             short_desc: "hallway carpet",
             long_desc: "It's covered in dust and animal droppings.",
             fg: (16,16,16),

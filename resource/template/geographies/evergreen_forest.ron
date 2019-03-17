@@ -1,11 +1,11 @@
 (
     tags: Some([Forest]),
     population_range: (0.0, 0.01),
-    icon: Some((name: "map_terrain_pine")),
+    icon: Some((name: "map_terrain_evergreen")),
     scatter: Some([
-            (frequency: 0.023, colors: ( fg: (r: 65, g: 65, b: 55), bg: (r: 0, g: 0, b: 0),), icon:(name: "flora_mushroom_1"), short: "mushroom", long: "Is it poisonous? One way to find out."),
-            (frequency: 0.023, colors: ( fg: (r: 65, g: 55, b: 65), bg: (r: 0, g: 0, b: 0),), icon:(name: "flora_mushroom_2"), short: "mushroom", long: "Tasty...?"),
-            (frequency: 0.1, colors: ( fg: (r: 15, g: 55, b: 25), bg: (r: 18, g: 16, b: 0),), icon:(name: "flora_tree_evergreen"), short: "pine tree", long: "A pine tree."),
+            (frequency: 0.023, colors: ( fg: (r: 65, g: 65, b: 55), bg: (r: 0, g: 0, b: 0),), icon:(name: "ground_mushroom_large"), short: "mushroom", long: "Is it poisonous? One way to find out."),
+            (frequency: 0.023, colors: ( fg: (r: 65, g: 55, b: 65), bg: (r: 0, g: 0, b: 0),), icon:(name: "ground_mushroom_cluster"), short: "mushrooms", long: "Tasty...?"),
+            (frequency: 0.1, colors: ( fg: (r: 15, g: 55, b: 25), bg: (r: 18, g: 16, b: 0),), icon:(name: "ground_sapling"), short: "sapling", long: "A young tree, dead."),
     ]),
     parent: Some("meadow")
 )

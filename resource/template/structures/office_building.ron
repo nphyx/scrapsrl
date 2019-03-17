@@ -5,20 +5,20 @@
     max_height:55,
     perimeter:1,
     perimeter_tile: Some((
-        icon: "structure_wall_office",
+        icon: "wall_concrete",
         fg: (64,64,64), 
         bg: (32,32,32),
     )),
     tiles: {
         'r': ( // floor
-            icon: "structure_floor_random",
+            icon: "floor_tile_random_1",
             fg: (64,64,64), 
             bg: (32,32,32),
             weight: 1,
             allowed_neighbors: ([], [], [], []),
         ),
         's': ( // floor
-            icon: "structure_floor_small_squares",
+            icon: "floor_tile_squares",
             fg: (64,64,64), 
             bg: (32,32,32),
             weight: 1,
