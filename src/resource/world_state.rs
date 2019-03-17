@@ -227,7 +227,8 @@ impl WorldState {
         if let Some(icon) = &choice.1.icon {
             self.icons.chars[x][y] = assets
                 .get_icon(&icon.name)
-                .variant_ch(noise.get_fbm([region.x as f32, region.y as f32], 8));
+                .variant(noise.get_fbm([region.x as f32, region.y as f32], 8))
+                .ch()
         }
     }
 

@@ -1,5 +1,0 @@
-(
-    base: '\u{189}',
-    cap_r: Some('\u{18a}'),
-    cap_l: Some('\u{18b}'),
-)

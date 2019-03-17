@@ -1,7 +1,0 @@
-(
-    base: '\u{ed}',
-    cap_u: Some('\u{ec}'),
-    cap_d: Some('\u{ed}'),
-    cap_l: Some('\u{ee}'),
-    cap_r: Some('\u{ef}'),
-)

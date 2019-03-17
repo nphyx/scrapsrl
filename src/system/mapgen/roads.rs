@@ -1,6 +1,6 @@
 use super::util::*;
 use crate::component::{Color, Description, Pos, Region};
-use crate::resource::{RegionMap, Assets, Tile, WorldState};
+use crate::resource::{Assets, RegionMap, Tile, WorldState};
 use crate::util::colors::lerp;
 use crate::util::*;
 use tcod::noise::Noise;
@@ -41,7 +41,7 @@ fn place_car(
     map.try_set(
         pos,
         Tile::new(
-            assets.get_icon(icon).base_ch(),
+            assets.get_icon(icon).ch(),
             fg,
             map.get(pos).map_or(default_bg, |t| t.bg),
             true,
@@ -109,9 +109,15 @@ pub fn place_horizontal_roads(
     let bg = default_bg;
     let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
 
-    let dashed = assets.get_icon("line_emdash").base_ch();
-    let line = assets.get_icon("line_single").ch(false, false, true, true);
-    let dbl = assets.get_icon("line_double").ch(false, false, true, true);
+    let dashed = assets.get_icon("line_emdash").ch();
+    let line = assets
+        .get_icon("line_single")
+        .connected(false, false, true, true)
+        .ch();
+    let dbl = assets
+        .get_icon("line_double")
+        .connected(false, false, true, true)
+        .ch();
     let lanes = world.get_road(region).lanes_x as usize;
     let offset = region.to_offset();
 
@@ -205,8 +211,14 @@ pub fn place_vertical_roads(
     let road_rubble_fg = Color { r: 5, g: 5, b: 5 };
 
     let dashed = '|';
-    let line = assets.get_icon("line_single").ch(true, true, false, false);
-    let dbl = assets.get_icon("line_double").ch(true, true, false, false);
+    let line = assets
+        .get_icon("line_single")
+        .connected(true, true, false, false)
+        .ch();
+    let dbl = assets
+        .get_icon("line_double")
+        .connected(true, true, false, false)
+        .ch();
     let lanes = world.get_road(region).lanes_y as usize;
     let offset = region.to_offset();
 

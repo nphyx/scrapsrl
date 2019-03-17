@@ -40,48 +40,60 @@ pub fn count_lines(text: &str, max_length: i32) -> i32 {
 /// draws a rectangle, using connected tiles if the icon supports it
 pub fn draw_rect(mut console: &dyn Console, x: i32, y: i32, width: i32, height: i32, icon: Icon) {
     // lay out lines
-    vert_line(console, x, y, height, icon.ch(true, true, false, false));
+    vert_line(
+        console,
+        x,
+        y,
+        height,
+        icon.connected(true, true, false, false).ch(),
+    );
     vert_line(
         console,
         x + width - 1,
         y,
         height,
-        icon.ch(true, true, false, false),
+        icon.connected(true, true, false, false).ch(),
     );
-    horiz_line(console, x, y, width, icon.ch(false, false, true, true));
+    horiz_line(
+        console,
+        x,
+        y,
+        width,
+        icon.connected(false, false, true, true).ch(),
+    );
     horiz_line(
         console,
         x,
         y + height - 1,
         width,
-        icon.ch(false, false, true, true),
+        icon.connected(false, false, true, true).ch(),
     );
     console.put_char(
         // top left corner
         x,
         y,
-        icon.ch(false, true, false, true),
+        icon.connected(false, true, false, true).ch(),
         BackgroundFlag::None,
     );
     console.put_char(
         // top right corner
         x + width - 1,
         y,
-        icon.ch(false, true, true, false),
+        icon.connected(false, true, true, false).ch(),
         BackgroundFlag::None,
     );
     console.put_char(
         // bottom left corner
         x,
         y + height - 1,
-        icon.ch(true, false, false, true),
+        icon.connected(true, false, false, true).ch(),
         BackgroundFlag::None,
     );
     console.put_char(
         // bottom right corner
         x + width - 1,
         y + height - 1,
-        icon.ch(true, false, true, false),
+        icon.connected(true, false, true, false).ch(),
         BackgroundFlag::None,
     );
 }

@@ -2,13 +2,13 @@
 pub mod builder;
 pub mod entity_template;
 pub mod geography_template;
-pub mod icon;
+pub mod icons;
 pub mod structure_template;
 
 pub use builder::*;
 pub use entity_template::*;
 pub use geography_template::*;
-pub use icon::*;
+pub use icons::*;
 pub use structure_template::*;
 
 use specs::{Component, VecStorage};

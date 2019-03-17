@@ -45,3 +45,16 @@ where
         None => None,
     }
 }
+
+/// chooses an item from a vec of options given an f32 sample between 0.0 and 1.0
+pub fn choose_ref<T>(options: &[T], sample: f32) -> Option<&T>
+where
+    T: Clone,
+{
+    let len = options.len();
+    let i = (sample * len as f32).floor() as usize;
+    match options.get(i) {
+        Some(item) => Some(&item),
+        None => None,
+    }
+}

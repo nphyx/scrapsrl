@@ -1,7 +1,0 @@
-(
-    base: '\u{d8}',
-    cap_d: Some('\u{d8}'),
-    cap_r: Some('\u{d9}'),
-    cap_l: Some('\u{da}'),
-    cap_u: Some('\u{db}'),
-)

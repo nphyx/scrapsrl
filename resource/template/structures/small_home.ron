@@ -5,7 +5,7 @@
     max_height:18,
     perimeter:1,
     perimeter_tile: Some((
-        icon: "structure_wall_slat",
+        icon: "wall_slat",
         fg: (64,64,64), 
         bg: (32,32,32),
     )),
@@ -21,7 +21,7 @@
     ],
     tiles: {
         '1': ( // floor tiles
-            icon: "structure_floor_carpet",
+            icon: "floor_carpet",
             short_desc: "tiled floor",
             long_desc: "Linoleum tiles.",
             fg: (16,16,16),
@@ -31,7 +31,7 @@
             allowed_neighbors: (['1'], ['1'], ['1'], ['1']),
         ),
         'h': (
-            icon: "fixture_chair",
+            icon: "fixture_armchair",
             short_desc: "chair",
             long_desc: "A chair. It's a little musty.",
             fg: (72,72,103),

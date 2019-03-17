@@ -279,7 +279,7 @@ impl Display {
                 self.root.put_char(
                     ipos.x,
                     ipos.y,
-                    assets.get_icon(&icon.name).base_ch(),
+                    assets.get_icon(&icon.name).ch(),
                     BackgroundFlag::None,
                 );
                 self.root
@@ -411,7 +411,7 @@ impl Display {
                 self.root.put_char(
                     pos.x as i32,
                     pos.y as i32,
-                    assets.get_icon(&icon.name).base_ch(),
+                    assets.get_icon(&icon.name).ch(),
                     BackgroundFlag::None,
                 );
                 self.root
@@ -477,7 +477,10 @@ impl Display {
             self.root.put_char(
                 pos.x as i32,
                 pos.y as i32,
-                assets.get_icon(&icon.name).ch(north, south, east, west),
+                assets
+                    .get_icon(&icon.name)
+                    .connected(north, south, east, west)
+                    .ch(),
                 BackgroundFlag::None,
             );
             self.root
@@ -531,7 +534,7 @@ impl Display {
                 if *pos == cursor_pos && *region == player_region {
                     ui::draw_entity_info(
                         &self.root,
-                        assets.get_icon(&icon.name).base_ch(),
+                        assets.get_icon(&icon.name).ch(),
                         *color,
                         desc,
                     );

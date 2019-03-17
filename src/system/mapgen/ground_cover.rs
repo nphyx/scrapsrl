@@ -1,6 +1,6 @@
 use super::util::*;
 use crate::component::{Color, Description, Pos};
-use crate::resource::{RegionMap, Assets, GeographyTemplate, GroundCover, Tile};
+use crate::resource::{Assets, GeographyTemplate, GroundCover, RegionMap, Tile};
 use crate::util::colors::lerp;
 use crate::util::*;
 use tcod::noise::Noise;
@@ -96,7 +96,7 @@ pub fn base(
         let bg = select_bg(&map.geography, i);
         let fg = select_fg(&map.geography, i);
         let selected_cover = select_ground_cover(&map.geography, i);
-        let icon = templates.get_icon(&selected_cover.icon.name).base_ch();
+        let icon = templates.get_icon(&selected_cover.icon.name).ch();
         map.unchecked_set(
             pos,
             Tile::new(
@@ -136,7 +136,7 @@ pub fn scatter(
                     8,
                 ));
                 if i < scatter_obj.frequency {
-                    let icon = templates.get_icon(&scatter_obj.icon.name).base_ch();
+                    let icon = templates.get_icon(&scatter_obj.icon.name).ch();
                     let bg = map.get(pos).map_or(default_bg, |t| t.bg);
                     queue.insert(
                         pos,

@@ -151,7 +151,7 @@ impl StructureTile {
 
     pub fn to_tile(&self, assets: &Assets) -> Tile {
         Tile {
-            icon: assets.get_icon(&self.icon).base_ch(),
+            icon: assets.get_icon(&self.icon).ch(),
             fg: self.fg(),
             bg: self.bg(),
             transparent: self.transparent,

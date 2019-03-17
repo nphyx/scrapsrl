@@ -26,7 +26,10 @@ pub fn draw_worldmap(
     let fg = TColor::new(16, 16, 16);
     let mut bg: TColor;
     let mut ch: char;
-    let horiz_line = assets.get_icon("line_single").ch(false, false, true, true);
+    let horiz_line = assets
+        .get_icon("line_single")
+        .connected(false, false, true, true)
+        .ch();
     draw_rect(
         console,
         base_x - 1,
@@ -54,12 +57,15 @@ pub fn draw_worldmap(
                         } else {
                             "map_hybrid_small"
                         };
-                        ch = assets.get_icon(size).ch(
-                            cur.lanes_y > 0 && up.lanes_y > 0,
-                            cur.lanes_y > 0 && down.lanes_y > 0,
-                            cur.lanes_x > 0 && left.lanes_x > 0,
-                            cur.lanes_x > 0 && right.lanes_x > 0,
-                        );
+                        ch = assets
+                            .get_icon(size)
+                            .connected(
+                                cur.lanes_y > 0 && up.lanes_y > 0,
+                                cur.lanes_y > 0 && down.lanes_y > 0,
+                                cur.lanes_x > 0 && left.lanes_x > 0,
+                                cur.lanes_x > 0 && right.lanes_x > 0,
+                            )
+                            .ch();
                     }
                 }
                 MapMode::Street => {
@@ -73,12 +79,15 @@ pub fn draw_worldmap(
                         } else {
                             "map_street_small"
                         };
-                        ch = assets.get_icon(size).ch(
-                            cur.lanes_y > 0 && up.lanes_y > 0,
-                            cur.lanes_y > 0 && down.lanes_y > 0,
-                            cur.lanes_x > 0 && left.lanes_x > 0,
-                            cur.lanes_x > 0 && right.lanes_x > 0,
-                        );
+                        ch = assets
+                            .get_icon(size)
+                            .connected(
+                                cur.lanes_y > 0 && up.lanes_y > 0,
+                                cur.lanes_y > 0 && down.lanes_y > 0,
+                                cur.lanes_x > 0 && left.lanes_x > 0,
+                                cur.lanes_x > 0 && right.lanes_x > 0,
+                            )
+                            .ch();
                     }
                 }
                 MapMode::Terrain => {

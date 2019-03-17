@@ -5,12 +5,12 @@ use std::path::Path;
 
 use crate::constants::{ICON_DIR, TEMPLATE_DIR};
 use crate::resource::{
-    Assets, EntityTemplate, GameStage, GameState, GeographyTemplate, Icon, StructureTemplate,
+    Assets, EntityTemplate, GameStage, GameState, GeographyTemplate, IconSet, StructureTemplate,
 };
 
 fn type_dir(template_type: AssetType) -> String {
     match template_type {
-        AssetType::Icon => format!("{}/{}", ICON_DIR, "icons"),
+        AssetType::IconSet => format!("{}/{}", ICON_DIR, "icons"),
         AssetType::Entity => format!("{}/{}", TEMPLATE_DIR, "entities"),
         AssetType::Geography => format!("{}/{}", TEMPLATE_DIR, "geographies"),
         AssetType::Structure => format!("{}/{}", TEMPLATE_DIR, "structures"),
@@ -19,7 +19,7 @@ fn type_dir(template_type: AssetType) -> String {
 
 #[derive(Copy, Clone)]
 pub enum AssetType {
-    Icon,
+    IconSet,
     Entity,
     Geography,
     Structure,
@@ -52,7 +52,7 @@ impl AssetLoader {
         if self.queue.is_none() {
             let mut queue: Vec<(AssetType, DirEntry)> = Vec::new();
             self.enqueue_directory(&mut queue, AssetType::Entity);
-            self.enqueue_directory(&mut queue, AssetType::Icon);
+            self.enqueue_directory(&mut queue, AssetType::IconSet);
             self.enqueue_directory(&mut queue, AssetType::Geography);
             self.enqueue_directory(&mut queue, AssetType::Structure);
             self.queue = Some(queue);
@@ -110,9 +110,11 @@ impl AssetLoader {
                         let template: EntityTemplate = ron::de::from_str(&text).unwrap();
                         assets.add_entity(&name, template);
                     }
-                    AssetType::Icon => {
-                        let template: Icon = ron::de::from_str(&text).unwrap();
-                        assets.add_icon(&name, template);
+                    AssetType::IconSet => {
+                        let set: IconSet = ron::de::from_str(&text).unwrap();
+                        for (name, icon) in set.process().drain(..) {
+                            assets.add_icon(&name, icon);
+                        }
                     }
                     AssetType::Geography => {
                         let template: GeographyTemplate = ron::de::from_str(&text).unwrap();
