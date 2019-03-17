@@ -19,8 +19,10 @@ use std::collections::HashMap;
 pub struct Assets {
     entities: HashMap<String, EntityTemplate>,
     icons: HashMap<String, Icon>,
+    icons_by_ch: HashMap<char, String>,
     structures: HashMap<String, StructureTemplate>,
     geographies: HashMap<String, GeographyTemplate>,
+    default_icon: Icon,
     pub ready: bool,
 }
 
@@ -29,8 +31,10 @@ impl Default for Assets {
         Assets {
             entities: HashMap::new(),
             icons: HashMap::new(),
+            icons_by_ch: HashMap::new(),
             structures: HashMap::new(),
             geographies: HashMap::new(),
+            default_icon: Default::default(),
             ready: false,
         }
     }
@@ -38,6 +42,7 @@ impl Default for Assets {
 
 impl Assets {
     pub fn add_icon(&mut self, name: &str, icon: Icon) {
+        self.icons_by_ch.insert(icon.ch(), name.to_string());
         self.icons.insert(name.to_string(), icon);
     }
     pub fn add_entity(&mut self, name: &str, template: EntityTemplate) {
@@ -67,12 +72,20 @@ impl Assets {
     pub fn get_geographies(&self) -> &HashMap<String, GeographyTemplate> {
         &self.geographies
     }
-    pub fn get_icon(&self, name: &str) -> Icon {
+    pub fn get_icon(&self, name: &str) -> &Icon {
         if let Some(icon) = self.icons.get(name) {
-            icon.clone()
+            &icon
         } else {
-            Icon::default()
+            &self.default_icon
         }
+    }
+    pub fn get_icon_by_ch(&self, ch: char) -> &Icon {
+        if let Some(name) = self.icons_by_ch.get(&ch) {
+            if let Some(icon) = self.icons.get(name) {
+                return &icon;
+            }
+        }
+        &self.default_icon
     }
 
     #[allow(unused)]

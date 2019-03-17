@@ -1,5 +1,5 @@
 use crate::component::Region;
-use crate::resource::{RegionMap, RegionMaps, Assets, GameStage, GameState, WorldState};
+use crate::resource::{Assets, GameStage, GameState, RegionMap, RegionMaps, WorldState};
 use tcod::noise::*;
 use tcod::random::{Algo, Rng};
 
@@ -43,7 +43,13 @@ impl<'a> System<'a> for MapGenerator {
 }
 
 impl MapGenerator {
-    fn generate(&mut self, region: Region, map: &mut RegionMap, assets: &Assets, world: &WorldState) {
+    fn generate(
+        &mut self,
+        region: Region,
+        map: &mut RegionMap,
+        assets: &Assets,
+        world: &WorldState,
+    ) {
         let seed = world.seed();
         println!(
             "Generating new map with dimensions {}x{}, seed {} for region {:?}",
@@ -79,7 +85,7 @@ impl MapGenerator {
         structure::build(&assets, &noise, map, region, world).ok(); // always ok if this fails
 
         // connect connectable tiles
-        connect(map);
+        connect(&assets, map);
 
         // mark map generation done
         map.populated = true;

@@ -10,7 +10,7 @@ fn choose_structure<'a>(
     noise: &Noise,
     pos: Pos,
     region: Region,
-    structures: &Vec<String>,
+    structures: &[String],
 ) -> Option<&'a StructureTemplate> {
     let sample = rand_up(fbm_offset(
         noise,

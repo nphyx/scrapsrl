@@ -23,8 +23,8 @@ pub enum DoorOrientation {
 pub struct CharPos([u32; 2]);
 
 impl CharPos {
-    pub fn to_char(&self) -> char {
-        char::from(*self)
+    pub fn to_char(self) -> char {
+        char::from(self)
     }
 }
 
@@ -55,7 +55,7 @@ impl From<char> for CharPos {
         let y = digit / 16;
         let x = digit % 16;
         println!("GOT {}, {}, {}", digit, x, y);
-        return CharPos([x, y]);
+        CharPos([x, y])
     }
 }
 

@@ -38,7 +38,7 @@ pub fn count_lines(text: &str, max_length: i32) -> i32 {
 }
 
 /// draws a rectangle, using connected tiles if the icon supports it
-pub fn draw_rect(mut console: &dyn Console, x: i32, y: i32, width: i32, height: i32, icon: Icon) {
+pub fn draw_rect(mut console: &dyn Console, x: i32, y: i32, width: i32, height: i32, icon: &Icon) {
     // lay out lines
     vert_line(
         console,

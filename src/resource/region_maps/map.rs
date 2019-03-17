@@ -63,11 +63,6 @@ impl RegionMap {
         self.grid.maybe_get_mut(pos)
     }
 
-    /// Shortcut function for getting the icon for a tile.
-    pub fn get_icon(&self, pos: Pos) -> char {
-        self.grid.maybe_get(pos).map_or('?', |t| t.icon)
-    }
-
     pub fn unchecked_set(&mut self, pos: Pos, tile: Tile) {
         self.grid.unchecked_set(pos, tile)
     }

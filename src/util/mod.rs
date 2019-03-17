@@ -1,10 +1,8 @@
 use crate::component::Pos;
 pub mod colors;
-mod connectable_char;
 mod coord;
 mod grid;
 mod rect;
-pub use self::connectable_char::ConnectableChars;
 pub use self::coord::Coord;
 pub use self::grid::Grid;
 pub use self::rect::Rect;
