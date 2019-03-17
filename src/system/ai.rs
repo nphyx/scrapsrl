@@ -1,6 +1,6 @@
 use crate::component::ai_brain::MovementBehavior;
 use crate::component::*;
-use crate::resource::{AreaMap, GameState};
+use crate::resource::{RegionMap, GameState};
 use rand::prelude::*;
 use specs::{Join, Read, ReadStorage, System, WriteStorage};
 
@@ -10,7 +10,7 @@ impl<'a> System<'a> for AI {
         WriteStorage<'a, AIBrain>,
         ReadStorage<'a, Pos>,
         WriteStorage<'a, MovePlan>,
-        Read<'a, AreaMap>,
+        Read<'a, RegionMap>,
         Read<'a, GameState>,
     );
 

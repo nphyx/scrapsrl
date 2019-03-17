@@ -1,6 +1,6 @@
 use super::util::*;
 use crate::component::{Color, Description, Pos, Region};
-use crate::resource::{AreaMap, Assets, Tile, WorldState};
+use crate::resource::{RegionMap, Assets, Tile, WorldState};
 use crate::util::colors::lerp;
 use crate::util::*;
 use tcod::noise::Noise;
@@ -21,7 +21,7 @@ const VEHICLES: [&str; 8] = [
 fn place_car(
     assets: &Assets,
     noise: &Noise,
-    map: &mut AreaMap,
+    map: &mut RegionMap,
     pos: Pos,
     offset: [i32; 2],
     scale: f32,
@@ -90,7 +90,7 @@ pub fn place_horizontal_roads(
     assets: &Assets,
     noise: &Noise,
     world: &WorldState,
-    map: &mut AreaMap,
+    map: &mut RegionMap,
     region: Region,
     noise_scale: f32,
     damage_factor: f32,
@@ -185,7 +185,7 @@ pub fn place_vertical_roads(
     assets: &Assets,
     noise: &Noise,
     world: &WorldState,
-    map: &mut AreaMap,
+    map: &mut RegionMap,
     region: Region,
     noise_scale: f32,
     damage_factor: f32,

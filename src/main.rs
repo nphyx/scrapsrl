@@ -24,7 +24,7 @@ fn main() {
 
     let ui_queue = UIQueue::default();
 
-    let mut maps = AreaMaps::default();
+    let mut maps = RegionMaps::default();
     let mut collisions = CollisionMaps::default();
     maps.init(Region::new(0, 0), constants::CHUNK_RADIUS);
     collisions.init(Region::new(0, 0), constants::CHUNK_RADIUS);

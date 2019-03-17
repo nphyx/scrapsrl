@@ -1,7 +1,6 @@
 use super::util::*;
 use crate::component::{Pos, Region};
-use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
-use crate::resource::{AreaMap, Assets, StructureTemplate, WorldState};
+use crate::resource::{Assets, RegionMap, StructureTemplate, WorldState};
 use crate::util::*;
 use rand::prelude::*;
 use tcod::noise::Noise;
@@ -161,7 +160,7 @@ pub fn map_constructed(grid: &Grid<Tile>) -> Grid<bool> {
 pub fn build(
     assets: &Assets,
     noise: &Noise,
-    map: &mut AreaMap,
+    map: &mut RegionMap,
     region: Region,
     world: &WorldState,
 ) -> Result<bool, &'static str> {

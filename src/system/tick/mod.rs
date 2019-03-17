@@ -1,6 +1,6 @@
 use crate::component::Cursor;
 use crate::resource::UserInput;
-use crate::resource::{AreaMaps, GameState, UIQueue, WorldState};
+use crate::resource::{RegionMaps, GameState, UIQueue, WorldState};
 use specs::{Join, Read, ReadStorage, System, Write};
 
 /// handles game state maintenance before a tick runs
@@ -10,7 +10,7 @@ impl<'a> System<'a> for PreTick {
         ReadStorage<'a, Cursor>,
         Read<'a, UserInput>,
         Read<'a, UIQueue>,
-        Read<'a, AreaMaps>,
+        Read<'a, RegionMaps>,
         Write<'a, GameState>,
         Write<'a, WorldState>,
     );

@@ -1,6 +1,6 @@
 use super::util::*;
 use crate::component::{Color, Description, Pos};
-use crate::resource::{AreaMap, Assets, GeographyTemplate, GroundCover, Tile};
+use crate::resource::{RegionMap, Assets, GeographyTemplate, GroundCover, Tile};
 use crate::util::colors::lerp;
 use crate::util::*;
 use tcod::noise::Noise;
@@ -86,7 +86,7 @@ fn select_ground_cover(geography: &GeographyTemplate, noise_sample: f32) -> Grou
 
 pub fn base(
     noise: &Noise,
-    map: &mut AreaMap,
+    map: &mut RegionMap,
     offset: [i32; 2],
     noise_scale: f32,
     templates: &Assets,
@@ -115,7 +115,7 @@ pub fn base(
 /// places scatter objects based on geography template
 pub fn scatter(
     noise: &Noise,
-    map: &mut AreaMap,
+    map: &mut RegionMap,
     offset: [i32; 2],
     noise_scale: f32,
     templates: &Assets,

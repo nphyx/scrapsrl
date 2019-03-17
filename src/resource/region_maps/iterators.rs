@@ -1,12 +1,12 @@
-use super::{AreaMap, Tile};
+use super::{RegionMap, Tile};
 use crate::component::Pos;
 
-pub struct AreaMapIter<'a> {
-    pub map: &'a AreaMap,
+pub struct RegionMapIter<'a> {
+    pub map: &'a RegionMap,
     pub cur: [usize; 2],
 }
 
-impl<'a> Iterator for AreaMapIter<'a> {
+impl<'a> Iterator for RegionMapIter<'a> {
     type Item = (Pos, &'a Tile);
 
     fn next(&mut self) -> Option<(Pos, &'a Tile)> {

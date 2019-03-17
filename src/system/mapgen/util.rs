@@ -1,5 +1,5 @@
 use crate::component::Region;
-use crate::resource::{AreaMap, WorldState};
+use crate::resource::{RegionMap, WorldState};
 use crate::util::{clamp, rand_up};
 use tcod::noise::Noise;
 
@@ -31,7 +31,7 @@ pub fn turb_offset(
 /*
  * DEPRECATED replace with Rect::iter when needed
 pub fn fill_rect(
-    map: &mut AreaMap,
+    map: &mut RegionMap,
     start_x: i32,
     start_y: i32,
     width: i32,
@@ -55,7 +55,7 @@ pub fn fill_rect(
 pub fn road_center_longitudinal(
     noise: &Noise,
     world: &WorldState,
-    map: &AreaMap,
+    map: &RegionMap,
     region: Region,
     x: usize,
 ) -> usize {
@@ -81,7 +81,7 @@ pub fn road_center_longitudinal(
 pub fn road_center_latitudinal(
     noise: &Noise,
     world: &WorldState,
-    map: &AreaMap,
+    map: &RegionMap,
     region: Region,
     y: usize,
 ) -> usize {

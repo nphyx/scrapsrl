@@ -1,26 +1,17 @@
+use super::RegionMap;
 use crate::component::Region;
-use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
 use crate::util::Rect;
-
-mod iterators;
-mod map;
-mod tile;
-pub use map::AreaMap;
-pub use tile::Tile;
-
-pub const WIDTH: usize = MAP_WIDTH as usize;
-pub const HEIGHT: usize = MAP_HEIGHT as usize;
-
 use specs::{Component, VecStorage};
 use std::collections::hash_map::IterMut;
 use std::collections::HashMap;
+
 #[derive(Clone, Default, Component)]
 #[storage(VecStorage)]
-pub struct AreaMaps {
-    maps: HashMap<Region, AreaMap>,
+pub struct RegionMaps {
+    maps: HashMap<Region, RegionMap>,
 }
 
-impl AreaMaps {
+impl RegionMaps {
     /// initialize new maps for a given <center> and <radius> radius
     /// Note that radius extends from the edge of the center, so a "size 2" map is 5x5
     pub fn init(&mut self, center: Region, size: u8) {
@@ -35,7 +26,7 @@ impl AreaMaps {
         for region in surrounding_maps.iter() {
             self.maps.entry(region.into()).or_insert_with(|| {
                 count += 1;
-                AreaMap::default()
+                RegionMap::default()
             });
         }
         if count > 0 {
@@ -48,7 +39,7 @@ impl AreaMaps {
 
     /// get the map at the given location. Will probably die if the map doesn't exist,
     /// but we want that because it shouldn't have happened.
-    pub fn get(&self, region: Region) -> &AreaMap {
+    pub fn get(&self, region: Region) -> &RegionMap {
         match self.maps.get(&region) {
             Some(map) => map,
             None => {
@@ -100,7 +91,7 @@ impl AreaMaps {
         }
     }
 
-    pub fn iter_mut(&mut self) -> IterMut<'_, Region, AreaMap> {
+    pub fn iter_mut(&mut self) -> IterMut<'_, Region, RegionMap> {
         self.maps.iter_mut()
     }
 }

@@ -2,14 +2,14 @@ use specs::{System, Write};
 use tcod::input::Key;
 use tcod::input::KeyCode::*;
 
-use crate::resource::{AreaMaps, GameState, MapMode, RenderMode, UserInput, WorldState};
+use crate::resource::{RegionMaps, GameState, MapMode, RenderMode, UserInput, WorldState};
 
 /// handle input that should work regardless of game state
 pub struct SystemInput;
 impl<'a> System<'a> for SystemInput {
     type SystemData = (
         Write<'a, UserInput>,
-        Write<'a, AreaMaps>,
+        Write<'a, RegionMaps>,
         Write<'a, GameState>,
         Write<'a, WorldState>,
     );

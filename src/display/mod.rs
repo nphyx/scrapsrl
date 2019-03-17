@@ -65,7 +65,7 @@ impl<'a> System<'a> for Display {
         ReadStorage<'a, Solid>,
         Write<'a, GameState>,
         Read<'a, WorldState>,
-        Read<'a, AreaMaps>,
+        Read<'a, RegionMaps>,
         Read<'a, Assets>,
         Read<'a, CollisionMaps>,
         Read<'a, UIQueue>,
@@ -231,7 +231,7 @@ impl Display {
         assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
         world: &Read<'a, WorldState>,
-        maps: &Read<'a, AreaMaps>,
+        maps: &Read<'a, RegionMaps>,
     ) {
         let mut player_pos: Pos = Pos::default();
         let mut player_region: Region = Region::default();
@@ -375,7 +375,7 @@ impl Display {
 
         assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
-        maps: &Read<'a, AreaMaps>,
+        maps: &Read<'a, RegionMaps>,
         collisions: &Read<'a, CollisionMaps>,
     ) {
         let mut player_region: Region = Region::default();
@@ -496,7 +496,7 @@ impl Display {
         players: &ReadStorage<'a, Player>,
         positions: &ReadStorage<'a, Pos>,
         regions: &ReadStorage<'a, Region>,
-        maps: &Read<'a, AreaMaps>,
+        maps: &Read<'a, RegionMaps>,
         assets: &Read<'a, Assets>,
         state: &mut Write<'a, GameState>,
         ui_queue: &Read<'a, UIQueue>,

@@ -2,10 +2,10 @@
  * TODO FIXME this whole module is presently unused and needs reimplementation someday
 use super::util::*;
 use crate::component::{Color, Description, Pos};
-use crate::resource::{AreaMap, Tile};
+use crate::resource::{RegionMap, Tile};
 use crate::util::*;
 
-fn place_tree(map: &mut AreaMap, cx: i32, cy: i32, size: i32) {
+fn place_tree(map: &mut RegionMap, cx: i32, cy: i32, size: i32) {
     let pos = Pos { x: cx, y: cy };
     let fg = Color { r: 14, g: 10, b: 3 };
     let bg: Color;
@@ -50,7 +50,7 @@ fn check_tree_placement(tree_places: &[(i32, i32)], cx: i32, cy: i32, size: i32)
 /// place large trees on the map, density is 0-1 with 1 being very dense
 pub fn place_trees(
     noise: &Noise,
-    map: &mut AreaMap,
+    map: &mut RegionMap,
     width: i32,
     height: i32,
     offset: [i32; 2],

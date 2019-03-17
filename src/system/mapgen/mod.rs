@@ -1,5 +1,5 @@
 use crate::component::Region;
-use crate::resource::{AreaMap, AreaMaps, Assets, GameStage, GameState, WorldState};
+use crate::resource::{RegionMap, RegionMaps, Assets, GameStage, GameState, WorldState};
 use tcod::noise::*;
 use tcod::random::{Algo, Rng};
 
@@ -24,7 +24,7 @@ use specs::{Read, System, Write};
 impl<'a> System<'a> for MapGenerator {
     type SystemData = (
         Read<'a, Assets>,
-        Write<'a, AreaMaps>,
+        Write<'a, RegionMaps>,
         Write<'a, GameState>,
         Read<'a, WorldState>,
     );
@@ -43,7 +43,7 @@ impl<'a> System<'a> for MapGenerator {
 }
 
 impl MapGenerator {
-    fn generate(&mut self, region: Region, map: &mut AreaMap, assets: &Assets, world: &WorldState) {
+    fn generate(&mut self, region: Region, map: &mut RegionMap, assets: &Assets, world: &WorldState) {
         let seed = world.seed();
         println!(
             "Generating new map with dimensions {}x{}, seed {} for region {:?}",

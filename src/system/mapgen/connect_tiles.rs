@@ -1,5 +1,5 @@
 use crate::component::Pos;
-use crate::resource::AreaMap;
+use crate::resource::RegionMap;
 use crate::util::ConnectableChars;
 
 /*
@@ -57,7 +57,7 @@ pub fn check_connect(
 }
 */
 
-pub fn connect(map: &mut AreaMap) {
+pub fn connect(map: &mut RegionMap) {
     let connectables = ConnectableChars::new();
     let mut queue: Vec<(Pos, char)> = Vec::new();
     for pos in map.bounds().iter() {

@@ -1,11 +1,11 @@
-use super::iterators::AreaMapIter;
+use super::iterators::RegionMapIter;
 use super::{Tile, HEIGHT, WIDTH};
 use crate::component::Pos;
 use crate::resource::GeographyTemplate;
 use crate::util::{Grid, Rect};
 
 #[derive(Clone)]
-pub struct AreaMap {
+pub struct RegionMap {
     /// don't really like this being public FIXME
     pub grid: Grid<Tile>,
     // grid needs to be public for mapgen ...
@@ -14,10 +14,10 @@ pub struct AreaMap {
     pub geography: GeographyTemplate,
 }
 
-impl Default for AreaMap {
-    fn default() -> AreaMap {
+impl Default for RegionMap {
+    fn default() -> RegionMap {
         let grid = Grid::with_dimensions(WIDTH, HEIGHT);
-        AreaMap {
+        RegionMap {
             grid,
             populated: false,
             geography: GeographyTemplate::default(),
@@ -25,11 +25,11 @@ impl Default for AreaMap {
     }
 }
 
-impl AreaMap {
+impl RegionMap {
     #[allow(unused)]
-    fn with_dimensions(width: usize, height: usize) -> AreaMap {
+    fn with_dimensions(width: usize, height: usize) -> RegionMap {
         let grid = Grid::with_dimensions(width, height);
-        AreaMap {
+        RegionMap {
             grid,
             populated: false,
             geography: GeographyTemplate::default(),
@@ -86,8 +86,8 @@ impl AreaMap {
         };
     }
 
-    pub fn iter(&self) -> AreaMapIter<'_> {
-        AreaMapIter {
+    pub fn iter(&self) -> RegionMapIter<'_> {
+        RegionMapIter {
             map: self,
             cur: [0, 0],
         }
@@ -103,15 +103,10 @@ impl AreaMap {
     pub fn paste_into(&mut self, t_l: Pos, subgrid: Grid<Tile>) -> Result<bool, &'static str> {
         self.grid.paste_into(t_l, subgrid)
     }
-
-    pub fn fit_rect(&self, rect: Rect<usize>) -> Rect<usize> {
-        self.grid
-            .fit_rect(rect, &|tile: &Tile| -> bool { tile.constructed })
-    }
 }
 
-impl From<&AreaMap> for Rect<usize> {
-    fn from(map: &AreaMap) -> Rect<usize> {
+impl From<&RegionMap> for Rect<usize> {
+    fn from(map: &RegionMap) -> Rect<usize> {
         Rect {
             t_l: Pos::new(0, 0),
             b_r: Pos::new(map.width(), map.height()),
@@ -119,7 +114,7 @@ impl From<&AreaMap> for Rect<usize> {
     }
 }
 
-impl std::fmt::Debug for AreaMap {
+impl std::fmt::Debug for RegionMap {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,

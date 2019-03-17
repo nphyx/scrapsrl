@@ -1,6 +1,6 @@
 use crate::component::*;
 use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
-use crate::resource::{AreaMaps, CollisionMaps};
+use crate::resource::{RegionMaps, CollisionMaps};
 use crate::util::clamp;
 use specs::{Entities, Join, Read, ReadStorage, System, Write, WriteStorage};
 
@@ -12,7 +12,7 @@ impl<'a> System<'a> for Movement {
         ReadStorage<'a, Solid>,
         WriteStorage<'a, Orientation>,
         WriteStorage<'a, Pos>,
-        Read<'a, AreaMaps>,
+        Read<'a, RegionMaps>,
         Write<'a, CollisionMaps>,
         Entities<'a>,
     );
