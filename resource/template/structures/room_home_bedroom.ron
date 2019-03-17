@@ -4,11 +4,11 @@
     min_height:3,
     max_height:5,
     perimeter:1,
-    perimeter_tile: (
+    perimeter_tile: Some((
         icon: "structure_wall_slat",
         fg: (64,64,64), 
         bg: (32,32,32),
-    ),
+    )),
     connect_to: [
         (connection_type: Structure("room_hallway"), connection_method: Door),
         (connection_type: Structure("room_home_common"), connection_method: Door),

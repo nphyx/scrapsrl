@@ -88,7 +88,7 @@ fn build_structure(
     if structure.fits_in(bounds) {
         // now place a structure of the size we've found
         let mut grid: Grid<Tile> = Grid::with_bounds(bounds);
-        bounds.shrink_perimeter(1);
+        bounds.shrink_perimeter(structure.perimeter);
         // fill in base tiles
         populate_structure(assets, &mut grid, &bounds, &structure, rng);
         // wipe out constructed status so rooms can be built on top
@@ -126,14 +126,18 @@ fn build_structure(
             remaining_grid =
                 grid.fit_rect(grid.bounds, &|tile: &Tile| -> bool { tile.constructed });
         }
-        // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
-        bounds.expand_perimeter(1);
-        let mut wall = structure.perimeter_tile.to_tile(assets).clone();
-        wall.constructed = false;
-        for pos in bounds.iter_perimeter() {
-            grid.unchecked_set(pos, wall.clone());
+        if structure.perimeter > 0 {
+            // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
+            bounds.expand_perimeter(structure.perimeter);
+            if let Some(wall_template) = &structure.perimeter_tile {
+                let mut wall = wall_template.to_tile(assets);
+                wall.constructed = false;
+                for pos in bounds.iter_perimeter() {
+                    grid.unchecked_set(pos, wall.clone());
+                }
+            }
+            bounds.shrink_perimeter(structure.perimeter);
         }
-        bounds.shrink_perimeter(1);
         // now mark as constructed, allowing wall overlap
         for pos in bounds.iter() {
             grid.unchecked_get_mut(pos).constructed = true;
@@ -144,6 +148,7 @@ fn build_structure(
 }
 
 // for debugging
+#[allow(unused)]
 pub fn map_constructed(grid: &Grid<Tile>) -> Grid<bool> {
     let bounds = grid.bounds;
     let mut c_grid: Grid<bool> = Grid::with_bounds(bounds);

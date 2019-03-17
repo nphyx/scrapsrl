@@ -226,6 +226,10 @@ impl Iterator for RectIterPerimeter<usize> {
     type Item = Coord<usize>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        // can't iterate the perimeter of a Rect that doesn't have a perimeter
+        if self.rect.width() < 2 || self.rect.height() < 2 {
+            return None;
+        }
         if self.final_item {
             return None;
         }
@@ -434,6 +438,10 @@ mod tests {
     }
     #[test]
     fn rect_iter_perimeter() {
+        {
+            let mut iter = Rect::new(Pos::new(1, 10), Pos::new(1, 10)).iter_perimeter();
+            assert_eq!(iter.next(), None);
+        }
         {
             let mut iter = Rect::new(Pos::new(0, 0), Pos::new(2, 2)).iter_perimeter();
             assert_eq!(iter.next().unwrap(), Pos { x: 0, y: 0 });

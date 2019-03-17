@@ -4,11 +4,11 @@
     min_height:12,
     max_height:18,
     perimeter:1,
-    perimeter_tile: (
+    perimeter_tile: Some((
         icon: "structure_wall_slat",
         fg: (64,64,64), 
         bg: (32,32,32),
-    ),
+    )),
     connect_to: [(connection_type: Road, connection_method: Driveway)],
     interior_structures: [
         "room_home_kitchen",

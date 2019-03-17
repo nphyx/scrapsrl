@@ -4,11 +4,11 @@
     min_height:16,
     max_height:22,
     perimeter:2,
-    perimeter_tile: (
+    perimeter_tile: Some((
         icon: "structure_wall_brick",
         fg: (64,46,22), 
         bg: (32,32,32),
-    ),
+    )),
     tiles: {
         'r': ( // floor
             icon: "structure_floor_random",

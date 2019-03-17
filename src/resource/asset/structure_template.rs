@@ -188,9 +188,9 @@ pub struct StructureTemplate {
     /// maps have a cap on the number of structures they can make;
     /// this is number of slots this structure should count for
     pub building_slots: u8,
-    #[serde(default = "StructureTile::default")]
+    #[serde(default)]
     /// tile used for outer walls
-    pub perimeter_tile: StructureTile,
+    pub perimeter_tile: Option<StructureTile>,
     #[serde(default = "default_empty_connection_vec")]
     /// a special instruction for connecting to roads, other structures, etc
     pub connect_to: Vec<StructureConnection>,
@@ -211,7 +211,7 @@ impl Default for StructureTemplate {
             max_height: 3,
             perimeter: 1,
             building_slots: 1,
-            perimeter_tile: StructureTile::default(),
+            perimeter_tile: None,
             connect_to: Vec::new(),
             interior_structures: Vec::new(),
             tiles: HashMap::new(),
