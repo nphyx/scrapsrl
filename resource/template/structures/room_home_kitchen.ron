@@ -57,7 +57,7 @@
             allowed_neighbors: (['1'], [], ['1'], []),
         ),
         'c': ( // kitchen counter
-            icon: "fixture_counter_cabinet",
+            icon: "fixture_counter",
             short_desc: "kitchen counter",
             long_desc: "Ah the joy of preparing to cook.",
             fg: (72,72,103),

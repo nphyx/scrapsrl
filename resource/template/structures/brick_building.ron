@@ -3,10 +3,10 @@
     max_width:22,
     min_height:16,
     max_height:22,
-    perimeter:2,
+    perimeter:1,
     perimeter_tile: Some((
         icon: "wall_brick",
-        fg: (64,46,22), 
+        fg: (64,46,22),
         bg: (32,32,32),
     )),
     tiles: {
