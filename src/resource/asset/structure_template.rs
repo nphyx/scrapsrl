@@ -183,6 +183,7 @@ pub struct StructureTemplate {
     pub min_height: usize,
     pub max_height: usize,
     /// perimeter is *inside* the bounds, so account for it in min/max properties
+    /// a perimeter less than / equal to min_width or min_height WILL CRASH
     pub perimeter: usize,
     #[serde(default = "default_building_slots")]
     /// maps have a cap on the number of structures they can make;

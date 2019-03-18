@@ -36,38 +36,54 @@ impl<T: Integer + PartialOrd + AddAssign + SubAssign + Copy> Rect<T> {
             || (coord == Coord::new(self.t_l.x, self.b_r.y))
             || (coord == Coord::new(self.b_r.x, self.t_l.y))
     }
+}
+
+impl Rect<usize> {
+    pub fn width(&self) -> usize {
+        1 + self.b_r.x - self.t_l.x
+    }
+
+    pub fn height(&self) -> usize {
+        1 + self.b_r.y - self.t_l.y
+    }
+
+    pub fn to_wave_size(&self) -> Size {
+        // wave size is exclusive of bottom/right bounds
+        Size::new(self.width() as u32, self.height() as u32)
+    }
 
     #[allow(unused)]
     /// expands the perimeter by <n> on each side
-    pub fn expand_perimeter(&mut self, n: T) {
-        self.t_l.x -= n;
-        self.t_l.y -= n;
+    pub fn expand_perimeter(&mut self, n: usize) {
+        if self.t_l.x > n {
+            self.t_l.x -= n;
+        } else {
+            self.t_l.x = 0;
+        }
+        if self.t_l.y > n {
+            self.t_l.y -= n;
+        } else {
+            self.t_l.y = 0;
+        }
         self.b_r.x += n;
         self.b_r.y += n;
     }
 
     #[allow(unused)]
     /// expands the perimeter by <n> on each side
-    pub fn shrink_perimeter(&mut self, n: T) {
+    pub fn shrink_perimeter(&mut self, n: usize) {
         self.t_l.x += n;
         self.t_l.y += n;
-        self.b_r.x -= n;
-        self.b_r.y -= n;
-    }
-}
-
-impl Rect<usize> {
-    pub fn width(&self) -> usize {
-        self.b_r.x - self.t_l.x + 1
-    }
-
-    pub fn height(&self) -> usize {
-        self.b_r.y - self.t_l.y + 1
-    }
-
-    pub fn to_wave_size(&self) -> Size {
-        // wave size is exclusive of bottom/right bounds
-        Size::new(self.width() as u32, self.height() as u32)
+        if (self.b_r.x >= n) {
+            self.b_r.x -= n;
+        } else {
+            self.b_r.x = 0;
+        }
+        if (self.b_r.y >= n) {
+            self.b_r.y -= n;
+        } else {
+            self.b_r.y = 0;
+        }
     }
 }
 
@@ -93,6 +109,24 @@ impl Rect<i32> {
             rect: *self,
             next_coord: self.t_l,
         }
+    }
+
+    #[allow(unused)]
+    /// expands the perimeter by <n> on each side
+    pub fn expand_perimeter(&mut self, n: i32) {
+        self.t_l.x -= n;
+        self.t_l.y -= n;
+        self.b_r.x += n;
+        self.b_r.y += n;
+    }
+
+    #[allow(unused)]
+    /// expands the perimeter by <n> on each side
+    pub fn shrink_perimeter(&mut self, n: i32) {
+        self.t_l.x += n;
+        self.t_l.y += n;
+        self.b_r.x -= n;
+        self.b_r.y -= n;
     }
 }
 

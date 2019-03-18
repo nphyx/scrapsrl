@@ -1,27 +1,24 @@
 (
-    min_width:22,
-    max_width:55,
-    min_height:22,
-    max_height:55,
-    perimeter:2,
+    min_width:1,
+    max_width:40,
+    min_height:1,
+    max_height:40,
+    perimeter:0,
     perimeter_tile: Some((
-        icon: "wall_concrete",
+        icon: "floor_concrete_rotted",
         fg: (64,64,64), 
         bg: (32,32,32),
     )),
-    interior_structures: [
-        "cubicle_farm"
-    ],
     tiles: {
         '1': ( // floor
-            icon: "floor_tile_squares",
+            icon: "floor_concrete_squares",
             fg: (64,64,64), 
             bg: (32,32,32),
             weight: 1,
             allowed_neighbors: ([], [], [], []),
         ),
         '2': ( // floor
-            icon: "floor_tile_squares",
+            icon: "floor_concrete_pitted",
             fg: (64,64,64), 
             bg: (32,32,32),
             weight: 1,

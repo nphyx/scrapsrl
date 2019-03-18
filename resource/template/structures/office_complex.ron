@@ -1,0 +1,28 @@
+(
+    min_width:30,
+    max_width:80,
+    min_height:30,
+    max_height:80,
+    perimeter:1,
+    interior_structures: [
+        "parking_lot",
+        "office_building",
+    /*
+        "plaza",
+        */
+    ],
+    perimeter_tile: Some((
+        icon: "fixture_guard_rail",
+        fg: (0,0,0),
+        bg: (64,64,64),
+    )),
+    tiles: {
+        '1': ( // floor
+            icon: "ground_concrete",
+            fg: (64,64,64),
+            bg: (32,32,32),
+            weight: 1,
+            allowed_neighbors: (['1'], ['1'], ['1'], ['1']),
+        ),
+    }
+)

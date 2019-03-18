@@ -26,6 +26,7 @@
         "road_line_double": (4, 39),
         "road_line_dashed": (8, 39),
         "road_cracked": (12, 39),
+        "fixture_guard_rail": (0, 43),
     },
     simple: {
         "map_terrain_deciduous": (12, 15),

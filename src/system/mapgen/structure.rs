@@ -76,8 +76,14 @@ fn build_structure(
     bundle: &MapGenBundle,
     structure: &StructureTemplate,
     mut bounds: Rect<usize>,
+    mut recursions: u8,
 ) -> Option<Grid<Tile>> {
     if structure.fits_in(bounds) {
+        recursions += 1;
+        if recursions > 10 {
+            println!("structure nesting level is too deep");
+            return None;
+        }
         // now place a structure of the size we've found
         let mut grid: Grid<Tile> = Grid::with_bounds(bounds);
         bounds.shrink_perimeter(structure.perimeter);
@@ -91,10 +97,16 @@ fn build_structure(
         let mut remaining_grid = grid.bounds;
         let mut done = false;
         let rng = &mut bundle.world.region_rng(bundle.region);
+        let mut loops = 0;
         while !done {
+            loops += 1;
             let mut built = 0;
             room_list.shuffle(rng);
             for room_name in &room_list {
+                println!(
+                    "TRYING TO GENERATE A {}, LOOP: {} RECURSION: {}",
+                    room_name, loops, recursions
+                );
                 if let Some(room) = bundle.assets.get_structure(&room_name) {
                     let sample = rand_up(fbm_offset(
                         bundle.noise,
@@ -105,13 +117,13 @@ fn build_structure(
                     ));
                     let bounds =
                         choose_structure_dimensions(sample, &grid, remaining_grid.t_l, &room);
-                    if let Some(room_grid) = build_structure(bundle, room, bounds) {
+                    if let Some(room_grid) = build_structure(bundle, room, bounds, recursions) {
                         built += 1;
                         grid.paste_into(Pos::new(0, 0), room_grid).ok()?;
                     }
                 }
             }
-            if built == 0 {
+            if built == 0 || loops > 50 {
                 done = true
             };
             remaining_grid =
@@ -119,7 +131,7 @@ fn build_structure(
         }
         if structure.perimeter > 0 {
             // draw a wall (TODO connect the tiles, once tile connection is rebuilt)
-            bounds.expand_perimeter(structure.perimeter);
+            bounds.expand_perimeter(1);
             if let Some(wall_template) = &structure.perimeter_tile {
                 let mut wall = wall_template.to_tile(bundle.assets);
                 wall.constructed = false;
@@ -127,7 +139,7 @@ fn build_structure(
                     grid.unchecked_set(pos, wall.clone());
                 }
             }
-            bounds.shrink_perimeter(structure.perimeter);
+            bounds.expand_perimeter((structure.perimeter as i32 - 2).max(0) as usize);
         }
         // now mark as constructed, allowing wall overlap
         for pos in bounds.iter() {
@@ -156,7 +168,7 @@ pub fn build(bundle: &mut MapGenBundle) -> Result<bool, &'static str> {
     let region = bundle.region;
     let max_structures: u8 = (world.get_pop(region) * 15.0).floor() as u8;
     let mut tries = 0;
-    let max_tries = 100;
+    let max_tries = 20;
     // these start at 1 to give room for a structure's perimeter tiles
     let horiz: Vec<usize> = (1..bundle.map.width()).collect();
     let vert: Vec<usize> = (1..bundle.map.height()).collect();
@@ -166,7 +178,7 @@ pub fn build(bundle: &mut MapGenBundle) -> Result<bool, &'static str> {
         return Err("no structures available for this geography");
     }
 
-    while count < max_structures && tries < max_tries {
+    while (count < max_structures) && (tries < max_tries) {
         let mut top_left = Pos::new(0, 0);
         while tries < max_tries {
             top_left.x = choose(&horiz, rng.gen_range(0.0, 1.0)).unwrap_or(0);
@@ -193,10 +205,17 @@ pub fn build(bundle: &mut MapGenBundle) -> Result<bool, &'static str> {
             0.1,
             1,
         ));
-        let bounds = choose_structure_dimensions(sample, &bundle.map.grid, top_left, &structure);
-        let maybe_grid = build_structure(bundle, structure, bounds);
+        let mut bounds =
+            choose_structure_dimensions(sample, &bundle.map.grid, top_left, &structure);
+        let maybe_grid = build_structure(bundle, structure, bounds, 0);
         if let Some(structure_grid) = maybe_grid {
             bundle.map.paste_into(Default::default(), structure_grid)?;
+            bounds.expand_perimeter(1);
+            for pos in bounds.iter_perimeter() {
+                if let Some(tile) = bundle.map.grid.maybe_get_mut(pos) {
+                    tile.constructed = true;
+                }
+            }
             count += structure.building_slots;
         }
     }
