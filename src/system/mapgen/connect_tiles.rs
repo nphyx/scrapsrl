@@ -1,7 +1,20 @@
 use super::MapGenBundle;
-use crate::component::Pos;
+use crate::resource::Tile;
+use crate::util::{connect_chars, Grid};
 
 pub fn connect(bundle: &mut MapGenBundle) {
+    /*
+     */
+    let assets = &*bundle.assets;
+    let grid = &mut (bundle.map).grid;
+
+    let get = &|grid: &Grid<Tile>, pos| -> char { grid.unchecked_get(pos).icon };
+    let set = &mut |grid: &mut Grid<Tile>, pos, ch| {
+        grid.unchecked_get_mut(pos).icon = ch;
+    };
+
+    connect_chars(assets, grid, get, set);
+    /*
     let mut queue: Vec<(Pos, char)> = Vec::new();
     let v = Pos::new(0, 1);
     let h = Pos::new(1, 0);
@@ -42,6 +55,6 @@ pub fn connect(bundle: &mut MapGenBundle) {
     }
 
     for (pos, icon) in queue {
-        bundle.map.set_icon(pos, icon);
     }
+    */
 }

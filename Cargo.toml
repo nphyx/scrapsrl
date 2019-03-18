@@ -8,6 +8,7 @@ edition = "2018"
 tcod = "0.13"
 specs = "0.14.0"
 shred = "0.7.1"
+shred-derive = "0.5.1"
 specs-derive = "0.4.0"
 serde = { version = "*", features = ["derive"] }
 serde_derive = "*"

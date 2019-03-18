@@ -24,6 +24,28 @@ pub struct Display {
     pub map: Map,
 }
 
+#[derive(SystemData)]
+pub struct DisplayData<'a> {
+    // I'll take one of everything
+    characters: ReadStorage<'a, Character>,
+    colors: ReadStorage<'a, Colors>,
+    cursors: ReadStorage<'a, Cursor>,
+    descriptions: ReadStorage<'a, Description>,
+    icons: ReadStorage<'a, IconRef>,
+    orientations: ReadStorage<'a, Orientation>,
+    players: ReadStorage<'a, Player>,
+    positions: ReadStorage<'a, Pos>,
+    regions: ReadStorage<'a, Region>,
+    solids: ReadStorage<'a, Solid>,
+    state: Write<'a, GameState>,
+    world: Read<'a, WorldState>,
+    maps: Read<'a, RegionMaps>,
+    assets: Read<'a, Assets>,
+    collisions: Read<'a, CollisionMaps>,
+    ui_queue: Read<'a, UIQueue>,
+    input: Write<'a, UserInput>,
+}
+
 impl Display {
     /// initialize the display
     pub fn new() -> Display {
@@ -50,130 +72,37 @@ impl Display {
 
 use specs::{Join, Read, ReadStorage, System, Write};
 impl<'a> System<'a> for Display {
-    #[allow(clippy::type_complexity)]
-    type SystemData = (
-        // I'll take one of everything
-        ReadStorage<'a, Character>,
-        ReadStorage<'a, Colors>,
-        ReadStorage<'a, Cursor>,
-        ReadStorage<'a, Description>,
-        ReadStorage<'a, IconRef>,
-        ReadStorage<'a, Orientation>,
-        ReadStorage<'a, Player>,
-        ReadStorage<'a, Pos>,
-        ReadStorage<'a, Region>,
-        ReadStorage<'a, Solid>,
-        Write<'a, GameState>,
-        Read<'a, WorldState>,
-        Read<'a, RegionMaps>,
-        Read<'a, Assets>,
-        Read<'a, CollisionMaps>,
-        Read<'a, UIQueue>,
-        Write<'a, UserInput>,
-    );
+    type SystemData = DisplayData<'a>;
 
     /// the drawing the game megafunction, what a disaster area
-    fn run(&mut self, data: Self::SystemData) {
-        let (
-            characters,
-            colors,
-            cursors,
-            descriptions,
-            icons,
-            orientations,
-            players,
-            positions,
-            regions,
-            solids,
-            mut state,
-            world,
-            maps,
-            assets,
-            collisions,
-            ui_queue,
-            mut keypress,
-        ) = data;
+    fn run(&mut self, mut data: Self::SystemData) {
+        self.accept_input(&mut data);
 
-        self.accept_input(&mut keypress, &mut state);
-
-        self.root.set_fullscreen(state.fullscreen);
+        self.root.set_fullscreen(data.state.fullscreen);
         // wipe screen and prepare for new draw
         self.root.clear();
         self.root.set_default_background(DEFAULT_BG);
         self.root.set_default_foreground(DEFAULT_FG);
 
-        let dot_dot_dot = ((state.frame / 15) % 4) as usize;
-        match state.stage {
+        let dot_dot_dot = ((data.state.frame / 15) % 4) as usize;
+        match data.state.stage {
             GameStage::LoadingAssets => {
                 self.render_splash("Loading Assets", dot_dot_dot);
                 return;
             }
             GameStage::Initializing => {
                 self.render_splash("Initializing", dot_dot_dot);
-                self.accept_input(&mut keypress, &mut state);
+                self.accept_input(&mut data);
                 return;
             }
-            _ => match state.render_mode {
+            _ => match data.state.render_mode {
                 RenderMode::Normal => {
-                    self.render_map_normal(
-                        &characters,
-                        &cursors,
-                        &colors,
-                        &icons,
-                        &orientations,
-                        &players,
-                        &positions,
-                        &regions,
-                        &assets,
-                        &mut state,
-                        &world,
-                        &maps,
-                    );
-                    self.render_ui(
-                        &characters,
-                        &cursors,
-                        &colors,
-                        &descriptions,
-                        &icons,
-                        &players,
-                        &positions,
-                        &regions,
-                        &maps,
-                        &assets,
-                        &mut state,
-                        &ui_queue,
-                    );
+                    self.render_map_normal(&data);
+                    self.render_ui(&data);
                 }
                 RenderMode::Collision => {
-                    self.render_map_collision(
-                        &characters,
-                        &cursors,
-                        &colors,
-                        &icons,
-                        &orientations,
-                        &players,
-                        &positions,
-                        &regions,
-                        &solids,
-                        &assets,
-                        &mut state,
-                        &maps,
-                        &collisions,
-                    );
-                    self.render_ui(
-                        &characters,
-                        &cursors,
-                        &colors,
-                        &descriptions,
-                        &icons,
-                        &players,
-                        &positions,
-                        &regions,
-                        &maps,
-                        &assets,
-                        &mut state,
-                        &ui_queue,
-                    );
+                    self.render_map_collision(&data);
+                    self.render_ui(&data);
                 }
             },
         }
@@ -182,7 +111,7 @@ impl<'a> System<'a> for Display {
 }
 
 impl Display {
-    fn accept_input(&mut self, keypress: &mut UserInput, state: &mut GameState) {
+    fn accept_input(&mut self, data: &mut DisplayData) {
         let key_input = self.root.check_for_keypress(KeyPressFlags::all());
         match key_input {
             // we don't match modifier keys as an input
@@ -191,8 +120,8 @@ impl Display {
             | Some(Key { code: Shift, .. }) => {}
             // only match when pressed = on, tcod fires on down + up
             Some(Key { pressed: true, .. }) => {
-                keypress.set(key_input);
-                if keypress.get().is_some() {
+                data.input.set(key_input);
+                if data.input.get().is_some() {
                     loop {
                         if self.root.check_for_keypress(KeyPressFlags::all()).is_none() {
                             break;
@@ -202,7 +131,7 @@ impl Display {
             }
             _ => {}
         }
-        state.close_game = self.root.window_closed() || state.close_game;
+        data.state.close_game = self.root.window_closed() || data.state.close_game;
     }
 
     fn render_splash(&mut self, title: &str, dot_dot_dot: usize) {
@@ -217,34 +146,32 @@ impl Display {
         self.root.flush();
     }
 
-    fn render_map_normal<'a>(
-        &mut self,
-        characters: &ReadStorage<'a, Character>,
-        cursors: &ReadStorage<'a, Cursor>,
-        colors: &ReadStorage<'a, Colors>,
-        icons: &ReadStorage<'a, IconRef>,
-        orientations: &ReadStorage<'a, Orientation>,
-        players: &ReadStorage<'a, Player>,
-        positions: &ReadStorage<'a, Pos>,
-        regions: &ReadStorage<'a, Region>,
-
-        assets: &Read<'a, Assets>,
-        state: &mut Write<'a, GameState>,
-        world: &Read<'a, WorldState>,
-        maps: &Read<'a, RegionMaps>,
-    ) {
+    fn render_map_normal<'a>(&mut self, data: &DisplayData) {
         let mut player_pos: Pos = Pos::default();
         let mut player_region: Region = Region::default();
 
-        for (region, pos, character, _player) in (regions, positions, characters, players).join() {
-            ui::draw_sidebar_frame(&self.root, assets);
-            ui::draw_stats(&self.root, &assets, character);
-            ui::draw_status_bar(&self.root, character, &state);
+        for (region, pos, character, _player) in (
+            &data.regions,
+            &data.positions,
+            &data.characters,
+            &data.players,
+        )
+            .join()
+        {
+            ui::draw_sidebar_frame(&self.root, &data.assets);
+            ui::draw_stats(&self.root, &data.assets, character);
+            ui::draw_status_bar(&self.root, character, &data.state);
             player_pos = *pos;
             player_region = *region;
-            ui::draw_worldmap(&self.root, &assets, player_region, &world, &state);
+            ui::draw_worldmap(
+                &self.root,
+                &data.assets,
+                player_region,
+                &data.world,
+                &data.state,
+            );
         }
-        let map = maps.get(player_region);
+        let map = data.maps.get(player_region);
 
         // update fov map before computing fov
         for (pos, tile) in map.iter() {
@@ -273,13 +200,21 @@ impl Display {
         }
 
         // draw all npcs, also snag the one under the cursor if applicable
-        for (region, pos, icon, color, ..) in (regions, positions, icons, colors, !players).join() {
+        for (region, pos, icon, color, ..) in (
+            &data.regions,
+            &data.positions,
+            &data.icons,
+            &data.colors,
+            !&data.players,
+        )
+            .join()
+        {
             let ipos: Coord<i32> = (*pos).into();
             if self.map.is_in_fov(ipos.x, ipos.y) && *region == player_region {
                 self.root.put_char(
                     ipos.x,
                     ipos.y,
-                    assets.get_icon(&icon.name).ch(),
+                    data.assets.get_icon(&icon.name).ch(),
                     BackgroundFlag::None,
                 );
                 self.root
@@ -287,10 +222,10 @@ impl Display {
             }
         }
 
-        self.draw_player(orientations, positions, icons, colors, players, assets);
+        self.draw_player(&data); //orientations, positions, icons, colors, players, assets);
 
         // TODO compute time of day adjustment, sunset gradient, and moon phase :D
-        let time_of_day_rel = world.time_relative();
+        let time_of_day_rel = data.world.time_relative();
 
         let light = Color::new(178, 162, 72);
         let day_ambient = Color::new(225, 255, 225);
@@ -348,7 +283,7 @@ impl Display {
         }
 
         // draw in the cursor highlight
-        for (pos, ..) in (positions, cursors).join() {
+        for (pos, ..) in (&data.positions, &data.cursors).join() {
             self.root.set_char_background(
                 pos.x as i32,
                 pos.y as i32,
@@ -361,36 +296,21 @@ impl Display {
     #[allow(clippy::too_many_arguments)]
     /// render in collision mode, showing solids in a lighter background color
     /// (also ignores fov so it's a wallhack)
-    fn render_map_collision<'a>(
-        &mut self,
-        characters: &ReadStorage<'a, Character>,
-        cursors: &ReadStorage<'a, Cursor>,
-        colors: &ReadStorage<'a, Colors>,
-        icons: &ReadStorage<'a, IconRef>,
-        orientations: &ReadStorage<'a, Orientation>,
-        players: &ReadStorage<'a, Player>,
-        positions: &ReadStorage<'a, Pos>,
-        regions: &ReadStorage<'a, Region>,
-        solids: &ReadStorage<'a, Solid>,
-
-        assets: &Read<'a, Assets>,
-        state: &mut Write<'a, GameState>,
-        maps: &Read<'a, RegionMaps>,
-        collisions: &Read<'a, CollisionMaps>,
-    ) {
+    fn render_map_collision<'a>(&mut self, data: &DisplayData) {
         let mut player_region: Region = Region::default();
 
-        for (region, character, _player) in (regions, characters, players).join() {
-            ui::draw_sidebar_frame(&self.root, assets);
-            ui::draw_stats(&self.root, assets, character);
-            ui::draw_status_bar(&self.root, character, &state);
+        for (region, character, _player) in (&data.regions, &data.characters, &data.players).join()
+        {
+            ui::draw_sidebar_frame(&self.root, &data.assets);
+            ui::draw_stats(&self.root, &data.assets, character);
+            ui::draw_status_bar(&self.root, character, &data.state);
             player_region = *region;
         }
-        let map = maps.get(player_region);
+        let map = &data.maps.get(player_region);
 
         // draw all tiles
         for (pos, tile) in map.iter() {
-            let collision = collisions.get(player_region, pos);
+            let collision = &data.collisions.get(player_region, pos);
             let bg: Color = if !collision && tile.walkable {
                 Color::new(32, 32, 32)
             } else {
@@ -406,12 +326,20 @@ impl Display {
         }
 
         // draw all npcs, also snag the one under the cursor if applicable
-        for (region, pos, icon, color, ..) in (regions, positions, icons, colors, !players).join() {
+        for (region, pos, icon, color, ..) in (
+            &data.regions,
+            &data.positions,
+            &data.icons,
+            &data.colors,
+            !&data.players,
+        )
+            .join()
+        {
             if *region == player_region {
                 self.root.put_char(
                     pos.x as i32,
                     pos.y as i32,
-                    assets.get_icon(&icon.name).ch(),
+                    data.assets.get_icon(&icon.name).ch(),
                     BackgroundFlag::None,
                 );
                 self.root
@@ -419,7 +347,7 @@ impl Display {
             }
         }
 
-        for (region, pos, _solid, ..) in (regions, positions, solids).join() {
+        for (region, pos, _solid, ..) in (&data.regions, &data.positions, &data.solids).join() {
             if *region == player_region {
                 self.root.set_char_background(
                     pos.x as i32,
@@ -430,10 +358,10 @@ impl Display {
             }
         }
 
-        self.draw_player(orientations, positions, icons, colors, players, assets);
+        self.draw_player(&data);
 
         // draw in the cursor highlight
-        for (pos, ..) in (positions, cursors).join() {
+        for (pos, ..) in (&data.positions, &data.cursors).join() {
             self.root.set_char_background(
                 pos.x as i32,
                 pos.y as i32,
@@ -443,18 +371,16 @@ impl Display {
         }
     }
 
-    fn draw_player<'a>(
-        &mut self,
-        orientations: &ReadStorage<'a, Orientation>,
-        positions: &ReadStorage<'a, Pos>,
-        icons: &ReadStorage<'a, IconRef>,
-        colors: &ReadStorage<'a, Colors>,
-        players: &ReadStorage<'a, Player>,
-        assets: &Read<'a, Assets>,
-    ) {
+    fn draw_player(&mut self, data: &DisplayData) {
         // draw player, make sure it ends up on top
-        for (orientation, pos, icon, color, ..) in
-            (orientations, positions, icons, colors, players).join()
+        for (orientation, pos, icon, color, ..) in (
+            &data.orientations,
+            &data.positions,
+            &data.icons,
+            &data.colors,
+            &data.players,
+        )
+            .join()
         {
             let mut north = false;
             let mut south = false;
@@ -477,7 +403,7 @@ impl Display {
             self.root.put_char(
                 pos.x as i32,
                 pos.y as i32,
-                assets
+                data.assets
                     .get_icon(&icon.name)
                     .connected(north, south, east, west)
                     .ch(),
@@ -489,52 +415,45 @@ impl Display {
     }
 
     /// renders UI elements, done after map draw passes
-    fn render_ui<'a>(
-        &mut self,
-        characters: &ReadStorage<'a, Character>,
-        cursors: &ReadStorage<'a, Cursor>,
-        colors: &ReadStorage<'a, Colors>,
-        descriptions: &ReadStorage<'a, Description>,
-        icons: &ReadStorage<'a, IconRef>,
-        players: &ReadStorage<'a, Player>,
-        positions: &ReadStorage<'a, Pos>,
-        regions: &ReadStorage<'a, Region>,
-        maps: &Read<'a, RegionMaps>,
-        assets: &Read<'a, Assets>,
-        state: &mut Write<'a, GameState>,
-        ui_queue: &Read<'a, UIQueue>,
-    ) {
+    fn render_ui<'a>(&mut self, data: &DisplayData) {
         let mut cursor_pos: Pos = Pos::default();
         let mut player_region: Region = Region::default();
         let mut has_cursor: bool = false;
 
-        for (region, character, _player) in (regions, characters, players).join() {
-            ui::draw_sidebar_frame(&self.root, assets);
-            ui::draw_stats(&self.root, assets, character);
-            ui::draw_status_bar(&self.root, character, &state);
+        for (region, character, _player) in (&data.regions, &data.characters, &data.players).join()
+        {
+            ui::draw_sidebar_frame(&self.root, &data.assets);
+            ui::draw_stats(&self.root, &data.assets, character);
+            ui::draw_status_bar(&self.root, character, &data.state);
             player_region = *region;
         }
 
         // find the cursor position
-        for (pos, _cursor) in (positions, cursors).join() {
+        for (pos, _cursor) in (&data.positions, &data.cursors).join() {
             cursor_pos.x = pos.x;
             cursor_pos.y = pos.y;
             has_cursor = true;
         }
 
         // get the current map
-        let map = maps.get(player_region);
+        let map = &data.maps.get(player_region);
 
         // find an entity under the cursor, if it exists
         if has_cursor && self.map.is_in_fov(cursor_pos.x as i32, cursor_pos.y as i32) {
             let mut found_entity = false;
-            for (region, pos, icon, color, desc) in
-                (regions, positions, icons, colors, descriptions).join()
+            for (region, pos, icon, color, desc) in (
+                &data.regions,
+                &data.positions,
+                &data.icons,
+                &data.colors,
+                &data.descriptions,
+            )
+                .join()
             {
                 if *pos == cursor_pos && *region == player_region {
                     ui::draw_entity_info(
                         &self.root,
-                        assets.get_icon(&icon.name).ch(),
+                        data.assets.get_icon(&icon.name).ch(),
                         *color,
                         desc,
                     );
@@ -546,7 +465,7 @@ impl Display {
             }
         }
 
-        if let Some(widget) = ui_queue.get() {
+        if let Some(widget) = data.ui_queue.get() {
             ui::draw_centered_dialog(&self.root, widget);
         }
     }

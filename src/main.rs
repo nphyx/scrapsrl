@@ -1,6 +1,9 @@
 #![feature(try_from)]
 #[macro_use]
 extern crate specs_derive;
+extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 #[macro_use(s)]
 extern crate ndarray;
 use specs::{Builder, DispatcherBuilder, RunNow, World as Game};

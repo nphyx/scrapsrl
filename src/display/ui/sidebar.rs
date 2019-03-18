@@ -14,16 +14,7 @@ pub fn draw_sidebar_frame(mut console: &dyn Console, assets: &Assets) {
     let y = 0;
     let height = console.height();
 
-    vert_line(
-        console,
-        x,
-        y,
-        height,
-        assets
-            .get_icon("line_double")
-            .connected(true, true, false, false)
-            .ch(),
-    );
+    vert_line(console, x, y, height, assets.get_icon("line_double").ch());
 }
 
 pub fn draw_stats(mut console: &dyn Console, assets: &Assets, pc: &Character) {
@@ -47,10 +38,7 @@ pub fn draw_stats(mut console: &dyn Console, assets: &Assets, pc: &Character) {
 
     draw_rect(console, x + 9, y + 1, 13, 5, assets.get_icon("line_single"));
 
-    let horiz_line = assets
-        .get_icon("line_single")
-        .connected(false, false, true, true)
-        .ch();
+    let horiz_line = assets.get_icon("line_single").ch();
     console.print_rect(
         x + 10,
         y + 1,

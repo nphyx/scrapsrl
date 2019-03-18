@@ -10,6 +10,8 @@
         "fauna_dog": (12, 14),
     },
     connected4: {
+        "line_single": (8, 9),
+        "line_double": (12, 9),
         "map_street_small": (0, 15),
         "map_street_medium": (4, 15),
         "map_street_large": (8, 15),
